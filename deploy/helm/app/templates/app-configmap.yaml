@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-config
+  labels:
+    variant: {{ include "app.variant" . }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+data:
+  APP_CONFIG_FILE: {{ .Values.configData.appConfigFile }}
+  APP_HTTP_PORT: "{{ .Values.configData.appHttpPort }}"
+  APP_HTTP_LISTEN_SPEC: {{ .Values.configData.appHttpListenSpec }}
+  APP_LOG_LEVEL: {{ .Values.configData.appLogLevel }}
+  APP_LOG_FILE: {{ .Values.configData.appLogFile }}
+  APP_PG_HOST: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}
+  APP_PG_PORT: "{{ .Values.configData.appPgPort }}"
+  APP_PG_DBNAME: {{ .Values.configData.appPgDbname }}
+  APP_PG_INSTALL_EMPTY_CHANGELOG: {{ .Values.configData.appPgInstallEmptyChangelog }}
+  APP_PG_INSTALL_TESTDATA_CHANGELOG: {{ .Values.configData.appPgInstallTestdataChangelog }}
+  APP_PG_UPGRADE_CHANGELOG: {{ .Values.configData.appPgUpgradeChangelog }}

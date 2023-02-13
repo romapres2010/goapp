@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
+
+        <changeSet id="1" author="romapres" runAlways="true">
+            <validCheckSum>1:any</validCheckSum>
+
+            <output>Drop schema</output>
+            <sqlFile path="../sql/1.0/1.0.0/dropSchemaApp.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
+            <output>Initialing schema: schemaName=app</output>
+            <sqlFile path="../sql/1.0/1.0.0/db.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
+            <output>Droping all foreign keys</output>
+            <sqlFile path="../sql/1.0/1.0.0/drop_all_fk.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
+        </changeSet>
+
+        <include file="changelog/db.changelog-1.0_testData.xml"/>
+</databaseChangeLog>

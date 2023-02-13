@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  app-api:
+#    depends_on:
+#      app-db:
+#        condition: service_healthy
+#      app_liquibase:
+#        condition: service_completed_successfully
+    build:
+      context: ./../../
+      dockerfile: ./deploy/docker/app-api.Dockerfile
+      tags:
+        - $APP_REPOSITORY/$APP_API_APP_NAME:$APP_VERSION
+      args:
+        - APP_COMMIT=${APP_COMMIT:-unset}
+        - APP_BUILD_TIME=${APP_BUILD_TIME:-unset}
+        - APP_VERSION=${APP_VERSION:-unset}
+    container_name: app-api
+    hostname: app-api-host
+    networks:
+      - app-net
+    ports:
+      - $APP_HTTP_OUT_PORT:$APP_HTTP_PORT
+      - 8001:$APP_HTTP_PORT
+    environment:
+      - TZ="Europe/Moscow"
+      - APP_CONFIG_FILE=${APP_CONFIG_FILE:-/app/defcfg/app.global.yaml}
+      - APP_HTTP_LISTEN_SPEC=${APP_HTTP_LISTEN_SPEC:-0.0.0.0:8080}
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-ERROR}
+      - APP_LOG_FILE=${APP_LOG_FILE:-/app/log/app.log}
+      - APP_PG_USER=${APP_PG_USER:-postgres}
+      - APP_PG_PASS=${APP_PG_PASS:?database password not set}
+      - APP_PG_HOST=${APP_PG_HOST:-app-db-host}
+      - APP_PG_PORT=${APP_PG_PORT:-5432}
+      - APP_PG_DBNAME=${APP_PG_DBNAME:-postgres}
+    volumes:
+      - "./../../../app_volumes/cfg:/app/cfg:ro"
+      - "./../../../app_volumes/log:/app/log:rw"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["curl -f 0.0.0.0:8080/app/system/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app-liquibase:
+    build:
+      context: ./../../
+      dockerfile: ./deploy/docker/app-liquibase.Dockerfile
+      tags:
+        - $APP_REPOSITORY/$APP_LUQUIBASE_APP_NAME:$APP_VERSION
+    container_name: app-liquibase
+    depends_on:
+      app-db:
+        condition: service_healthy
+    networks:
+      - app-net
+#    volumes:
+#      - "./../../../app_volumes/log:/liquibase/mylog:rw"
+#    command: --changelog-file=./changelog/$APP_PG_CHANGELOG --url="jdbc:postgresql://$APP_PG_HOST:$APP_PG_PORT/$APP_PG_DBNAME" --username=$APP_PG_USER --password=$APP_PG_PASS --logFile="mylog/liquibase.log" --logLevel=info update
+    command: --changelog-file=./changelog/$APP_PG_CHANGELOG --url="jdbc:postgresql://$APP_PG_HOST:$APP_PG_PORT/$APP_PG_DBNAME" --username=$APP_PG_USER --password=$APP_PG_PASS --logLevel=info update
+
+  app-ui:
+    build:
+      context: ./../../
+      dockerfile: ./deploy/docker/app-ui.Dockerfile
+    container_name: app-ui
+    depends_on:
+      app-db:
+        condition: service_healthy
+    ports:
+      - $APP_HTTP_UI_OUT_PORT:8080
+    environment:
+      - DB_HOST=${APP_PG_HOST:-app-db-host}
+      - DB_PORT=${APP_PG_PORT:-5432}
+      - DB_NAME=${APP_PG_DBNAME:-postgres}
+      - DB_USER=${APP_PG_USER:-postgres}
+      - DB_PASS=${APP_PG_PASS:?database password not set}
+    networks:
+      - app-net
+
+  app-db:
+    image: postgres:14.5-alpine
+    container_name: app-db
+    hostname: app-db-host
+    environment:
+      - POSTGRES_PASSWORD=${APP_PG_PASS:?database password not set}
+      - PGUSER=${APP_PG_USER:?database user not set}
+    networks:
+      - app-net
+    ports:
+      - $APP_PG_OUT_PORT:$APP_PG_PORT
+    volumes:
+      - "./../../../app_volumes/db:/var/lib/postgresql/data:rw"
+#      - app_db_data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  hazelcast:
+    image: hazelcast/hazelcast:5.2.1
+    hostname: hazelcast-host
+    networks:
+      - app-net
+    ports:
+      - "5701:5701"
+    environment:
+      - HZ_CLUSTERNAME=hazelcast-app
+
+  hazelcast-management-center:
+    image: hazelcast/management-center:5.2.1
+    hostname: hazelcast-management-center-host
+    networks:
+      - app-net
+    ports:
+      - "8888:8080"
+    environment:
+      - MC_DEFAULT_CLUSTER=hazelcast-app
+      - MC_DEFAULT_CLUSTER_MEMBERS=hazelcast
+
+networks:
+  app-net:
+    driver: bridge

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
+        
+        <preConditions>
+            <dbms  type="postgresql"/>
+            <runningAs  username="postgres"/>
+        </preConditions>
+
+        <changeSet author="romapres" id="v0.0.0">
+            <tagDatabase tag="v0.0.0"/>
+        </changeSet>
+        
+        <include file="changelog/db.changelog-1.0.xml"/>
+</databaseChangeLog>

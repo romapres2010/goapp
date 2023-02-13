@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
+
+        <changeSet id="TD-valid-1" author="romapres" runAlways="true">
+            <validCheckSum>1:any</validCheckSum>
+         
+            <output>Clean tables</output>
+            <sqlFile path="../sql/1.0/1.0.0-test-data/clean_all_tables.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
+            <output>Loading test data: tableName=countries</output>
+            <sqlFile path="../sql/1.0/1.0.0-test-data/postgres_app_countries.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+            <output>Loading test data: tableName=currencies</output>
+            <sqlFile path="../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
+            <rollback>
+                <output>Clean tables</output>
+                <sqlFile path="../sql/1.0/1.0.0-test-data/clean_all_tables.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+            </rollback>
+        </changeSet>
+
+</databaseChangeLog>

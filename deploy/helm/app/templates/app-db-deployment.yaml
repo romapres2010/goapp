@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}
+  labels:
+    variant: {{ include "app.variant" . }}
+    tier: {{ include "app.name" . }}-{{ .Values.appDb.tierSuffix }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+spec:
+  {{- if not .Values.appDb.autoscaling.enabled }}
+  replicas: {{ .Values.appDb.replicaCount }}
+  minReadySeconds: 20
+  revisionHistoryLimit: 2
+  {{- end }}
+  selector:
+    matchLabels:
+      variant: {{ include "app.variant" . }}
+      tier: {{ include "app.name" . }}-{{ .Values.appDb.tierSuffix }}
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.appDb.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        variant: {{ include "app.variant" . }}
+        tier: {{ include "app.name" . }}-{{ .Values.appDb.tierSuffix }}
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.appDb.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.appDb.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.appDb.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Chart.Name }}-{{ .Values.appDb.tierSuffix }}
+          securityContext:
+            {{- toYaml .Values.appDb.securityContext | nindent 12 }}
+          image: "{{ .Values.appDb.image.repository }}:{{ .Values.appDb.image.tag }}"
+          imagePullPolicy: {{ .Values.appDb.image.pullPolicy }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "app.fullname" . }}-secret
+                  key: APP_PG_PASS
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_PG_DBNAME
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "app.fullname" . }}-secret
+                  key: APP_PG_USER
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "app.fullname" . }}-secret
+                  key: APP_PG_USER
+          ports:
+            - name: pgport
+              containerPort: {{ .Values.configData.appPgPort }}
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+            initialDelaySeconds: 10  # Time to create a new DB
+            failureThreshold: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.appDb.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}-volume
+      restartPolicy: {{ .Values.appDb.restartPolicy }}
+      volumes:
+        - name: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}-volume
+          persistentVolumeClaim:
+            claimName: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}-claim
+      {{- with .Values.appDb.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.appDb.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.appDb.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

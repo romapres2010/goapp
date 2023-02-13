@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appApi.tierSuffix }}
+  labels:
+    variant: {{ include "app.variant" . }}
+    tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+spec:
+  {{- if not .Values.appApi.autoscaling.enabled }}
+  replicas: {{ .Values.appApi.replicaCount }}
+  minReadySeconds: 5
+  revisionHistoryLimit: 5
+  {{- end }}
+  selector:
+    matchLabels:
+      variant: {{ include "app.variant" . }}
+      tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.appApi.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        variant: {{ include "app.variant" . }}
+        tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.appApi.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.appApi.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: init-{{ .Chart.Name }}-{{ .Values.appApi.tierSuffix }}
+          env:
+            {{- include "app.env.pgHostPortDB" . | nindent 12 }}
+          image: busybox:1.28
+          command: {{ include "app.pgWait" . }} # wait for db to be ready
+      terminationGracePeriodSeconds: {{ .Values.appApi.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Chart.Name }}-{{ .Values.appApi.tierSuffix }}
+          securityContext:
+            {{- toYaml .Values.appApi.securityContext | nindent 12 }}
+          image: "{{ .Values.appApi.image.repository }}:{{ .Values.appApi.image.tag | default .Values.version | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.appApi.image.pullPolicy }}
+          env:
+            {{- include "app.env.pgHostPortDB" . | nindent 12 }}
+            {{- include "app.env.pgUserPass" . | nindent 12 }}
+            - name: APP_CONFIG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_CONFIG_FILE
+            - name: APP_HTTP_LISTEN_SPEC
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_HTTP_LISTEN_SPEC
+            - name: APP_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_LOG_LEVEL
+            - name: APP_LOG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_LOG_FILE
+          ports:
+            - name: apiport
+              containerPort: {{ .Values.configData.appHttpPort }}
+              protocol: TCP
+          readinessProbe:
+            httpGet: &health
+              path: /app/system/health
+              port: {{ .Values.configData.appHttpPort }}
+              scheme: HTTP
+            initialDelaySeconds: 30  # Time to start
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: *health
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.appApi.resources | nindent 12 }}
+      restartPolicy: {{ .Values.appApi.restartPolicy }}
+      {{- with .Values.appApi.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.appApi.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.appApi.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

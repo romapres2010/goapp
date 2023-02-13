@@ -1,0 +1,49 @@
+{{- if .Values.configData.appPgInstallTestdataChangelog }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appLiquibase.tierSuffix }}-install-testdata
+  labels:
+    variant: {{ include "app.variant" . }}
+    tier: {{ include "app.name" . }}-{{ .Values.appLiquibase.tierSuffix }}-install-testdata
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      {{- with .Values.appLiquibase.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        variant: {{ include "app.variant" . }}
+        tier: {{ include "app.name" . }}-{{ .Values.appLiquibase.tierSuffix }}-install-testdata
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: init-{{ .Chart.Name }}-{{ .Values.appLiquibase.tierSuffix }}-install-testdata
+          env:
+          {{- include "app.env.pgHostPortDB" . | nindent 12 }}
+          image: busybox:1.28
+          command: {{ include "app.pgWait" . }} # wait for db to be ready
+      containers:
+        - name: {{ include "app.fullname" . }}-{{ .Values.appLiquibase.tierSuffix }}
+          image: "{{ .Values.appLiquibase.image.repository }}:{{ .Values.appLiquibase.image.tag | default .Values.version }}"
+          imagePullPolicy: {{ .Values.appLiquibase.image.pullPolicy }}
+          env:
+            {{- include "app.env.pgHostPortDB" . | nindent 12 }}
+            {{- include "app.env.pgUserPass" . | nindent 12 }}
+            - name: APP_PG_INSTALL_TESTDATA_CHANGELOG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "app.fullname" . }}-config
+                  key: APP_PG_INSTALL_TESTDATA_CHANGELOG
+          command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_TESTDATA_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
+      restartPolicy: {{ .Values.appLiquibase.restartPolicy }}
+{{- end }}

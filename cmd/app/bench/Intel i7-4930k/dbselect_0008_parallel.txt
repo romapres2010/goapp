@@ -1,0 +1,43 @@
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+
+
+Server Software:        
+Server Hostname:        127.0.0.1
+Server Port:            3001
+
+Document Path:          /app/system/entities/Currency/json
+Document Length:        Variable
+
+Concurrency Level:      8
+Time taken for tests:   80.348 seconds
+Complete requests:      100000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      2152900000 bytes
+HTML transferred:       2137800000 bytes
+Requests per second:    1244.58 [#/sec] (mean)
+Time per request:       6.428 [ms] (mean)
+Time per request:       0.803 [ms] (mean, across all concurrent requests)
+Transfer rate:          26166.58 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   1.2      0      11
+Processing:     0    6  10.5      5     223
+Waiting:        0    4  10.6      4     223
+Total:          0    6  10.6      5     223
+
+Percentage of the requests served within a certain time (ms)
+  50%      5
+  66%      6
+  75%      7
+  80%      7
+  90%      9
+  95%     10
+  98%     13
+  99%     14
+ 100%    223 (longest request)

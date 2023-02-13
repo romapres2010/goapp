@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appDb.tierSuffix }}-claim
+  labels:
+    variant: {{ include "app.variant" . }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi

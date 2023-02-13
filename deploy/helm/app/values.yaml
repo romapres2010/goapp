@@ -1,0 +1,128 @@
+nameOverride: ""
+fullnameOverride: ""
+namespace: ""   # if set override .Release.Namespace
+variant: ""     # if set override .Release.Name
+version: ""
+
+#TODO - serviceAccount
+#TODO - ingress
+#TODO - appDb -> StateFul
+
+secretData:
+  appPgUser: postgres
+  appPgPass: postgres
+
+configData:
+  appConfigFile: /app/defcfg/app.global.yaml
+  appHttpPort: "8080"
+  appHttpListenSpec: 0.0.0.0:8080
+  appLogLevel: ERROR
+  appLogFile: /app/log/app.log
+#  appPgHost: dev-app-db
+  appPgPort: "5432"
+  appPgDbname: postgres
+  appPgInstallEmptyChangelog: db.changelog-root.xml
+  appPgInstallTestdataChangelog: db.changelog-1.0_testData.xml
+  appPgUpgradeChangelog: ""
+
+appApi:
+  tierSuffix: api
+  podAnnotations: {}
+  imagePullSecrets: []
+  podSecurityContext: {}
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+  replicaCount: 1
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+    packetsPerSecond: ""
+  restartPolicy: Always
+  image:
+    hostname: docker.io
+    repository: romapres2010/app-api
+    pullPolicy: IfNotPresent
+    tag: ""
+  resources:
+     limits:
+       cpu: 500m
+       memory: 512Mi
+     requests:
+       cpu: 100m
+       memory: 128Mi
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  terminationGracePeriodSeconds: 60
+  service:
+    type: LoadBalancer
+    port: 3000
+
+appDb:
+  tierSuffix: db
+  podAnnotations: {}
+  imagePullSecrets: []
+  podSecurityContext: {}
+  securityContext: {}
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  restartPolicy: Always
+  image:
+    hostname: docker.io
+    repository: postgres
+    tag: "14.5-alpine"
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  terminationGracePeriodSeconds: 30
+  service:
+    type: NodePort
+    port: 5432
+
+appLiquibase:
+  tierSuffix: liquibase
+  podAnnotations: {}
+  restartPolicy: Never
+  image:
+    hostname: docker.io
+    repository: romapres2010/app-liquibase
+    tag: ""
+    pullPolicy: IfNotPresent
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+ingress:
+  enabled: true
+  className: ""
+#  annotations: {}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /app
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local

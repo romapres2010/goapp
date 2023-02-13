@@ -1,0 +1,47 @@
+#https://dev.to/docker/enable-kubernetes-metrics-server-on-docker-desktop-5434
+#https://blog.mi.hdm-stuttgart.de/index.php/2020/03/01/autoscaling-of-docker-containers-in-google-kubernetes-engine/
+
+{{- if .Values.appApi.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appApi.tierSuffix }}-hpa
+  labels:
+    variant: {{ include "app.variant" . }}
+    tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "app.fullname" . }}-{{ .Values.appApi.tierSuffix }}
+  minReplicas: {{ .Values.appApi.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.appApi.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.appApi.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.appApi.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.appApi.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.appApi.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.appApi.autoscaling.packetsPerSecond }}
+    - type: Pods
+      pods:
+        metric:
+          name: packets-per-second
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.appApi.autoscaling.packetsPerSecond }}
+    {{- end }}
+{{- end }}

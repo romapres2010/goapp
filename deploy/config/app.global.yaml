@@ -1,0 +1,157 @@
+memory_limit: 2000000000         # рекомендуемый предел памяти в байтах - использовать для запуска в контейнере
+
+# конфигурация сервиса логирования
+logger:
+    enable: true                        # состояние логирования 'true', 'false'
+    global_level: INFO                  # debug, info, warn, error, dpanic, panic, fatal - все логгеры ниже этого уровня будут отключены
+    global_filename: /app/log/app.log   # глобальное имя файл для логирования
+    zap:
+        enable: true                # состояние логирования 'true', 'false'
+        disable_caller: false       # запретить вывод в лог информации о caller
+        disable_stacktrace: false   # запретить вывод stacktrace
+        development: false          # режим разработки для уровня dpanic
+        stacktrace_level: error     # для какого уровня выводить stacktrace debug, info, warn, error, dpanic, panic, fatal
+        core:
+            -   enable: true        # состояние логирования 'true', 'false'
+                min_level: null     # минимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                max_level: INFO     # максимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                log_to: lumberjack  # логировать в 'file', 'stderr', 'stdout', 'url', 'lumberjack'
+                encoding: "console" # формат вывода 'console', 'json'
+                file:
+                    filename: ".debug.log"       # имя файл для логирования, если не заполнено, то используется глобальное имя
+                    max_size: 10                 # максимальный размер лог файла в MB
+                    max_age: 7                   # время хранения истории лог файлов в днях
+                    max_backups: 10              # максимальное количество архивных логов
+                    local_time: true             # использовать локальное время в имени архивных лог файлов
+                    compress: false              # сжимать архивные лог файлы в zip архив
+                encoder_config: &encoderconfig
+                    message_key: "msg"
+                    level_key: "level"
+                    time_key: "ts"
+                    name_key: "log"
+                    caller_key: "caller"
+                    function_key: ""
+                    stacktrace_key: "stacktrace"
+                    skip_line_ending: false
+                    line_ending: "\n"
+                    encode_level: "lower"               # capital, capitalColor, color, lower
+                    encode_time: "iso8601"              # rfc3339nano, rfc3339, iso8601, millis, nanos
+                    encode_time_custom: "2006-01-02 15:04:05.000000"  # приоритет над encode_time
+                    encode_duration: "ms"               # string, nanos, ms
+                    encode_caller: "short"              # full, short
+                    console_separator: "    "
+            -   enable: true        # состояние логирования 'true', 'false'
+                min_level: ERROR    # минимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                max_level: null     # максимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                log_to: lumberjack  # логировать в 'file', 'stderr', 'stdout', 'url', 'lumberjack
+                encoding: "console" # формат вывода 'console', 'json'
+                file:
+                    filename: ".error.log"       # имя файл для логирования, если не заполнено, то используется глобальное имя
+                    max_size: 10                 # максимальный размер лог файла в MB
+                    max_age: 7                   # время хранения истории лог файлов в днях
+                    max_backups: 10              # максимальное количество архивных логов
+                    local_time: true             # использовать локальное время в имени архивных лог файлов
+                    compress: false              # сжимать архивные лог файлы в zip архив
+                encoder_config: *encoderconfig
+            -   enable: true        # состояние логирования 'true', 'false'
+                min_level: null     # минимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                max_level: null     # максимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                log_to: stdout      # логировать в 'file', 'stderr', 'stdout', 'url', 'lumberjack
+                encoding: "console" # формат вывода 'console', 'json'
+                encoder_config: *encoderconfig
+            -   enable: false       # состояние логирования 'true', 'false'
+                min_level: ERROR    # минимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                max_level: null     # максимальный уровень логирования debug, info, warn, error, dpanic, panic, fatal
+                log_to: stderr      # логировать в 'file', 'stderr', 'stdout', 'url', 'lumberjack
+                encoding: "console" # формат вывода 'console', 'json'
+                encoder_config: *encoderconfig
+
+# конфигурация HTTP сервера
+http_server:
+    listen_spec: 0.0.0.0:8080   #  HTTP listener address string
+    read_timeout: 3600s          #  HTTP read timeout duration in sec - default 60 sec
+    write_timeout: 3600s         #  HTTP write timeout duration in sec - default 60 sec
+    idle_timeout: 3600s          #  HTTP idle timeout duration in sec - default 60 sec
+    shutdown_timeout: 30s       #  service shutdown timeout in sec - default 30 sec
+    max_header_bytes: 262144    #  HTTP max header bytes - default 1 MB
+    use_go_profile: false       #  use Go profiling
+    use_tls: false              #  use Transport Level Security
+    tls_cert_file: ""           #  TLS Certificate file name
+    tls_key_file: ""            #  TLS Private key file name
+    tls_min_version: 0          #  TLS min version VersionTLS13, VersionTLS12, VersionTLS11, VersionTLS10, VersionSSL30
+    tls_max_version: 0          #  TLS max version VersionTLS13, VersionTLS12, VersionTLS11, VersionTLS10, VersionSSL30
+
+# конфигурация обработчиков HTTP запросов
+http_service:
+    auth_type: NONE                 # Authentication type NONE, INTERNAL, MSAD
+    max_body_bytes: 0               # HTTP max body bytes - default 0 - unlimited
+    use_hsts: false                 # use HTTP Strict Transport Security
+    use_jwt: false                  # use JSON web token (JWT)
+    jwt_expires_at: 0               # JWT expiry time in seconds - 0 without restriction
+    msad_server: ""                 # MS Active Directory server
+    msad_port: 0                    # MS Active Directory Port
+    msad_base_dn: ""                # MS Active Directory BaseDN
+    msad_security: 0                # MS Active Directory Security: SecurityNone, SecurityTLS, SecurityStartTLS
+    use_buf_pool: false             # use byte polling for JSON -> HTTP
+    buf_pooled_size: 65536          # recommended size of polling for JSON -> HTTP
+    buf_pooled_max_size: 131072     # max size of polling for JSON -> HTTP
+    log_error_to_http_header: true  # log any error to HTTP response header
+    log_error_to_http_body: true    # log any error to HTTP response body
+    http_header_max_size: 512       # max size HTTP header element - use for out response
+    handlers:
+        HealthHandler:               # Сервис health - проверка активности HEALTH
+            enabled: true                               # Признак включен ли сервис
+            application: "app"                         # Приложение к которому относится сервис
+            module: "system"                            # Модуль к которому относится сервис
+            service: "health"                           # Имя сервиса
+            version: "v1.0.0"                           # Версия сервиса
+            full_path: "/app/system/health"            # URI сервиса /Application.Module.Service.APIVersion или /Application/APIVersion/Module/Service
+            params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
+            method: "GET"                               # HTTP метод: GET, POST, ...
+            handler_name: "HealthHandler"               # Имя функции обработчика
+        ReadyHandler:               # Сервис ready - handle to test readinessProbe
+            enabled: true                               # Признак включен ли сервис
+            application: "app"                         # Приложение к которому относится сервис
+            module: "system"                            # Модуль к которому относится сервис
+            service: "ready"                            # Имя сервиса
+            version: "v1.0.0"                           # Версия сервиса
+            full_path: "/app/system/ready"             # URI сервиса /Application.Module.Service.APIVersion или /Application/APIVersion/Module/Service
+            params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
+            method: "GET"                               # HTTP метод: GET, POST, ...
+            handler_name: "ReadyHandler"               # Имя функции обработчика
+
+# конфигурация сервиса логирования HTTP трафика (опциональный сервис)
+http_logger:
+    enable: false                          # состояние логирования 'true', 'false'
+    log_in_req: true                      # логировать входящие запросы
+    log_out_req: true                     # логировать исходящие запросы
+    log_in_resp: true                     # логировать входящие ответы
+    log_out_resp: true                    # логировать исходящие ответы
+    log_body: true                        # логировать тело запроса
+    file:
+        filename: /app/log/app_http.log   # имя файл для логирования, если не заполнено, то используется глобальное имя
+        max_size: 10                        # максимальный размер лог файла в MB
+        max_age: 7                          # время хранения истории лог файлов в днях
+        max_backups: 10                     # максимальное количество архивных логов
+        local_time: true                    # использовать локальное время в имени архивных лог файлов
+        compress: false                     # сжимать архивные лог файлы в zip архив
+
+# конфигурация сбора метрик
+metrics:
+    metrics_namespace: com
+    metrics_subsystem: go_app
+    collect_db_count_vec: true
+    collect_db_duration_vec: false
+    collect_http_requests_count_vec: true
+    collect_http_error_requests_count_vec: true
+    collect_http_requests_duration_vec: true
+    collect_http_active_requests_count: true
+    collect_http_requests_duration: true
+    collect_http_client_call_count_vec: true
+    collect_http_client_call_duration_vec: true
+    collect_wp_task_queue_buffer_len: true
+    collect_wp_add_task_wait_count: true
+    collect_wp_worker_process_count: true
+    collect_wp_task_queue_buffer_len_vec: true
+    collect_wp_add_task_wait_count_vec: true
+    collect_wp_worker_process_count_vec: true

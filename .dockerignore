@@ -1,0 +1,12 @@
+### Exclude catalog
+_vendor/
+venv/
+doc/
+docker/
+cmd/app/bin
+cmd/app/bench
+cmd/client_test
+cmd/template
+.gitignore
+.vscode
+.idea

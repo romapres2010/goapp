@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.fullname" . }}-{{ .Values.appApi.tierSuffix }}
+  labels:
+    variant: {{ include "app.variant" . }}
+    tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+    {{- include "app.labels" . | nindent 4 }}
+  namespace: {{ include "app.namespace" . }}
+spec:
+  type: {{ .Values.appApi.service.type }}
+  ports:
+    - port: {{ .Values.appApi.service.port }}
+      targetPort: apiport
+      protocol: TCP
+      name: apiport
+  selector:
+    tier: {{ include "app.name" . }}-{{ .Values.appApi.tierSuffix }}
+    {{- include "app.selectorLabels" . | nindent 4 }}
+
