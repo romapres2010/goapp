@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-db
+    labels:
+        tier: app-db
+    namespace: app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            tier: app-db
+    strategy:
+        type: Recreate
+    #    rollingUpdate:
+    #      maxSurge: 1
+    #      maxUnavailable: 1
+    #    type: RollingUpdate
+    template:
+        metadata:
+            labels:
+                app_net: "true"
+                tier: app-db
+        spec:
+            containers:
+                - name: app-db
+#                  envFrom:
+#                    - configMapRef:
+#                        name: app-db-config
+                  env:
+                    - name: POSTGRES_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_PASS
+                    - name: POSTGRES_DB
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_DBNAME
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+                    - name: PGUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+#                  env:
+#                      - name: PGUSER
+#                        value: postgres
+#                      - name: POSTGRES_PASSWORD
+#                        value: postgres
+                  image: postgres:14.5-alpine
+                  imagePullPolicy: IfNotPresent
+                  readinessProbe:
+                    exec:
+                      command:
+                        - pg_isready
+                    initialDelaySeconds: 30  # Time to create a new DB
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  livenessProbe:
+                    exec:
+                      command:
+                        - pg_isready
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  ports:
+                    - containerPort: 5432
+#                  resources:
+#                    requests:
+#                      cpu: 500m
+#                      memory: 256Mi
+#                    limits:
+#                      cpu: 3000m
+#                      memory: 512Mi
+                  volumeMounts:
+                    - mountPath: /var/lib/postgresql/data
+                      name: app-db-volume
+            #            - mountPath: /var/lib/postgresql/data
+            #              name: app-db-vol
+            hostname: app-db-host
+            restartPolicy: Always
+            volumes:
+              - name: app-db-volume
+                persistentVolumeClaim:
+                  claimName: app-db-claim
+#        - name: app-db-vol
+#          hostPath:
+#            path: ./../../../app_volumes/db
+#            type: Directory

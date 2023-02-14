@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-api
+    labels:
+        tier: app-api
+    namespace: app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            tier: app-api
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app_net: "true"
+                tier: app-api
+        spec:
+            initContainers:
+                - name: init-app-api
+                  env:
+                    - name: APP_PG_HOST
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_HOST
+                    - name: APP_PG_PORT
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_PORT
+                  image: busybox:1.28
+                  command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"]
+            containers:
+                - name: app-api
+                  env:
+                    - name: APP_CONFIG_FILE
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_CONFIG_FILE
+                    - name: APP_HTTP_LISTEN_SPEC
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_HTTP_LISTEN_SPEC
+                    - name: APP_LOG_LEVEL
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_LOG_LEVEL
+                    - name: APP_LOG_FILE
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_LOG_FILE
+                    - name: APP_PG_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+                    - name: APP_PG_PASS
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_PASS
+                    - name: APP_PG_HOST
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_HOST
+                    - name: APP_PG_PORT
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_PORT
+                    - name: APP_PG_DBNAME
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_DBNAME
+                  image: app-api # image: romapres2010/app-api:2.1.8
+                  imagePullPolicy: IfNotPresent
+                  readinessProbe:
+                    httpGet:
+                      path: /app/system/health
+                      port: 8080
+                      scheme: HTTP
+                    initialDelaySeconds: 30  # Time to start
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  livenessProbe:
+                    httpGet:
+                      path: /app/system/health
+                      port: 8080
+                      scheme: HTTP
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  ports:
+                    - containerPort: 8080
+#                  resources:
+#                    requests:
+#                      cpu: 500m
+#                      memory: 256Mi
+#                    limits:
+#                      cpu: 3000m
+#                      memory: 300000Mi
+            hostname: app-api-host
+            restartPolicy: Always
+

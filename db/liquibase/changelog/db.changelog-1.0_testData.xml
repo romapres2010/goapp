@@ -17,6 +17,7 @@
 
             <output>Loading test data: tableName=countries</output>
             <sqlFile path="../sql/1.0/1.0.0-test-data/postgres_app_countries.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
+
             <output>Loading test data: tableName=currencies</output>
             <sqlFile path="../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql" splitStatements="true" endDelimiter=";" encoding="UTF-8"/>
 

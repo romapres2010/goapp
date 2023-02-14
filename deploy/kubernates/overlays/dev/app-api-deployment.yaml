@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-api
+    labels:
+        tier: app-api
+    namespace: app
+spec:
+    replicas: 1
+    strategy:
+        type: Recreate
+#    template:
+#        spec:
+#            initContainers:
+#                - name: init-app-db
+#                  image: busybox:1.28
+#                  command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 10; done"]
+
+

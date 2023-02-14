@@ -1,0 +1,20 @@
+commonLabels:
+  app: app
+  variant: base
+resources:
+- app-namespase.yaml
+- app-net-networkpolicy.yaml
+- app-configmap.yaml
+- app-secret.yaml
+- app-db-persistentvolumeclaim.yaml
+- app-db-deployment.yaml
+- app-db-service.yaml
+- app-api-deployment.yaml
+- app-api-service.yaml
+- app-liquibase-pod.yaml
+#- app-liquibase-deployment.yaml
+
+#configMapGenerator:
+#- name: app-db-config
+#  files:
+#  - .env

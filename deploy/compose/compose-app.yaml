@@ -60,6 +60,8 @@ services:
       - app-net
 #    volumes:
 #      - "./../../../app_volumes/log:/liquibase/mylog:rw"
+#      - "./../../../app_volumes/sql:/liquibase/sql:rw"
+#      - "./../../../app_volumes/log:/liquibase/changelog:rw"
 #    command: --changelog-file=./changelog/$APP_PG_CHANGELOG --url="jdbc:postgresql://$APP_PG_HOST:$APP_PG_PORT/$APP_PG_DBNAME" --username=$APP_PG_USER --password=$APP_PG_PASS --logFile="mylog/liquibase.log" --logLevel=info update
     command: --changelog-file=./changelog/$APP_PG_CHANGELOG --url="jdbc:postgresql://$APP_PG_HOST:$APP_PG_PORT/$APP_PG_DBNAME" --username=$APP_PG_USER --password=$APP_PG_PASS --logLevel=info update
 
@@ -95,7 +97,6 @@ services:
       - $APP_PG_OUT_PORT:$APP_PG_PORT
     volumes:
       - "./../../../app_volumes/db:/var/lib/postgresql/data:rw"
-#      - app_db_data:/var/lib/postgresql/data:rw
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s

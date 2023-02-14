@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: app
+  namespace: app
+data:
+  APP_CONFIG_FILE: /app/defcfg/app.global.yaml
+  APP_HTTP_PORT: "8080"
+  APP_HTTP_LISTEN_SPEC: 0.0.0.0:8080
+  APP_LOG_LEVEL: ERROR
+  APP_LOG_FILE: /app/log/app.log
+  APP_PG_HOST: dev-app-db
+  APP_PG_PORT: "5432"
+  APP_PG_DBNAME: postgres
+  APP_PG_CHANGELOG: db.changelog-1.0_recreate_testdatamdg.xml	

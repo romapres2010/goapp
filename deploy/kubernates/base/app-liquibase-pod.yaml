@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: app-liquibase
+    labels:
+        tier: app-liquibase
+    namespace: app
+spec:
+    initContainers:
+        - name: init-app-liquibase
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_PORT
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"]
+    containers:
+        - name: app-liquibase
+          env:
+            - name: APP_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: APP_PG_USER
+            - name: APP_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: APP_PG_PASS
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_DBNAME
+            - name: APP_PG_CHANGELOG
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_CHANGELOG
+          image: app-liquibase # image: romapres2010/app-liquibase:2.1.8
+          command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
+          imagePullPolicy: IfNotPresent
+    restartPolicy: Never
+
