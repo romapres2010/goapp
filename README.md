@@ -27,7 +27,7 @@
 7. Подготовка YAML для Kubernetes
 8. Kustomization YAML для Kubernetes
 9. Подготовка Helm chart
-11. Настройка Horizontal Autoscaler
+10. Настройка Horizontal Autoscaler
  
 <cut />
 
@@ -887,6 +887,9 @@ spec:
 ```
 
 ## 8. Kustomization YAML для Kubernetes
+
+Kubernetes не предоставляет возможности использовать внешние ENV переменные.
+
 
 
 ## . Подготовка Helm chart
