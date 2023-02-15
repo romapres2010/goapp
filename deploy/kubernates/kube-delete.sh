@@ -6,7 +6,7 @@ fi
 
 if [ -z "$1" ]
 then
-    echo "No kibe variant supplied"
+    echo "No kube variant supplied"
     exit 1
 fi
 

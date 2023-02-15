@@ -434,24 +434,463 @@ COPY ./db/sql /sql
     restart: unless-stopped
 ```
 
-
 ## 6. Схема развертывания в Kubernetes
-Схема развертывания приведена в сокращенном виде, исключены компоненты, связанные с UI (Jmix) и распределенным кэшем (hazelcast).
-- Все компоненты развертываются в отдельном namespace (subnamespace)
-- API
-  - 
-- БД
-  - 
+Схема развертывания в [Kubernetes](https://kubernetes.io/ru/docs/tutorials/kubernetes-basics/) приведена в сокращенном виде, исключены компоненты, связанные с UI (Jmix) и распределенным кэшем (hazelcast).
 
 ![Схема развертывания в Kubernetes](https://github.com/romapres2010/goapp/raw/master/doc/diagram/APP%20-%20Kebernates.jpg)
 
+Основным элементом развертывания в Kubernetes является [Pod](https://kubernetes.io/docs/concepts/workloads/pods/). 
+Для простоты - это группа контейнеров с общими ресурсами, которая изолирована от остальных Pod.
+- Обычно, в Pod размещается один app контейнер, и, при необходимости, init контейнер.
+- Остановить app контейнер в Pod нельзя, либо он завершит работу сам, либо нужно удалить Pod (руками или через Deployment уменьшив количество replicas дo 0).
+- Pod размещается на определенном узле кластера Kubernetes
+- Для Pod задается политика автоматического рестарта в рамках одного Node [restartPolicy](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy): Always, OnFailure, Never.
+- Треминированием Pod управляет Kubernetes. В общем случае, Pod может быть автоматически остановлен если:
+  - все контейнеры в Pod завершили работу (успешно или ошибочно)
+  - нарушены liveness probe для контейнера
+  - нарушены limits.memory для контейнера
+  - Pod больше не нужен, например, если уменьшилась нагрузка и Horizontal Autoscaler уменьшил количество replicas 
+- При [остановке Pod](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination):
+  - в контейнеры будет отправлен STOPSIGNAL
+  - по прошествии terminationGracePeriodSeconds процессы контейнеров будут удалены
+  - при удалении Pod и следующем создании, он может быть создан на другом узле кластера, с другими IP адресами и портами и к нему могут быть примонтированы новые Volume
+
+При разработке stateless приложений для Kubernetes нужно учитывать эту специфику:
+- приложение может быть остановлено в любой момент
+  - необходимо предусмотреть возможность "чистой" остановки в течении grace period (закрыть подключения к БД, завершить (или нет) текущие задачи, закрыть HTTP соединения, ...)
+  - необходимо предусмотреть возможность "жесткой" остановки, если приложение взаимодействие со stateful сервисами, то предусмотреть компенсирующие воздействия при повторном запуске
+  - желательно контролировать лимит по памяти для приложения 
+- при запуске/перезапуске приложения все данные в локальной файловой системе контейнера потенциально могут быть потеряны
+- при запуске/перезапуске приложения данные на примонтированных Volume потенциально могут быть так же потеряны
+- при остановке приложения доступ к stdout и stderr получить можно, но есть ограничения - критические логи желательно сразу отправлять во внешний сервис или на Volume, который точно не будет удален  
+- в Kubernetes нет возможности явно задать последовательность старта различных Pod
+  - приложение может потенциально запущено раньше других связанных сервисов 
+  - желательно предусмотреть вариант постоянного (или лимитированного по количеству раз) перезапуска приложения в ожидании готовности внешних сервисов
+  - желательно предусмотреть в связанных приложениях liveness/readiness probe, чтобы понять, когда связанное приложение готово к работе
+
 ## 7. Подготовка YAML для Kubernetes
+
+### Конфигурирование
+В Kubernetes предусмотрено для основных способа конфигурирования [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) для основных настроек и [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) для настроек, чувствительных с точки зрения безопасности.
+
+В простейшем случае [/deploy/kubernates/base/app-configmap.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-configmap.yaml), содержит переменные со строковыми значениями. В более сложных вариантах, можно считывать и разбирать конфиги из внешнего файла или использовать внешний файл без "разбора".
+
+Все артефакты Kubernetes желательно сразу создавать в отдельном namespace [/deploy/kubernates/base/app-namespase.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-namespase.yaml).
+
+Для каждого артефакта нужно указывать метки для дальнейшего поиска и фильтрации. В примере приведена одна метка с именем 'app' и значением 'app'.
+
+
+``` yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: app
+  namespace: go-app
+data:
+  APP_CONFIG_FILE: /app/defcfg/app.global.yaml
+  APP_HTTP_PORT: "8080"
+  APP_HTTP_LISTEN_SPEC: 0.0.0.0:8080
+  APP_LOG_LEVEL: ERROR
+  APP_LOG_FILE: /app/log/app.log
+  APP_PG_HOST: dev-app-db
+  APP_PG_PORT: "5432"
+  APP_PG_DBNAME: postgres
+  APP_PG_CHANGELOG: db.changelog-1.0_recreate_testdatamdg.xml	
+```
+"Секретные" конфигурационные данные определяются в [/deploy/kubernates/base/app-secret.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-secret.yaml).
+Данный вариант максимально упрощенный - правильно использовать внешнее зашифрованное хранилище. 
+
+``` yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  labels:
+    app: app
+  namespace: go-app
+type: Opaque
+stringData:
+  APP_PG_USER: postgres
+  APP_PG_PASS: postgres
+```
+
+### БД
+Развертывание БД в шаблоне приведено в упрощенном stateless варианте (может быть использовано только для dev). 
+Правильный вариант для промышленной эксплуатации - развертывание через оператор с поддержкой кластеризации, например, [zalando](https://github.com/zalando/postgres-operator).
+
+Прежде всего, нужно запросить ресурсы для [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) на котором будет располагаться файлы с БД.
+
+Если PersistentVolumeClaim удаляется, то выделенный Persistent Volumes в зависимости от persistentVolumeReclaimPolicy, будет удален, очищен или сохранен.
+
+_Хорошая статья с описанием [хранилищ данных (Persistent Volumes) в Kubernetes](https://serveradmin.ru/hranilishha-dannyh-persistent-volumes-v-kubernetes/)_
+
+``` yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: app-db-claim
+    labels:
+        app: app
+    namespace: go-app
+spec:
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 100Mi
+```
+
+Управлять созданием Pod удобнее через [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), который задает шаблон по которому будут создаваться Pod.
+Особенности развертывания [/deploy/kubernates/base/app-db-deployment.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-db-deployment.yaml):
+- количество replicas: 1 - создавать несколько экземпляров БД таким образом можно, но физически у каждой БД будут свои файлы.
+- template.metadata.labels задана дополнительная метка tier: app-db, чтобы можно было легко найти Pod БД
+- ENV переменные заполняются из ранее созданных ConfigMap и Secret
+- определены readinessProbe и livenessProbe
+- resources.limits для БД не указываются
+- к /var/lib/postgresql/data примонтирован volume, полученный через ранее определенный  persistentVolumeClaim.claimName: app-db-claim
+
+``` yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-db
+    labels:
+        tier: app-db
+    namespace: go-app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            tier: app-db
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app_net: "true"
+                tier: app-db
+        spec:
+            containers:
+                - name: app-db
+                  env:
+                    - name: POSTGRES_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_PASS
+                    - name: POSTGRES_DB
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_DBNAME
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+                    - name: PGUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+                  image: postgres:14.5-alpine
+                  imagePullPolicy: IfNotPresent
+                  readinessProbe:
+                    exec:
+                      command:
+                        - pg_isready
+                    initialDelaySeconds: 30  # Time to create a new DB
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  livenessProbe:
+                    exec:
+                      command:
+                        - pg_isready
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  ports:
+                    - containerPort: 5432
+                  volumeMounts:
+                    - mountPath: /var/lib/postgresql/data
+                      name: app-db-volume
+            hostname: app-db-host
+            restartPolicy: Always
+            volumes:
+              - name: app-db-volume
+                persistentVolumeClaim:
+                  claimName: app-db-claim
+```
+
+Если доступ к БД нужен вне кластера, то можно определить [Service](https://kubernetes.io/docs/concepts/services-networking/service/) с типом NodePort - [/deploy/kubernates/base/app-db-service.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-db-service.yaml). 
+- в этом случае на каждом узле кластера, где развернут Pod с БД будет открыт "рандомный" порт, на который будет смаплен порт 5432 из Docker контейнера с БД
+- по этому "рандомному" порту и IP адресу узла кластера можно получить доступ к БД.
+- назначить БД конкретный порт нельзя. При пересоздании Pod через stateless Deployment, порт может быть уже другим.
+- для того, чтобы Service был смаплен с созданным через Deployment Pod БД, должны соответствовать Service.spec.selector.tier: app-db и Deployment.spec.template.metadata.labels.tier: app-db
+
+``` yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: app-db
+    labels:
+        tier: app-db
+    namespace: go-app
+spec:
+    type: NodePort   # A port is opened on each node in your cluster via Kube proxy.
+    ports:
+        - port: 5432
+          targetPort: 5432
+    selector:
+        tier: app-db
+```
+
+### Liquibase
+Liquibase со скриптами должен запускаться только один раз, сразу после старта БД: 
+- нужно задержать запуск, пока БД не поднимется
+- второй раз Liquibase не должен запускаться 
+- нужно различать запуски для первичной инсталляции и установки изменений DDL и DML на существующую БД.
+
+В простом случае, без использования Helm, запуск реализован в виде однократно запускаемого Pod - [/deploy/kubernates/base/app-liquibase-pod.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-liquibase-pod.yaml)
+- ENV переменные заполняются из ранее созданных ConfigMap и Secret
+- template.metadata.labels задана дополнительная метка tier: app-liquibase, чтобы можно было легко найти Pod Liquibase
+- задан отдельный initContainers с image: busybox:1.28, задача которой - бесконечный цикл (лучше его ограничить, иначе придется руками удалять Pod) - ожидания готовности порта 5432 postgres в Pod c БД.
+  - для прослушивания порта используется команда nc -w
+  - здесь нам пригодился созданный ранее [Service]((https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-db-service.yaml)) для БД. 
+    - В рамках Kubernetes кластера в качестве краткого DNS имени используется именно Service.metadata.name, которое мы определили как 'app-db'. 
+    - Это же значения мы записали в ConfigMap.data.APP_PG_HOST
+    - ConfigMap.data.APP_PG_HOST смаплен на ENV переменную initContainers.env.APP_PG_HOST
+    - ENV переменную initContainers.env.APP_PG_HOST используем в команде nc -w
+- в command определена собственно строка запуска Liquibase с передачей через ENV переменную initContainers.env.APP_PG_CHANGELOG корневого скрипта для запуска '--changelog-file=./changelog/$(APP_PG_CHANGELOG)'
+- чтобы исключить повторный запуск Liquibase Pod указано spec.restartPolicy: Never
+
+``` yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: app-liquibase
+    labels:
+        tier: app-liquibase
+    namespace: go-app
+spec:
+    initContainers:
+        - name: init-app-liquibase
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_PORT
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"]
+    containers:
+        - name: app-liquibase
+          env:
+            - name: APP_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: APP_PG_USER
+            - name: APP_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: APP_PG_PASS
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_DBNAME
+            - name: APP_PG_CHANGELOG
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PG_CHANGELOG
+          image: app-liquibase # image: romapres2010/app-liquibase:2.0.0
+          command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
+          imagePullPolicy: IfNotPresent
+    restartPolicy: Never
+```
+
+### Go Api
+
+Особенности развертывания [/deploy/kubernates/base/app-api-deployment.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-api-deployment.yaml):
+- начальное количество replicas: 1, остальные будет автоматически создаваться Horizontal Autoscaler
+- template.metadata.labels задана дополнительная метка tier: app-api, чтобы можно было легко найти Pod БД
+- ENV переменные заполняются из ранее созданных ConfigMap и Secret
+- по аналогии с Liquibase задан отдельный initContainers для ожидания готовности порта 5432 postgres в Pod c БД
+  - так как все Pod (БД, Liquibase, Go Api) будут запущены одновременно, то возникнет ситуация, когда БД уже стартовала, но Liquibase еще не применил DDL и DML скрипты. Или применил их только частично. 
+  - в это время контейнер с Go Api (в текущем шаблоне) будет падать с ошибкой и пересоздаваться.
+  - поэтому нужно правильно настроить readinessProbe для Go Api, которая определяет с какого момента приложение готово к работе
+  - альтернативный вариант иметь в БД метку или сигнал, об успешной установке патчей на БД по которому Go Api будет готова к работе    
+- определены readinessProbe и livenessProbe на основе httpGet
+- определена период мягкой остановки - terminationGracePeriodSeconds: 45
+- заданы resources.requests - это определяет минимальные ресурсы, для старта приложения. В зависимости от этого будет выбран узел кластера со свободными ресурсами.
+- заданы resources.limits
+  - если превышен limits.memory, то Pod будет удален и пересоздан
+  - limits.cpu контролируется собственно кластером - больше процессорного времени не будет выделено. 
+
+``` yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-api
+    labels:
+        tier: app-api
+    namespace: go-app
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            tier: app-api
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app_net: "true"
+                tier: app-api
+        spec:
+            initContainers:
+                - name: init-app-api
+                  env:
+                    - name: APP_PG_HOST
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_HOST
+                    - name: APP_PG_PORT
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_PORT
+                  image: busybox:1.28
+                  command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"]
+            terminationGracePeriodSeconds: 45
+            containers:
+                - name: app-api
+                  env:
+                    - name: APP_CONFIG_FILE
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_CONFIG_FILE
+                    - name: APP_HTTP_LISTEN_SPEC
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_HTTP_LISTEN_SPEC
+                    - name: APP_LOG_LEVEL
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_LOG_LEVEL
+                    - name: APP_LOG_FILE
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_LOG_FILE
+                    - name: APP_PG_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_USER
+                    - name: APP_PG_PASS
+                      valueFrom:
+                        secretKeyRef:
+                          name: app-secret
+                          key: APP_PG_PASS
+                    - name: APP_PG_HOST
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_HOST
+                    - name: APP_PG_PORT
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_PORT
+                    - name: APP_PG_DBNAME
+                      valueFrom:
+                        configMapKeyRef:
+                          name: app-config
+                          key: APP_PG_DBNAME
+                  image: app-api # image: romapres2010/app-api:2.0.0
+                  imagePullPolicy: IfNotPresent
+                  readinessProbe:
+                    httpGet:
+                      path: /app/system/health
+                      port: 8080
+                      scheme: HTTP
+                    initialDelaySeconds: 30  # Time to start
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  livenessProbe:
+                    httpGet:
+                      path: /app/system/health
+                      port: 8080
+                      scheme: HTTP
+                    failureThreshold: 5
+                    periodSeconds: 10
+                    timeoutSeconds: 5
+                  ports:
+                    - containerPort: 8080
+                  resources:
+                    requests:
+                      cpu: 500m
+                      memory: 256Mi
+                    limits:
+                      cpu: 2000m
+                      memory: 2000Mi
+            hostname: app-api-host
+            restartPolicy: Always
+```
+
+Доступ к Go Api нужен вне кластера, причем так как Pod может быть несколько, то нужен LoadBalancer - [/deploy/kubernates/base/app-api-service.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-api-service.yaml).
+- в нашем случае для кластера настраивается внешний порт 3000 на IP адрес собственно кластера
+- для того, чтобы Service был смаплен с созданным через Deployment Pod Go APi (при масштабировании нагрузки их будет несколько), должны соответствовать Service.spec.selector.tier: app-api и Deployment.spec.template.metadata.labels.tier: app-api
+
+``` yaml
+apiVersion: v1
+kind: Service
+metadata:
+    name: app-api
+    labels:
+        tier: app-api
+    namespace: go-app
+spec:
+    type: LoadBalancer
+    ports:
+        - port: 3000
+          targetPort: 8080
+    selector:
+        tier: app-api
+```
+
+## 8. Kustomization YAML для Kubernetes
 
 
 ## . Подготовка Helm chart
 
 ## . Настройка Horizontal Autoscaler
-Управление памятью в контейнере - memory_limit: 2000000000 - как срабатывает снижение количества replica
-
 
 Так же нужно иметь в виду, что в Kubernetes может быть запущено более одного экземпляра Docker контейнера и так же возможна ситуация, когда Docker контейнер будет удален и пересоздано на другом узле кластера.

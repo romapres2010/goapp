@@ -12,10 +12,6 @@ spec:
             tier: app-db
     strategy:
         type: Recreate
-    #    rollingUpdate:
-    #      maxSurge: 1
-    #      maxUnavailable: 1
-    #    type: RollingUpdate
     template:
         metadata:
             labels:
@@ -24,9 +20,6 @@ spec:
         spec:
             containers:
                 - name: app-db
-#                  envFrom:
-#                    - configMapRef:
-#                        name: app-db-config
                   env:
                     - name: POSTGRES_PASSWORD
                       valueFrom:
@@ -48,11 +41,6 @@ spec:
                         secretKeyRef:
                           name: app-secret
                           key: APP_PG_USER
-#                  env:
-#                      - name: PGUSER
-#                        value: postgres
-#                      - name: POSTGRES_PASSWORD
-#                        value: postgres
                   image: postgres:14.5-alpine
                   imagePullPolicy: IfNotPresent
                   readinessProbe:
@@ -72,25 +60,12 @@ spec:
                     timeoutSeconds: 5
                   ports:
                     - containerPort: 5432
-#                  resources:
-#                    requests:
-#                      cpu: 500m
-#                      memory: 256Mi
-#                    limits:
-#                      cpu: 3000m
-#                      memory: 512Mi
                   volumeMounts:
                     - mountPath: /var/lib/postgresql/data
                       name: app-db-volume
-            #            - mountPath: /var/lib/postgresql/data
-            #              name: app-db-vol
             hostname: app-db-host
             restartPolicy: Always
             volumes:
               - name: app-db-volume
                 persistentVolumeClaim:
                   claimName: app-db-claim
-#        - name: app-db-vol
-#          hostPath:
-#            path: ./../../../app_volumes/db
-#            type: Directory

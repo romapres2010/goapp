@@ -33,6 +33,7 @@ spec:
                           key: APP_PG_PORT
                   image: busybox:1.28
                   command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"]
+            terminationGracePeriodSeconds: 45
             containers:
                 - name: app-api
                   env:
@@ -107,8 +108,8 @@ spec:
                       cpu: 500m
                       memory: 256Mi
                     limits:
-                      cpu: 3000m
-                      memory: 300000Mi
+                      cpu: 2000m
+                      memory: 2000Mi
             hostname: app-api-host
             restartPolicy: Always
 

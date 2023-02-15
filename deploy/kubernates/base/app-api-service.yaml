@@ -6,7 +6,7 @@ metadata:
         tier: app-api
     namespace: go-app
 spec:
-    type: LoadBalancer                # A port is opened on each node in your cluster via Kube proxy.
+    type: LoadBalancer
     ports:
         - port: 3000
           targetPort: 8080

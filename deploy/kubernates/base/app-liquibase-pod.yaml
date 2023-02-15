@@ -54,7 +54,7 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: APP_PG_CHANGELOG
-          image: app-liquibase # image: romapres2010/app-liquibase:2.1.8
+          image: app-liquibase # image: romapres2010/app-liquibase:2.0.0
           command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
           imagePullPolicy: IfNotPresent
     restartPolicy: Never
