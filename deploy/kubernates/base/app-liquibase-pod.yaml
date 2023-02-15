@@ -4,7 +4,7 @@ metadata:
     name: app-liquibase
     labels:
         tier: app-liquibase
-    namespace: app
+    namespace: go-app
 spec:
     initContainers:
         - name: init-app-liquibase

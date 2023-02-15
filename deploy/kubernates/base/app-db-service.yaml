@@ -4,7 +4,7 @@ metadata:
     name: app-db
     labels:
         tier: app-db
-    namespace: app
+    namespace: go-app
 spec:
     type: NodePort                 # A port is opened on each node in your cluster via Kube proxy.
     ports:

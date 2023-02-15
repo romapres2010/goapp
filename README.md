@@ -6,7 +6,7 @@
 
 [Вторая часть](https://habr.com/ru/post/500554/) шаблона была посвящена прототипированию REST API.
 
-Третья часть посвящена развертыванию шаблона в Kubernetes и настройке Horizontal Autoscaler.
+Третья часть посвящена развертыванию в Kubernetes и настройке Horizontal Autoscaler.
 
 Для корректного развертывания в Kubernetes, в шаблон пришлось внести изменения: 
 - способа конфигурирования - YAML, ENV, [Kustomize](https://kustomize.io/)

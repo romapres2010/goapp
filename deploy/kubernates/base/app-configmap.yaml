@@ -4,7 +4,7 @@ metadata:
   name: app-config
   labels:
     app: app
-  namespace: app
+  namespace: go-app
 data:
   APP_CONFIG_FILE: /app/defcfg/app.global.yaml
   APP_HTTP_PORT: "8080"

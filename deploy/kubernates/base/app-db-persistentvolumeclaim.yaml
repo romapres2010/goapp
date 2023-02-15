@@ -4,7 +4,7 @@ metadata:
     name: app-db-claim
     labels:
         app: app
-    namespace: app
+    namespace: go-app
 spec:
     accessModes:
         - ReadWriteOnce

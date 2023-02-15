@@ -4,7 +4,7 @@ metadata:
     name: app-api
     labels:
         tier: app-api
-    namespace: app
+    namespace: go-app
 spec:
     replicas: 1
     selector:
@@ -81,7 +81,7 @@ spec:
                         configMapKeyRef:
                           name: app-config
                           key: APP_PG_DBNAME
-                  image: app-api # image: romapres2010/app-api:2.1.8
+                  image: app-api # image: romapres2010/app-api:2.0.0
                   imagePullPolicy: IfNotPresent
                   readinessProbe:
                     httpGet:
@@ -102,13 +102,13 @@ spec:
                     timeoutSeconds: 5
                   ports:
                     - containerPort: 8080
-#                  resources:
-#                    requests:
-#                      cpu: 500m
-#                      memory: 256Mi
-#                    limits:
-#                      cpu: 3000m
-#                      memory: 300000Mi
+                  resources:
+                    requests:
+                      cpu: 500m
+                      memory: 256Mi
+                    limits:
+                      cpu: 3000m
+                      memory: 300000Mi
             hostname: app-api-host
             restartPolicy: Always
 
