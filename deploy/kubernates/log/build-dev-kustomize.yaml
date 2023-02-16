@@ -1,0 +1,408 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    variant: dev
+  name: go-app
+---
+apiVersion: v1
+data:
+  APP_CONFIG_FILE: /app/defcfg/app.global.yaml
+  APP_HTTP_LISTEN_SPEC: 0.0.0.0:8080
+  APP_HTTP_PORT: "8080"
+  APP_LOG_FILE: /app/log/app.log
+  APP_LOG_LEVEL: DEBUG
+  APP_PG_CHANGELOG: db.changelog-1.0_recreate_testdata.xml
+  APP_PG_DBNAME: postgres
+  APP_PG_HOST: dev-app-db
+  APP_PG_PORT: "5432"
+kind: ConfigMap
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    variant: dev
+  name: dev-app-config
+  namespace: go-app
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    variant: dev
+  name: dev-app-secret
+  namespace: go-app
+stringData:
+  APP_PG_PASS: postgres
+  APP_PG_USER: postgres
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    tier: app-api
+    variant: dev
+  name: dev-app-api
+  namespace: go-app
+spec:
+  ports:
+  - port: 3000
+    targetPort: 8080
+  selector:
+    app: app
+    tier: app-api
+    variant: dev
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    tier: app-db
+    variant: dev
+  name: dev-app-db
+  namespace: go-app
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: app
+    tier: app-db
+    variant: dev
+  type: NodePort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    variant: dev
+  name: dev-app-db-claim
+  namespace: go-app
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    tier: app-api
+    variant: dev
+  name: dev-app-api
+  namespace: go-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app
+      tier: app-api
+      variant: dev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        note: This is development
+      labels:
+        app: app
+        app_net: "true"
+        tier: app-api
+        variant: dev
+    spec:
+      containers:
+      - env:
+        - name: APP_CONFIG_FILE
+          valueFrom:
+            configMapKeyRef:
+              key: APP_CONFIG_FILE
+              name: dev-app-config
+        - name: APP_HTTP_LISTEN_SPEC
+          valueFrom:
+            configMapKeyRef:
+              key: APP_HTTP_LISTEN_SPEC
+              name: dev-app-config
+        - name: APP_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: APP_LOG_LEVEL
+              name: dev-app-config
+        - name: APP_LOG_FILE
+          valueFrom:
+            configMapKeyRef:
+              key: APP_LOG_FILE
+              name: dev-app-config
+        - name: APP_PG_USER
+          valueFrom:
+            secretKeyRef:
+              key: APP_PG_USER
+              name: dev-app-secret
+        - name: APP_PG_PASS
+          valueFrom:
+            secretKeyRef:
+              key: APP_PG_PASS
+              name: dev-app-secret
+        - name: APP_PG_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_HOST
+              name: dev-app-config
+        - name: APP_PG_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_PORT
+              name: dev-app-config
+        - name: APP_PG_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_DBNAME
+              name: dev-app-config
+        image: romapres2010/app-api:2.0.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /app/system/health
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          timeoutSeconds: 5
+        name: app-api
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /app/system/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 4000Mi
+          requests:
+            cpu: 500m
+            memory: 256Mi
+      hostname: app-api-host
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT)
+          to be ready; sleep 5; done
+        env:
+        - name: APP_PG_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_HOST
+              name: dev-app-config
+        - name: APP_PG_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_PORT
+              name: dev-app-config
+        image: busybox:1.28
+        name: init-app-api
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    tier: app-db
+    variant: dev
+  name: dev-app-db
+  namespace: go-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+      tier: app-db
+      variant: dev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        note: This is development
+      labels:
+        app: app
+        app_net: "true"
+        tier: app-db
+        variant: dev
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: APP_PG_PASS
+              name: dev-app-secret
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              key: APP_PG_DBNAME
+              name: dev-app-config
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: APP_PG_USER
+              name: dev-app-secret
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              key: APP_PG_USER
+              name: dev-app-secret
+        image: postgres:14.5-alpine
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+          failureThreshold: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        name: app-db
+        ports:
+        - containerPort: 5432
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: app-db-volume
+      hostname: app-db-host
+      restartPolicy: Always
+      volumes:
+      - name: app-db-volume
+        persistentVolumeClaim:
+          claimName: dev-app-db-claim
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    variant: dev
+  name: dev-app-net
+  namespace: go-app
+spec:
+  egress:
+  - {}
+  ingress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Egress
+  - Ingress
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    note: This is development
+  labels:
+    app: app
+    tier: app-liquibase
+    variant: dev
+  name: dev-app-liquibase
+  namespace: go-app
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME)
+      --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
+    env:
+    - name: APP_PG_USER
+      valueFrom:
+        secretKeyRef:
+          key: APP_PG_USER
+          name: dev-app-secret
+    - name: APP_PG_PASS
+      valueFrom:
+        secretKeyRef:
+          key: APP_PG_PASS
+          name: dev-app-secret
+    - name: APP_PG_HOST
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_HOST
+          name: dev-app-config
+    - name: APP_PG_PORT
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_PORT
+          name: dev-app-config
+    - name: APP_PG_DBNAME
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_DBNAME
+          name: dev-app-config
+    - name: APP_PG_CHANGELOG
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_CHANGELOG
+          name: dev-app-config
+    image: romapres2010/app-liquibase:2.0.0
+    imagePullPolicy: IfNotPresent
+    name: app-liquibase
+  initContainers:
+  - command:
+    - sh
+    - -c
+    - until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT)
+      to be ready; sleep 5; done
+    env:
+    - name: APP_PG_HOST
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_HOST
+          name: dev-app-config
+    - name: APP_PG_PORT
+      valueFrom:
+        configMapKeyRef:
+          key: APP_PG_PORT
+          name: dev-app-config
+    image: busybox:1.28
+    name: init-app-liquibase
+  restartPolicy: Never

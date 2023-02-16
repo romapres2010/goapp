@@ -12,6 +12,7 @@
 - способа конфигурирования - YAML, ENV, [Kustomize](https://kustomize.io/)
 - подхода к логированию - переход на [zap](https://github.com/uber-go/zap)
 - способа развертывания схемы БД - переход на [liquibase](https://www.liquibase.org/)
+- добавление метрик [prometheus](https://prometheus.io/)
 
 Ссылка на новый [репозиторий проекта](https://github.com/romapres2010/goapp).
 
@@ -26,8 +27,10 @@
 6. Схема развертывания в Kubernetes
 7. Подготовка YAML для Kubernetes
 8. Kustomization YAML для Kubernetes
-9. Подготовка Helm chart
-10. Настройка Horizontal Autoscaler
+9. Тестирование Kubernetes с kustomize
+10. Переход на Helm chart
+11. Тестирование Kubernetes с Helm
+12. Настройка Horizontal Autoscaler
  
 <cut />
 
@@ -666,6 +669,7 @@ Liquibase со скриптами должен запускаться тольк
     - ENV переменную initContainers.env.APP_PG_HOST используем в команде nc -w
 - в command определена собственно строка запуска Liquibase с передачей через ENV переменную initContainers.env.APP_PG_CHANGELOG корневого скрипта для запуска '--changelog-file=./changelog/$(APP_PG_CHANGELOG)'
 - чтобы исключить повторный запуск Liquibase Pod указано spec.restartPolicy: Never
+- tag для Docker образа будет определен в kustomize через подстановку image: app-liquibase 
 
 ``` yaml
 apiVersion: v1
@@ -747,7 +751,8 @@ spec:
 - заданы resources.limits
   - если превышен limits.memory, то Pod будет удален и пересоздан
   - limits.cpu контролируется собственно кластером - больше процессорного времени не будет выделено. 
-
+- tag для Docker образа будет определен в kustomize через подстановку image: app-api
+- 
 ``` yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -888,9 +893,192 @@ spec:
 
 ## 8. Kustomization YAML для Kubernetes
 
-Kubernetes не предоставляет возможности использовать внешние ENV переменные.
+Kubernetes не предоставляет стандартной возможности использовать внешние ENV переменные - каждый раз нужно менять YAML заново "накатывать конфигурацию".
+
+Самый простой автоматически вносить изменения в YAML файлы в зависимости от сред развертывания DEV-TEST-PROD - это [Kustomize](https://kustomize.io/).
+- создается "базовая версия" (не содержит специфику сред) YAML для Kubernetes - она выложена в каталоге [/deploy/kubernates/base](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates/base)
+- для каждой из сред (вариантов развертывания) создает отдельный каталог, содержащий изменения в YAML, которые должны быть применены поверх "базовой версии". Например, [/deploy/kubernates/overlays/dev](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates/overlays/dev). 
+
+Состав YAML "базовой версии" определен в [/deploy/kubernates/base/kustomization.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/kustomization.yaml). 
+
+``` yaml
+commonLabels:
+  app: app
+  variant: base
+resources:
+- app-namespase.yaml
+- app-net-networkpolicy.yaml
+- app-configmap.yaml
+- app-secret.yaml
+- app-db-persistentvolumeclaim.yaml
+- app-db-deployment.yaml
+- app-db-service.yaml
+- app-api-deployment.yaml
+- app-api-service.yaml
+- app-liquibase-pod.yaml
+```
+
+Состав изменений, которые нужно применить для среды DEV к "базовой версии" определен в [/deploy/kubernates/overlays/dev/kustomization.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/overlays/dev/kustomization.yaml).
+- в имена всех артефактов Kubernetes добавлен дополнительный префикс namePrefix: dev- 
+- определена новая метка, для фильтрации всех артефактов среды - commonLabels.variant: dev
+- определены подстановки реальных Docker образов для app-api и app-liquibase
+- определены патчи, которые нужно применить поверх "базовой версии"
+
+``` yaml
+namePrefix: dev-
+commonLabels:
+  variant: dev
+commonAnnotations:
+  note: This is development
+resources:
+- ../../base
+images:
+- name: app-api
+  newName: romapres2010/app-api
+  newTag: 2.0.0
+- name: app-liquibase
+  newName: romapres2010/app-liquibase
+  newTag: 2.0.0
+patches:
+- app-configmap.yaml
+- app-secret.yaml
+- app-api-deployment.yaml
+```
+
+### Патчи поверх базовой версии
+Включают изменения, специфичные для сред: IP, порты, имена схем БД, пароли, ресурсы, лимиты.
+
+Изменение Secret
+``` yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  labels:
+    app: app
+  namespace: go-app
+type: Opaque
+stringData:
+  APP_PG_USER: postgres
+  APP_PG_PASS: postgres
+```
+
+Изменение ConfigMap
+``` yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app: app
+  namespace: go-app
+data:
+  APP_CONFIG_FILE: /app/defcfg/app.global.yaml
+  APP_HTTP_PORT: "8080"
+  APP_HTTP_LISTEN_SPEC: 0.0.0.0:8080
+  APP_LOG_LEVEL: ERROR
+  APP_LOG_FILE: /app/log/app.log
+  APP_PG_HOST: dev-app-db
+  APP_PG_PORT: "5432"
+  APP_PG_DBNAME: postgres
+  APP_PG_CHANGELOG: db.changelog-1.0_recreate_testdatamdg.xml	
+```
+
+Изменение Deployment Go Api - заданы другие лимиты, количество реплик и время "чистой" остановки
+``` yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: app-api
+    labels:
+        tier: app-api
+    namespace: go-app
+spec:
+    replicas: 2
+    template:
+        spec:
+            terminationGracePeriodSeconds: 60
+            containers:
+                - name: app-api
+                  resources:
+                      limits:
+                          cpu: 4000m
+                          memory: 4000Mi
+            restartPolicy: Always
+```
+
+## . Тестирование Kubernetes с kustomize
+Для тестирования подготовлено несколько скриптов в каталоге [/deploy/kubernates](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates).
+
+_скрипты представлены только для ознакомительных целей_
+
+### Развертывание 
+Запускаем скрипт [/deploy/kubernates/kube-build.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-build.sh) и передаем ему в качестве параметров среду dev, которую нужно развернуть.
+
+``` shell
+./kube-build.sh dev
+```
+
+Все результаты логируются в каталог 
+
+``` shell
+$ ./kube-build.sh dev
+Kube namespace: go-app
+Kube variant: dev
+YAML file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kustomize.yaml
+Kustomize Log file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kustomize.log
+Kube Log file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kube.log
+APP describe file: /g/Projects/go/goapp/deploy/kubernates/log/describe-dev-kube.log
+kubectl kustomize ./overlays/dev
+kubectl apply
+Kube namespace: go-app
+Kube variant: dev
+
+kubectl get pods
+NAME                           READY   STATUS     RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
+dev-app-api-59b6ff97b4-2kmfm   0/1     Init:0/1   0          5s    10.1.1.182   docker-desktop   <none>           <none>
+dev-app-api-59b6ff97b4-plmz6   0/1     Init:0/1   0          5s    10.1.1.183   docker-desktop   <none>           <none>
+dev-app-db-58bbb867d8-c96bz    0/1     Running    0          5s    10.1.1.184   docker-desktop   <none>           <none>
+dev-app-liquibase              0/1     Init:0/1   0          5s    10.1.1.185   docker-desktop   <none>           <none>
+
+kubectl get deployment
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                       SELECTOR
+dev-app-api   0/2     2            0           6s    app-api      romapres2010/app-api:2.0.0   app=app,tier=app-api,variant=dev
+dev-app-db    0/1     1            0           6s    app-db       postgres:14.5-alpine         app=app,tier=app-db,variant=dev
+
+kubectl get service
+NAME          TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+dev-app-api   LoadBalancer   10.106.114.183   localhost     3000:30894/TCP   6s    app=app,tier=app-api,variant=dev
+dev-app-db    NodePort       10.111.201.17    <none>        5432:30906/TCP   6s    app=app,tier=app-db,variant=dev
+
+kubectl get configmap
+NAME             DATA   AGE
+dev-app-config   9      6s
+
+kubectl get secret
+NAME             TYPE     DATA   AGE
+dev-app-secret   Opaque   2      7s
+
+kubectl get pvc
+NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE   VOLUMEMODE
+dev-app-db-claim   Bound    pvc-996244d5-c5fd-4496-abfd-b6d9301549af   100Mi      RWO            hostpath       7s    Filesystem
+
+kubectl get hpa
+No resources found in go-app namespace.
+sleep: 120
+Kube namespace: go-app
+Kube variant: dev
+APP db Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-db.log
+APP api Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-api.log
+APP liquibase Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-liquibase.log
+```
 
 
+
+
+### Проверка логов
+
+### Удаление 
 
 ## . Подготовка Helm chart
 

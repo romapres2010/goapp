@@ -31,23 +31,23 @@ echo "APP describe file:" $KUBE_DESCRIBE_FILE
 echo "" 1>$KUBE_LOG_FILE 2>&1
 echo "Delete all resources" 1>>$KUBE_LOG_FILE 2>&1
 
-echo "kubectl delete pods,services,deployments -n app -l app=app,variant=$KUBE_VARIANT"
+echo "kubectl delete pods,services,deployments -n go-app -l app=app,variant=$KUBE_VARIANT"
 kubectl delete pods,services,deployments -n $KUBE_NAMESPACE -l app=app,variant=$KUBE_VARIANT 1>>$KUBE_LOG_FILE 2>&1
 
 echo ""
-echo "kubectl delete configmap -n app -l app=app"
+echo "kubectl delete configmap -n go-app -l app=app"
 kubectl delete configmap -n $KUBE_NAMESPACE -l app=app 1>>$KUBE_LOG_FILE 2>&1
 
 echo ""
-echo "kubectl delete secret -n app -l app=app"
+echo "kubectl delete secret -n go-app -l app=app"
 kubectl delete secret -n $KUBE_NAMESPACE -l app=app 1>>$KUBE_LOG_FILE 2>&1
 
 echo ""
-echo "kubectl delete NetworkPolicy -n app app-net"
+echo "kubectl delete NetworkPolicy -n go-app app-net"
 kubectl delete NetworkPolicy -n $KUBE_NAMESPACE app-net 1>>$KUBE_LOG_FILE 2>&1
 
 echo ""
-echo "kubectl delete namespace app"
+echo "kubectl delete namespace go-app"
 kubectl delete namespace $KUBE_NAMESPACE 1>>$KUBE_LOG_FILE 2>&1
 
 echo "" 1>>$KUBE_LOG_FILE 2>&1

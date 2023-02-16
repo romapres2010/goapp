@@ -12,9 +12,3 @@ resources:
 - app-api-deployment.yaml
 - app-api-service.yaml
 - app-liquibase-pod.yaml
-#- app-liquibase-deployment.yaml
-
-#configMapGenerator:
-#- name: app-db-config
-#  files:
-#  - .env

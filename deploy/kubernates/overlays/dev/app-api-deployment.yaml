@@ -6,14 +6,16 @@ metadata:
         tier: app-api
     namespace: go-app
 spec:
-    replicas: 1
-    strategy:
-        type: Recreate
-#    template:
-#        spec:
-#            initContainers:
-#                - name: init-app-db
-#                  image: busybox:1.28
-#                  command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 10; done"]
+    replicas: 2
+    template:
+        spec:
+            terminationGracePeriodSeconds: 60
+            containers:
+                - name: app-api
+                  resources:
+                      limits:
+                          cpu: 4000m
+                          memory: 4000Mi
+            restartPolicy: Always
 
 
