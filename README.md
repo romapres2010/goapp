@@ -1,4 +1,4 @@
-# Шаблон backend сервера на Golang — часть 3 (Docker, Docker Compose, Kubernetes (kustomize)
+# [Шаблон backend сервера на Golang — часть 3 (Docker, Docker Compose, Kubernetes (kustomize)](https://habr.com/ru/post/716634/)
 
 ![Схема развертывания в Kubernetes](https://github.com/romapres2010/goapp/raw/master/doc/diagram/APP%20-%20Kebernates.jpg)
 
@@ -18,7 +18,7 @@
 
 Ссылка на новый [репозиторий](https://github.com/romapres2010/goapp).
 
-Шаблон в репозитории представлен в виде полностью готового к развертыванию кода в Docker, Docker Compose, Kubernetes (kustomize).
+Шаблон в репозитории представлен в виде полностью готового к развертыванию кода в Docker, Docker Compose, Kubernetes (kustomize), Kubernetes (helm).
 
 ## Содержание
 1. Изменение подхода к конфигурированию
@@ -125,23 +125,43 @@ for handlerName, handlerCfg := range s.cfg.Handlers {
 
 В шаблон встроена сборка следующих метрик для [prometheus](https://prometheus.io/):
 - Метрики DB
-  - __db_total__ тип CounterVec - The total number of processed DB by sql statement
-  - __db_duration_ms__ тип HistogramVec - The duration histogram of DB operation in ms by sql statement
+  - **db_total** - The total number of processed DB by sql statement (CounterVec)
+  - **db_duration_ms** - The duration histogram of DB operation in ms by sql statement (HistogramVec)
 - Метрики HTTP request
-  - __http_requests_total_by_resource__ тип CounterVec - How many HTTP requests processed, partitioned by resource
-  - __http_requests_error_total_by_resource__ тип CounterVec - How many HTTP requests was ERRORED, partitioned by resource
-  - __http_request_duration_ms_by_resource__ тип HistogramVec - The duration histogram of HTTP requests in ms by resource
-  - __http_active_requests_count__ тип Gauge - The total number of active HTTP requests
-  - __http_request_duration_ms__ тип Histogram - The duration histogram of HTTP requests in ms
+  - **http_requests_total_by_resource** - How many HTTP requests processed, partitioned by resource (CounterVec)
+  - **http_requests_error_total_by_resource** - How many HTTP requests was ERRORED, partitioned by resource (CounterVec)
+  - **http_request_duration_ms_by_resource** - The duration histogram of HTTP requests in ms by resource (HistogramVec)
+  - **http_active_requests_count** - The total number of active HTTP requests (Gauge)
+  - **http_request_duration_ms** - The duration histogram of HTTP requests in ms (Histogram)
 - Метрики HTTP client call
-  - __http_client_call_total_by_resource__ тип CounterVec - How many HTTP client call processed, partitioned by resource
-  - __http_client_call_duration_ms_by_resource__ тип HistogramVec - The duration histogram of HTTP client call in ms by resource
+  - **http_client_call_total_by_resource** - How many HTTP client call processed, partitioned by resource (CounterVec)
+  - **http_client_call_duration_ms_by_resource** - The duration histogram of HTTP client call in ms by resource (HistogramVec)
 - Метрики WorkerPoolVec
-  - __wp_task_queue_buffer_len_vec__ тип GaugeVec - The len of the worker pool buffer
-  - __wp_add_task_wait_count_vec__ тип GaugeVec - The number of the task waiting to add to worker pool queue
-  - __wp_worker_process_count_vec__ тип GaugeVec - The number of the working worker
+  - **wp_task_queue_buffer_len_vec** - The len of the worker pool buffer (GaugeVec)
+  - **wp_add_task_wait_count_vec** - The number of the task waiting to add to worker pool queue (GaugeVec)
+  - **wp_worker_process_count_vec** - The number of the working worker (GaugeVec)
 
 Доступ к метрикам настроен по стандартному пути HTTP GET [/metrics](http://127.0.0.1:3000/metrics).
+
+Включение / выключение метрик настраивается через YAML конфиг 
+``` yaml
+# конфигурация сбора метрик
+metrics:
+    metrics_namespace: com
+    metrics_subsystem: go_app
+    collect_db_count_vec: true
+    collect_db_duration_vec: false
+    collect_http_requests_count_vec: true
+    collect_http_error_requests_count_vec: true
+    collect_http_requests_duration_vec: true
+    collect_http_active_requests_count: true
+    collect_http_requests_duration: true
+    collect_http_client_call_count_vec: true
+    collect_http_client_call_duration_vec: true
+    collect_wp_task_queue_buffer_len_vec: true
+    collect_wp_add_task_wait_count_vec: true
+    collect_wp_worker_process_count_vec: true
+```
 
 ## 3. Изменение подхода к логированию
 Логирование приложения в Kubernetes можно реализовать несколькими способами:

@@ -149,9 +149,6 @@ metrics:
     collect_http_requests_duration: true
     collect_http_client_call_count_vec: true
     collect_http_client_call_duration_vec: true
-    collect_wp_task_queue_buffer_len: true
-    collect_wp_add_task_wait_count: true
-    collect_wp_worker_process_count: true
     collect_wp_task_queue_buffer_len_vec: true
     collect_wp_add_task_wait_count_vec: true
     collect_wp_worker_process_count_vec: true
