@@ -1,0 +1,48 @@
+Defaulted container "app-liquibase" out of: app-liquibase, init-app-liquibase (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 09:02:58 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-16 09:02:58] INFO [liquibase.database] Set default schema name to public
+[2023-02-16 09:02:58] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_recreate_testdata.xml::1::romapres
+Drop schema
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Drop schema
+[2023-02-16 09:02:59] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/dropSchemaApp.sql executed
+Initialing schema: schemaName=app
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-16 09:02:59] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-16 09:02:59] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-16 09:02:59] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_recreate_testdata.xml::1::romapres ran successfully in 93ms
+Running Changeset: changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-16 09:02:59] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-16 09:02:59] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-16 09:02:59] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-16 09:03:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+[2023-02-16 09:03:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 521ms
+[2023-02-16 09:03:00] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.

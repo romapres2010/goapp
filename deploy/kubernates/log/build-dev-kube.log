@@ -1,0 +1,10 @@
+namespace/go-app created
+configmap/dev-app-config created
+secret/dev-app-secret created
+service/dev-app-api created
+service/dev-app-db created
+persistentvolumeclaim/dev-app-db-claim created
+deployment.apps/dev-app-api created
+deployment.apps/dev-app-db created
+networkpolicy.networking.k8s.io/dev-app-net created
+pod/dev-app-liquibase created

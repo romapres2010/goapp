@@ -1,0 +1,57 @@
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+sh: locale: not found
+2023-02-16 09:02:14.668 UTC [31] WARNING:  no usable system locales were found
+performing post-bootstrap initialization ... ok
+initdb: warning: enabling "trust" authentication for local connections
+You can change this by editing pg_hba.conf or using the option -A, or
+--auth-local and --auth-host, the next time you run initdb.
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+waiting for server to start....2023-02-16 09:02:15.775 UTC [37] LOG:  starting PostgreSQL 14.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 11.2.1_git20220219) 11.2.1 20220219, 64-bit
+2023-02-16 09:02:15.777 UTC [37] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2023-02-16 09:02:15.783 UTC [38] LOG:  database system was shut down at 2023-02-16 09:02:15 UTC
+2023-02-16 09:02:15.786 UTC [37] LOG:  database system is ready to accept connections
+ done
+server started
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+waiting for server to shut down...2023-02-16 09:02:15.872 UTC [37] LOG:  received fast shutdown request
+.2023-02-16 09:02:15.876 UTC [37] LOG:  aborting any active transactions
+2023-02-16 09:02:15.877 UTC [37] LOG:  background worker "logical replication launcher" (PID 44) exited with exit code 1
+2023-02-16 09:02:15.878 UTC [39] LOG:  shutting down
+2023-02-16 09:02:15.897 UTC [37] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2023-02-16 09:02:16.031 UTC [1] LOG:  starting PostgreSQL 14.5 on x86_64-pc-linux-musl, compiled by gcc (Alpine 11.2.1_git20220219) 11.2.1 20220219, 64-bit
+2023-02-16 09:02:16.031 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2023-02-16 09:02:16.031 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2023-02-16 09:02:16.127 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2023-02-16 09:02:16.144 UTC [49] LOG:  database system was shut down at 2023-02-16 09:02:15 UTC
+2023-02-16 09:02:16.153 UTC [1] LOG:  database system is ready to accept connections
+2023-02-16 09:02:58.894 UTC [94] ERROR:  relation "public.databasechangeloglock" does not exist at character 22
+2023-02-16 09:02:58.894 UTC [94] STATEMENT:  SELECT COUNT(*) FROM public.databasechangeloglock

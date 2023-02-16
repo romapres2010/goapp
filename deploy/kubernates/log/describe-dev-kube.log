@@ -1,0 +1,620 @@
+Kube namespace: go-app
+Kube variant: dev
+
+kubectl get pods
+NAME                           READY   STATUS              RESTARTS   AGE   IP       NODE             NOMINATED NODE   READINESS GATES
+dev-app-api-59b6ff97b4-2kmfm   0/1     Init:0/1            0          1s    <none>   docker-desktop   <none>           <none>
+dev-app-api-59b6ff97b4-plmz6   0/1     Init:0/1            0          1s    <none>   docker-desktop   <none>           <none>
+dev-app-db-58bbb867d8-c96bz    0/1     ContainerCreating   0          1s    <none>   docker-desktop   <none>           <none>
+dev-app-liquibase              0/1     Pending             0          1s    <none>   docker-desktop   <none>           <none>
+
+kubectl get deployment
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                       SELECTOR
+dev-app-api   0/2     2            0           1s    app-api      romapres2010/app-api:2.0.0   app=app,tier=app-api,variant=dev
+dev-app-db    0/1     1            0           1s    app-db       postgres:14.5-alpine         app=app,tier=app-db,variant=dev
+
+kubectl get service
+NAME          TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+dev-app-api   LoadBalancer   10.106.114.183   localhost     3000:30894/TCP   1s    app=app,tier=app-api,variant=dev
+dev-app-db    NodePort       10.111.201.17    <none>        5432:30906/TCP   1s    app=app,tier=app-db,variant=dev
+
+kubectl get configmap
+NAME             DATA   AGE
+dev-app-config   9      2s
+
+kubectl get secret
+NAME             TYPE     DATA   AGE
+dev-app-secret   Opaque   2      2s
+
+kubectl get pvc
+NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE   VOLUMEMODE
+dev-app-db-claim   Bound    pvc-996244d5-c5fd-4496-abfd-b6d9301549af   100Mi      RWO            hostpath       2s    Filesystem
+
+kubectl get hpa
+No resources found in go-app namespace.
+Kube namespace: go-app
+Kube variant: dev
+
+kubectl describe pods
+Name:             dev-app-api-59b6ff97b4-2kmfm
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Thu, 16 Feb 2023 12:02:11 +0300
+Labels:           app=app
+                  app_net=true
+                  pod-template-hash=59b6ff97b4
+                  tier=app-api
+                  variant=dev
+Annotations:      note: This is development
+Status:           Pending
+IP:               
+IPs:              <none>
+Controlled By:    ReplicaSet/dev-app-api-59b6ff97b4
+Init Containers:
+  init-app-api:
+    Container ID:  
+    Image:         busybox:1.28
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:  <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>  Optional: false
+      APP_PG_PORT:  <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-kcxjt (ro)
+Containers:
+  app-api:
+    Container ID:   
+    Image:          romapres2010/app-api:2.0.0
+    Image ID:       
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     4
+      memory:  4000Mi
+    Requests:
+      cpu:      500m
+      memory:   256Mi
+    Liveness:   http-get http://:8080/app/system/health delay=0s timeout=5s period=10s #success=1 #failure=5
+    Readiness:  http-get http://:8080/app/system/health delay=30s timeout=5s period=10s #success=1 #failure=5
+    Environment:
+      APP_CONFIG_FILE:       <set to the key 'APP_CONFIG_FILE' of config map 'dev-app-config'>       Optional: false
+      APP_HTTP_LISTEN_SPEC:  <set to the key 'APP_HTTP_LISTEN_SPEC' of config map 'dev-app-config'>  Optional: false
+      APP_LOG_LEVEL:         <set to the key 'APP_LOG_LEVEL' of config map 'dev-app-config'>         Optional: false
+      APP_LOG_FILE:          <set to the key 'APP_LOG_FILE' of config map 'dev-app-config'>          Optional: false
+      APP_PG_USER:           <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_PASS:           <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_HOST:           <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>           Optional: false
+      APP_PG_PORT:           <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>           Optional: false
+      APP_PG_DBNAME:         <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>         Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-kcxjt (ro)
+Conditions:
+  Type              Status
+  Initialized       False 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-kcxjt:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  3s    default-scheduler  Successfully assigned go-app/dev-app-api-59b6ff97b4-2kmfm to docker-desktop
+  Normal  Pulled     1s    kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    1s    kubelet            Created container init-app-api
+  Normal  Started    1s    kubelet            Started container init-app-api
+
+
+Name:             dev-app-api-59b6ff97b4-plmz6
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Thu, 16 Feb 2023 12:02:11 +0300
+Labels:           app=app
+                  app_net=true
+                  pod-template-hash=59b6ff97b4
+                  tier=app-api
+                  variant=dev
+Annotations:      note: This is development
+Status:           Pending
+IP:               10.1.1.183
+IPs:
+  IP:           10.1.1.183
+Controlled By:  ReplicaSet/dev-app-api-59b6ff97b4
+Init Containers:
+  init-app-api:
+    Container ID:  docker://da28b0f79965e1a6e8cb19d2e94a6dba41bb97f1730d4bf2c52fb6ba53e1f07a
+    Image:         busybox:1.28
+    Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    State:          Running
+      Started:      Thu, 16 Feb 2023 12:02:13 +0300
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:  <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>  Optional: false
+      APP_PG_PORT:  <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-6hjrh (ro)
+Containers:
+  app-api:
+    Container ID:   
+    Image:          romapres2010/app-api:2.0.0
+    Image ID:       
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     4
+      memory:  4000Mi
+    Requests:
+      cpu:      500m
+      memory:   256Mi
+    Liveness:   http-get http://:8080/app/system/health delay=0s timeout=5s period=10s #success=1 #failure=5
+    Readiness:  http-get http://:8080/app/system/health delay=30s timeout=5s period=10s #success=1 #failure=5
+    Environment:
+      APP_CONFIG_FILE:       <set to the key 'APP_CONFIG_FILE' of config map 'dev-app-config'>       Optional: false
+      APP_HTTP_LISTEN_SPEC:  <set to the key 'APP_HTTP_LISTEN_SPEC' of config map 'dev-app-config'>  Optional: false
+      APP_LOG_LEVEL:         <set to the key 'APP_LOG_LEVEL' of config map 'dev-app-config'>         Optional: false
+      APP_LOG_FILE:          <set to the key 'APP_LOG_FILE' of config map 'dev-app-config'>          Optional: false
+      APP_PG_USER:           <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_PASS:           <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_HOST:           <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>           Optional: false
+      APP_PG_PORT:           <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>           Optional: false
+      APP_PG_DBNAME:         <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>         Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-6hjrh (ro)
+Conditions:
+  Type              Status
+  Initialized       False 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-6hjrh:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  3s    default-scheduler  Successfully assigned go-app/dev-app-api-59b6ff97b4-plmz6 to docker-desktop
+  Normal  Pulled     1s    kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    1s    kubelet            Created container init-app-api
+  Normal  Started    1s    kubelet            Started container init-app-api
+
+
+Name:             dev-app-db-58bbb867d8-c96bz
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Thu, 16 Feb 2023 12:02:11 +0300
+Labels:           app=app
+                  app_net=true
+                  pod-template-hash=58bbb867d8
+                  tier=app-db
+                  variant=dev
+Annotations:      note: This is development
+Status:           Pending
+IP:               
+IPs:              <none>
+Controlled By:    ReplicaSet/dev-app-db-58bbb867d8
+Containers:
+  app-db:
+    Container ID:   
+    Image:          postgres:14.5-alpine
+    Image ID:       
+    Port:           5432/TCP
+    Host Port:      0/TCP
+    State:          Waiting
+      Reason:       ContainerCreating
+    Ready:          False
+    Restart Count:  0
+    Liveness:       exec [pg_isready] delay=0s timeout=5s period=10s #success=1 #failure=5
+    Readiness:      exec [pg_isready] delay=30s timeout=5s period=10s #success=1 #failure=5
+    Environment:
+      POSTGRES_PASSWORD:  <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>        Optional: false
+      POSTGRES_DB:        <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
+      POSTGRES_USER:      <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>        Optional: false
+      PGUSER:             <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>        Optional: false
+    Mounts:
+      /var/lib/postgresql/data from app-db-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-zmsg6 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  app-db-volume:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  dev-app-db-claim
+    ReadOnly:   false
+  kube-api-access-zmsg6:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  3s    default-scheduler  Successfully assigned go-app/dev-app-db-58bbb867d8-c96bz to docker-desktop
+  Normal  Pulled     1s    kubelet            Container image "postgres:14.5-alpine" already present on machine
+  Normal  Created    1s    kubelet            Created container app-db
+  Normal  Started    0s    kubelet            Started container app-db
+
+
+Name:             dev-app-liquibase
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Thu, 16 Feb 2023 12:02:12 +0300
+Labels:           app=app
+                  tier=app-liquibase
+                  variant=dev
+Annotations:      note: This is development
+Status:           Pending
+IP:               
+IPs:              <none>
+Init Containers:
+  init-app-liquibase:
+    Container ID:  
+    Image:         busybox:1.28
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:  <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>  Optional: false
+      APP_PG_PORT:  <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fcf44 (ro)
+Containers:
+  app-liquibase:
+    Container ID:  
+    Image:         romapres2010/app-liquibase:2.0.0
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
+    State:          Waiting
+      Reason:       PodInitializing
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_USER:       <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>           Optional: false
+      APP_PG_PASS:       <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>           Optional: false
+      APP_PG_HOST:       <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>       Optional: false
+      APP_PG_PORT:       <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>       Optional: false
+      APP_PG_DBNAME:     <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>     Optional: false
+      APP_PG_CHANGELOG:  <set to the key 'APP_PG_CHANGELOG' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fcf44 (ro)
+Conditions:
+  Type              Status
+  Initialized       False 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-fcf44:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  2s    default-scheduler  Successfully assigned go-app/dev-app-liquibase to docker-desktop
+  Normal  Pulled     0s    kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    0s    kubelet            Created container init-app-liquibase
+  Normal  Started    0s    kubelet            Started container init-app-liquibase
+
+kubectl describe deployment
+Name:               dev-app-api
+Namespace:          go-app
+CreationTimestamp:  Thu, 16 Feb 2023 12:02:11 +0300
+Labels:             app=app
+                    tier=app-api
+                    variant=dev
+Annotations:        deployment.kubernetes.io/revision: 1
+                    note: This is development
+Selector:           app=app,tier=app-api,variant=dev
+Replicas:           2 desired | 2 updated | 2 total | 0 available | 2 unavailable
+StrategyType:       Recreate
+MinReadySeconds:    0
+Pod Template:
+  Labels:       app=app
+                app_net=true
+                tier=app-api
+                variant=dev
+  Annotations:  note: This is development
+  Init Containers:
+   init-app-api:
+    Image:      busybox:1.28
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    Environment:
+      APP_PG_HOST:  <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>  Optional: false
+      APP_PG_PORT:  <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>  Optional: false
+    Mounts:         <none>
+  Containers:
+   app-api:
+    Image:      romapres2010/app-api:2.0.0
+    Port:       8080/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     4
+      memory:  4000Mi
+    Requests:
+      cpu:      500m
+      memory:   256Mi
+    Liveness:   http-get http://:8080/app/system/health delay=0s timeout=5s period=10s #success=1 #failure=5
+    Readiness:  http-get http://:8080/app/system/health delay=30s timeout=5s period=10s #success=1 #failure=5
+    Environment:
+      APP_CONFIG_FILE:       <set to the key 'APP_CONFIG_FILE' of config map 'dev-app-config'>       Optional: false
+      APP_HTTP_LISTEN_SPEC:  <set to the key 'APP_HTTP_LISTEN_SPEC' of config map 'dev-app-config'>  Optional: false
+      APP_LOG_LEVEL:         <set to the key 'APP_LOG_LEVEL' of config map 'dev-app-config'>         Optional: false
+      APP_LOG_FILE:          <set to the key 'APP_LOG_FILE' of config map 'dev-app-config'>          Optional: false
+      APP_PG_USER:           <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_PASS:           <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>               Optional: false
+      APP_PG_HOST:           <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>           Optional: false
+      APP_PG_PORT:           <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>           Optional: false
+      APP_PG_DBNAME:         <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>         Optional: false
+    Mounts:                  <none>
+  Volumes:                   <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      False   MinimumReplicasUnavailable
+  Progressing    True    ReplicaSetUpdated
+OldReplicaSets:  <none>
+NewReplicaSet:   dev-app-api-59b6ff97b4 (2/2 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  3s    deployment-controller  Scaled up replica set dev-app-api-59b6ff97b4 to 2
+
+
+Name:               dev-app-db
+Namespace:          go-app
+CreationTimestamp:  Thu, 16 Feb 2023 12:02:11 +0300
+Labels:             app=app
+                    tier=app-db
+                    variant=dev
+Annotations:        deployment.kubernetes.io/revision: 1
+                    note: This is development
+Selector:           app=app,tier=app-db,variant=dev
+Replicas:           1 desired | 1 updated | 1 total | 0 available | 1 unavailable
+StrategyType:       Recreate
+MinReadySeconds:    0
+Pod Template:
+  Labels:       app=app
+                app_net=true
+                tier=app-db
+                variant=dev
+  Annotations:  note: This is development
+  Containers:
+   app-db:
+    Image:      postgres:14.5-alpine
+    Port:       5432/TCP
+    Host Port:  0/TCP
+    Liveness:   exec [pg_isready] delay=0s timeout=5s period=10s #success=1 #failure=5
+    Readiness:  exec [pg_isready] delay=30s timeout=5s period=10s #success=1 #failure=5
+    Environment:
+      POSTGRES_PASSWORD:  <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>        Optional: false
+      POSTGRES_DB:        <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
+      POSTGRES_USER:      <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>        Optional: false
+      PGUSER:             <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>        Optional: false
+    Mounts:
+      /var/lib/postgresql/data from app-db-volume (rw)
+  Volumes:
+   app-db-volume:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  dev-app-db-claim
+    ReadOnly:   false
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      False   MinimumReplicasUnavailable
+  Progressing    True    ReplicaSetUpdated
+OldReplicaSets:  <none>
+NewReplicaSet:   dev-app-db-58bbb867d8 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  3s    deployment-controller  Scaled up replica set dev-app-db-58bbb867d8 to 1
+
+kubectl describe service
+Name:                     dev-app-api
+Namespace:                go-app
+Labels:                   app=app
+                          tier=app-api
+                          variant=dev
+Annotations:              note: This is development
+Selector:                 app=app,tier=app-api,variant=dev
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.106.114.183
+IPs:                      10.106.114.183
+LoadBalancer Ingress:     localhost
+Port:                     <unset>  3000/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  30894/TCP
+Endpoints:                
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+
+
+Name:                     dev-app-db
+Namespace:                go-app
+Labels:                   app=app
+                          tier=app-db
+                          variant=dev
+Annotations:              note: This is development
+Selector:                 app=app,tier=app-db,variant=dev
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.111.201.17
+IPs:                      10.111.201.17
+LoadBalancer Ingress:     localhost
+Port:                     <unset>  5432/TCP
+TargetPort:               5432/TCP
+NodePort:                 <unset>  30906/TCP
+Endpoints:                
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+
+kubectl describe configmap
+Name:         dev-app-config
+Namespace:    go-app
+Labels:       app=app
+              variant=dev
+Annotations:  note: This is development
+
+Data
+====
+APP_CONFIG_FILE:
+----
+/app/defcfg/app.global.yaml
+APP_HTTP_PORT:
+----
+8080
+APP_LOG_FILE:
+----
+/app/log/app.log
+APP_PG_CHANGELOG:
+----
+db.changelog-1.0_recreate_testdata.xml
+APP_PG_DBNAME:
+----
+postgres
+APP_PG_HOST:
+----
+dev-app-db
+APP_PG_PORT:
+----
+5432
+APP_HTTP_LISTEN_SPEC:
+----
+0.0.0.0:8080
+APP_LOG_LEVEL:
+----
+DEBUG
+
+BinaryData
+====
+
+Events:  <none>
+
+kubectl describe secret
+Name:         dev-app-secret
+Namespace:    go-app
+Labels:       app=app
+              variant=dev
+Annotations:  note: This is development
+
+Type:  Opaque
+
+Data
+====
+APP_PG_PASS:  8 bytes
+APP_PG_USER:  8 bytes
+
+kubectl describe pvc
+Name:          dev-app-db-claim
+Namespace:     go-app
+StorageClass:  hostpath
+Status:        Bound
+Volume:        pvc-996244d5-c5fd-4496-abfd-b6d9301549af
+Labels:        app=app
+               variant=dev
+Annotations:   note: This is development
+               pv.kubernetes.io/bind-completed: yes
+               pv.kubernetes.io/bound-by-controller: yes
+               volume.beta.kubernetes.io/storage-provisioner: docker.io/hostpath
+               volume.kubernetes.io/storage-provisioner: docker.io/hostpath
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      100Mi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Used By:       dev-app-db-58bbb867d8-c96bz
+Events:
+  Type    Reason                 Age   From                                                                         Message
+  ----    ------                 ----  ----                                                                         -------
+  Normal  ExternalProvisioning   5s    persistentvolume-controller                                                  waiting for a volume to be created, either by external provisioner "docker.io/hostpath" or manually created by system administrator
+  Normal  Provisioning           5s    docker.io/hostpath_storage-provisioner_790976a3-d564-47f1-9090-54c1df889b1d  External provisioner is provisioning volume for claim "go-app/dev-app-db-claim"
+  Normal  ProvisioningSucceeded  5s    docker.io/hostpath_storage-provisioner_790976a3-d564-47f1-9090-54c1df889b1d  Successfully provisioned volume pvc-996244d5-c5fd-4496-abfd-b6d9301549af
+
+kubectl describe hpa
+No resources found in go-app namespace.

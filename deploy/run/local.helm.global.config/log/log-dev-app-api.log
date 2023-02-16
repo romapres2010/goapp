@@ -1,0 +1,901 @@
+Defaulted container "app-api" out of: app-api, init-app-api (init)
+2023-02-12 18:26:25.919212    info    app/main.go:228    main() - Starting up server
+2023-02-12 18:26:25.919394    info    app/main.go:185    main.func1() - Load config file 'configfile'='/app/defcfg/app.global.yaml' from environment 'APP_CONFIG_FILE'
+2023-02-12 18:26:25.919420    info    config/config.go:127    (*Config).LoadYamlConfig() - Loading config from file: FileName['/app/defcfg/app.global.yaml']
+2023-02-12 18:26:25.919466    info    config/config.go:135    (*Config).LoadYamlConfig() - Config file exist: FileName, FileInfo['/app/defcfg/app.global.yaml', '&{app.global.yaml 43772 493 {349470200 63811822928 0x17a3000} {1048769 355058 1 33261 0 0 0 0 43772 4096 88 {1676226340 820615000} {1676226128 349470200} {1676226340 580615000} [0 0 0]}}']
+2023-02-12 18:26:25.937213    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'http_server.listen_spec'='0.0.0.0:8080' was replaced with environment 'APP_HTTP_LISTEN_SPEC'='0.0.0.0:8080'
+2023-02-12 18:26:25.937457    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'logger.global_level'='INFO' was replaced with environment 'APP_LOG_LEVEL'='INFO'
+2023-02-12 18:26:25.937602    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'logger.log_file'='/app/log/app.log' was replaced with environment 'APP_LOG_FILE'='/app/log/app.log'
+2023-02-12 18:26:25.937662    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'db_service.postgres.host'='localhost' was replaced with environment 'APP_PG_HOST'='dev-app-db'
+2023-02-12 18:26:25.937800    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'db_service.postgres.port'='5434' was replaced with environment 'APP_PG_PORT'='5432'
+2023-02-12 18:26:25.937895    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'db_service.postgres.dbname'='postgres' was replaced with environment 'APP_PG_DBNAME'='postgres'
+2023-02-12 18:26:25.938002    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'db_service.postgres.user'='postgres' was replaced with environment 'APP_PG_USER'='postgres'
+2023-02-12 18:26:25.938063    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'db_service.postgres.pass'='postgres' was replaced with environment 'APP_PG_PASS'='postgres'
+2023-02-12 18:26:25.938142    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'crud_service.postgres.host'='localhost' was replaced with environment 'APP_PG_HOST'='dev-app-db'
+2023-02-12 18:26:25.938240    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'crud_service.postgres.port'='5434' was replaced with environment 'APP_PG_PORT'='5432'
+2023-02-12 18:26:25.938374    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'crud_service.postgres.dbname'='postgres' was replaced with environment 'APP_PG_DBNAME'='postgres'
+2023-02-12 18:26:25.938477    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'crud_service.postgres.user'='postgres' was replaced with environment 'APP_PG_USER'='postgres'
+2023-02-12 18:26:25.938540    info    config/config.go:110    replaceCfgArgsEnv() - YAML config parameter 'crud_service.postgres.pass'='postgres' was replaced with environment 'APP_PG_PASS'='postgres'
+2023-02-12 18:26:25.938689    error    logger/logger.go:497    CloseLogger() - sync /dev/stdout: invalid argument
+github.com/romapres2010/goapp/pkg/common/logger.CloseLogger
+	/app/pkg/common/logger/logger.go:497
+github.com/romapres2010/goapp/pkg/common/logger.SetGlobalConfig
+	/app/pkg/common/logger/logger.go:207
+main.main.func1
+	/app/cmd/app/main.go:195
+github.com/urfave/cli.HandleAction
+	/app/vendor/github.com/urfave/cli/app.go:524
+github.com/urfave/cli.(*App).Run
+	/app/vendor/github.com/urfave/cli/app.go:286
+main.main
+	/app/cmd/app/main.go:231
+runtime.main
+	/usr/local/go/src/runtime/proc.go:250
+2023-02-12 18:26:25.938799    info    logger/logger.go:173    gClose() - Logger - close all
+2023-02-12 18:26:25.938904    info    logger/logger.go:318    newZapLogger() - Setup zap logger
+2023-02-12 18:26:25.939034    info    logger/logger.go:340    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', 'INFO', 'lumberjack', 'console']
+2023-02-12 18:26:25.939141    info    logger/logger.go:238    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.debug.log']
+2023-02-12 18:26:25.939261    info    logger/logger.go:340    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['ERROR', '', 'lumberjack', 'console']
+2023-02-12 18:26:25.939424    info    logger/logger.go:238    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.error.log']
+2023-02-12 18:26:25.939636    info    logger/logger.go:340    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', '', 'stdout', 'console']
+2023-02-12 18:26:25.939773    info    logger/logger.go:391    newZapLogger() - Zap logger - core DISABLE: log_to, encoding['stderr', 'console']
+2023-02-12 18:26:25.939928    info    logger/logger.go:269    newStdLogger() - Setup std logger
+2023-02-12 18:26:25.943858    info    logger/logger.go:304    newStdLogger() - Std logger - DISABLE
+2023-02-12 18:26:25.944117    info    logger/logger.go:228    SetGlobalConfig() - Logger settings applied: cfg['{true INFO /app/log/app.log {true false false error false [{true  INFO lumberjack  console 0xc0004e6bd0 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true ERROR  lumberjack  console 0xc0004e6cf0 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true   stdout  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {false ERROR  stderr  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }}] <nil>} {false  true true 23  0xc0004e6e10}}']
+2023-02-12 18:26:25.957094    info    app/main.go:203    main.func1() - Configuration: 
+['
+memory_limit: 2000000000
+config_file: /app/defcfg/app.global.yaml
+args_config_file: ""
+args_http_listen_spec: ""
+args_http_user: ""
+args_http_pass: ""
+args_jwt_key: ""
+args_log_level: ""
+args_log_file: ""
+args_pg_host: ""
+args_pg_port: ""
+args_pg_dbname: ""
+args_pg_user: ""
+args_pg_pass: ""
+env_config_file: /app/defcfg/app.global.yaml
+env_http_listen_spec: 0.0.0.0:8080
+env_http_user: ""
+env_http_pass: ""
+env_jwt_key: ""
+env_log_level: INFO
+env_log_file: /app/log/app.log
+env_pg_host: dev-app-db
+env_pg_port: "5432"
+env_pg_dbname: postgres
+env_pg_user: postgres
+env_pg_pass: postgres
+logger:
+    enable: true
+    global_level: INFO
+    global_filename: /app/log/app.log
+    zap:
+        enable: true
+        disable_caller: false
+        disable_stacktrace: false
+        stacktrace_level: error
+        development: false
+        core:
+            - enable: true
+              min_level: ""
+              max_level: INFO
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .debug.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ERROR
+              max_level: ""
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .error.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ""
+              max_level: ""
+              log_to: stdout
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: false
+              min_level: ERROR
+              max_level: ""
+              log_to: stderr
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+        sampling: null
+    std:
+        enable: false
+        log_level: ""
+        log_to_file: true
+        log_to_stderr: true
+        log_flag: 23
+        log_prefix: ""
+        file:
+            filename: .std.log
+            max_size: 10
+            max_age: 7
+            max_backups: 10
+            local_time: true
+            compress: false
+http_server:
+    listen_spec: 0.0.0.0:8080
+    read_timeout: 1h0m0s
+    write_timeout: 1h0m0s
+    idle_timeout: 1h0m0s
+    shutdown_timeout: 30s
+    max_header_bytes: 262144
+    use_go_profile: false
+    use_tls: false
+    tls_cert_file: ""
+    tls_key_file: ""
+    tls_min_version: 0
+    tls_max_version: 0
+http_service:
+    auth_type: NONE
+    max_body_bytes: 0
+    use_hsts: false
+    use_jwt: false
+    jwt_expires_at: 0
+    msad_server: ""
+    msad_port: 0
+    msad_base_dn: ""
+    msad_security: 0
+    use_buf_pool: false
+    buf_pooled_size: 65536
+    buf_pooled_max_size: 131072
+    log_error_to_http_header: true
+    log_error_to_http_body: true
+    http_header_max_size: 512
+    handlers:
+        CrudCreateEntityMetaHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_meta_create
+            version: v1.0.0
+            full_path: /app/system/entity_meta
+            params: '{format}'
+            method: POST
+            handler_name: CrudCreateEntityMetaHandler
+        CrudCreateHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_create
+            version: v1.0.0
+            full_path: /app/system/entities
+            params: '{entity}/{format}'
+            method: POST
+            handler_name: CrudCreateHandler
+        CrudGetEntityMetaHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_meta_get
+            version: v1.0.0
+            full_path: /app/system/entity_meta
+            params: '{entity}/{format}'
+            method: GET
+            handler_name: CrudGetEntityMetaHandler
+        CrudGetHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_get
+            version: v1.0.0
+            full_path: /app/system/entities
+            params: '{entity}/{id}/{format}'
+            method: GET
+            handler_name: CrudGetHandler
+        CrudSelectHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_select
+            version: v1.0.0
+            full_path: /app/system/entities
+            params: '{entity}/{format}'
+            method: GET
+            handler_name: CrudSelectHandler
+        CrudUpdateEntityMetaHandler:
+            enabled: true
+            application: app
+            module: system
+            service: entity_meta_update
+            version: v1.0.0
+            full_path: /app/system/entity_meta
+            params: '{entity}/{format}'
+            method: PUT
+            handler_name: CrudUpdateEntityMetaHandler
+        HealthHandler:
+            enabled: true
+            application: app
+            module: system
+            service: health
+            version: v1.0.0
+            full_path: /app/system/health
+            params: ""
+            method: GET
+            handler_name: HealthHandler
+        ReadyHandler:
+            enabled: true
+            application: app
+            module: system
+            service: ready
+            version: v1.0.0
+            full_path: /app/system/ready
+            params: ""
+            method: GET
+            handler_name: ReadyHandler
+        StructValidateHandler:
+            enabled: true
+            application: app
+            module: system
+            service: struct_valudate
+            version: v1.0.0
+            full_path: /app/system/struct_validate
+            params: ""
+            method: POST
+            handler_name: StructValidateHandler
+http_handler: {}
+http_logger:
+    enable: false
+    log_in_req: true
+    log_out_req: true
+    log_in_resp: true
+    log_out_resp: true
+    log_body: true
+    file:
+        filename: /app/log/app_http.log
+        max_size: 10
+        max_age: 7
+        max_backups: 10
+        local_time: true
+        compress: false
+db_service:
+    postgres:
+        host: dev-app-db
+        port: "5432"
+        dbname: postgres
+        ssl_mode: disable
+        user: postgres
+        pass: postgres
+        conn_max_lifetime: 1s
+        max_open_conns: 16
+        max_idle_conns: 8
+        driver_name: pgx
+crud_service:
+    populate_cache_on_start: false
+    cache:
+        populate_on_start: false
+        num_counters: 10000000
+        max_cost: 1000000000
+        buffer_items: 64
+        metrics: false
+        ignore_internal_cost: false
+    entities_meta:
+        Route:
+            status: ENABLED
+            name: Route
+            display_name: Маршруты
+            full_name: Route (Маршруты)
+            db_schema_name: app
+            db_table_name: routes
+            json_tag: route
+            xml_tag: route
+            xls_tag: Маршруты
+            fields:
+                - status: ENABLED
+                  name: Id
+                  type: uint64
+                  key_type: PK_AUTO
+                  display_name: Id маршрута
+                  full_name: Id (Id маршрута)
+                  db_column_name: route_id
+                  db_tag: route_id
+                  json_tag: id
+                  xml_tag: id
+                  yaml_tag: id
+                  xls_tag: Id маршрута
+                  format: PK_AUTO_GENERATED
+                  validate_rule: '-'
+                - status: ENABLED
+                  name: Code
+                  type: string
+                  display_name: Код маршрута
+                  full_name: Code (Код маршрута)
+                  db_column_name: route_code
+                  db_tag: route_code
+                  json_tag: route_code
+                  xml_tag: route_code
+                  yaml_tag: route_code
+                  xls_tag: Код маршрута
+                  validate_rule: required
+                - status: ENABLED
+                  order: 1
+                  name: Name
+                  type: string
+                  display_name: Наименование маршрута
+                  full_name: Name (Наименование маршрута)
+                  db_column_name: route_name
+                  db_tag: route_name
+                  json_tag: route_name
+                  xml_tag: route_name
+                  yaml_tag: route_name
+                  xls_tag: Наименование маршрута
+                  validate_rule: required
+                - status: ENABLED
+                  order: 2
+                  name: FromDate
+                  type: time.Time
+                  display_name: Дата действия записи с
+                  full_name: FromDate (Дата действия записи с)
+                  db_column_name: from_date
+                  db_tag: from_date
+                  json_tag: from_date
+                  xml_tag: from_date
+                  yaml_tag: from_date
+                  xls_tag: Дата действия с
+                  format: "2006-01-02"
+                  validate_rule: required
+                - status: ENABLED
+                  order: 3
+                  name: ToDate
+                  type: time.Time
+                  display_name: Дата действия записи по
+                  full_name: ToDate (Дата действия записи по)
+                  db_column_name: to_date
+                  db_tag: to_date
+                  json_tag: to_date
+                  xml_tag: to_date
+                  yaml_tag: to_date
+                  xls_tag: Дата действия по
+                  format: "2006-01-02"
+                  validate_rule: required
+                - status: ENABLED
+                  order: 4
+                  name: BerthCodeFrom
+                  type: string
+                  display_name: Код причала
+                  full_name: BerthCodeFrom (Код причала)
+                  db_column_name: berth_code_from
+                  db_tag: berth_code_from
+                  json_tag: berth_code_from
+                  xml_tag: berth_code_from
+                  yaml_tag: berth_code_from
+                  xls_tag: '-'
+                  validate_rule: required
+                - status: ENABLED
+                  order: 5
+                  name: BerthCodeTo
+                  type: string
+                  display_name: Код причала
+                  full_name: BerthCodeTo (Код причала)
+                  db_column_name: berth_code_to
+                  db_tag: berth_code_to
+                  json_tag: berth_code_to
+                  xml_tag: berth_code_to
+                  yaml_tag: berth_code_to
+                  xls_tag: '-'
+                  validate_rule: required
+                - status: ENABLED
+                  order: 6
+                  name: TransitCode
+                  type: null.String
+                  display_name: Код транзитной зоны
+                  full_name: TransitCode (Код транзитной зоны)
+                  db_column_name: transit_code
+                  db_tag: transit_code
+                  json_tag: transit_code
+                  xml_tag: transit_code
+                  yaml_tag: transit_code
+                  xls_tag: transit_code
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 7
+                  name: HubCodeFrom
+                  type: null.String
+                  display_name: Код хаба
+                  full_name: HubCodeFrom (Код хаба)
+                  db_column_name: hub_code_from
+                  db_tag: hub_code_from
+                  json_tag: hub_code_from
+                  xml_tag: hub_code_from
+                  yaml_tag: hub_code_from
+                  xls_tag: hub_code_from
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 8
+                  name: HubCodeTo
+                  type: null.String
+                  display_name: Код хаба
+                  full_name: HubCodeTo (Код хаба)
+                  db_column_name: hub_code_to
+                  db_tag: hub_code_to
+                  json_tag: hub_code_to
+                  xml_tag: hub_code_to
+                  yaml_tag: hub_code_to
+                  xls_tag: hub_code_to
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 9
+                  name: AvailableFrom
+                  type: int
+                  display_name: Номер месяца начала доступности маршрута
+                  full_name: AvailableFrom (Номер месяца начала доступности маршрута)
+                  db_column_name: available_from
+                  db_tag: available_from
+                  json_tag: available_from
+                  xml_tag: available_from
+                  yaml_tag: available_from
+                  xls_tag: available_from
+                  validate_rule: required,gte=1,lte=12
+                - status: ENABLED
+                  order: 10
+                  name: AvailableTo
+                  type: int
+                  display_name: Номер месяца окончания доступности маршрута
+                  full_name: AvailableTo (Номер месяца окончания доступности маршрута)
+                  db_column_name: available_to
+                  db_tag: available_to
+                  json_tag: available_to
+                  xml_tag: available_to
+                  yaml_tag: available_to
+                  xls_tag: available_to
+                  validate_rule: required,gte=1,lte=12
+                - status: ENABLED
+                  order: 10
+                  name: IceBreaker
+                  type: string
+                  display_name: Признак считать только ледокольный вариант
+                  full_name: IceBreaker (Признак считать только ледокольный вариант)
+                  db_column_name: ice_breaker
+                  db_tag: ice_breaker
+                  json_tag: ice_breaker
+                  xml_tag: ice_breaker
+                  yaml_tag: ice_breaker
+                  xls_tag: ice_breaker
+                  validate_rule: required,oneof=Y N
+                - status: ENABLED
+                  order: 11
+                  name: TimeTypePol
+                  type: null.String
+                  display_name: Режим работы причала в порту погрузки
+                  full_name: TimeTypePol (Режим работы причала в порту погрузки)
+                  db_column_name: time_type_pol
+                  db_tag: time_type_pol
+                  json_tag: time_type_pol
+                  xml_tag: time_type_pol
+                  yaml_tag: time_type_pol
+                  xls_tag: time_type_pol
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 12
+                  name: TimeTypeCoefficientPol
+                  type: null.Float
+                  display_name: Коэффициент времени работы причала в порту разгрузки
+                  full_name: TimeTypeCoefficientPol (Коэффициент времени работы причала в порту разгрузки)
+                  db_column_name: time_type_coefficient_pol
+                  db_tag: time_type_coefficient_pol
+                  json_tag: time_type_coefficient_pol
+                  xml_tag: time_type_coefficient_pol
+                  yaml_tag: time_type_coefficient_pol
+                  xls_tag: time_type_coefficient_pol
+                  validate_rule: omitempty,gt=0
+                - status: ENABLED
+                  order: 13
+                  name: TimeTypePod
+                  type: null.String
+                  display_name: Режим работы причала в порту разгрузки
+                  full_name: TimeTypePod (Режим работы причала в порту разгрузки)
+                  db_column_name: time_type_pod
+                  db_tag: time_type_pod
+                  json_tag: time_type_pod
+                  xml_tag: time_type_pod
+                  yaml_tag: time_type_pod
+                  xls_tag: time_type_pod
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 14
+                  name: TimeTypeCoefficientPod
+                  type: null.Float
+                  display_name: Коэффициент времени работы причала в порту разгрузки
+                  full_name: TimeTypeCoefficientPod (Коэффициент времени работы причала в порту разгрузки)
+                  db_column_name: time_type_coefficient_pod
+                  db_tag: time_type_coefficient_pod
+                  json_tag: time_type_coefficient_pod
+                  xml_tag: time_type_coefficient_pod
+                  yaml_tag: time_type_coefficient_pod
+                  xls_tag: time_type_coefficient_pod
+                  validate_rule: omitempty,gt=0
+                - status: DEPRECATED
+                  order: 15
+                  name: FloorVoyageDuration
+                  type: null.Float
+                  display_name: DEPRECATED Ожидаемая продолжительность маршрута
+                  full_name: FloorVoyageDuration (DEPRECATED Ожидаемая продолжительность маршрута)
+                  db_column_name: floor_voyage_duration
+                  db_tag: floor_voyage_duration
+                  json_tag: floor_voyage_duration
+                  xml_tag: floor_voyage_duration
+                  yaml_tag: floor_voyage_duration
+                  xls_tag: floor_voyage_duration
+                  validate_rule: omitempty,min=0
+                - status: ENABLED
+                  order: 16
+                  name: NameAlt
+                  type: null.String
+                  display_name: Наименование маршрута альтернативное
+                  full_name: NameAlt (Наименование маршрута альтернативное)
+                  db_column_name: route_name_alt
+                  db_tag: route_name_alt
+                  json_tag: route_name_alt
+                  xml_tag: route_name_alt
+                  yaml_tag: route_name_alt
+                  xls_tag: Наименование маршрута альтернативное
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 17
+                  name: TransshipmentCurrencyCode
+                  type: null.String
+                  display_name: Код валюты перегрузки топлива на судно
+                  full_name: TransshipmentCurrencyCode (Код валюты перегрузки топлива на судно)
+                  db_column_name: transshipment_currency_code
+                  db_tag: transshipment_currency_code
+                  json_tag: transshipment_currency_code
+                  xml_tag: transshipment_currency_code
+                  yaml_tag: transshipment_currency_code
+                  xls_tag: transshipment_currency_code
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 18
+                  name: TransshipmentToDel
+                  type: null.Float
+                  display_name: Стоимость перегрузки топлива на судно
+                  full_name: TransshipmentToDel (Стоимость перегрузки топлива на судно)
+                  db_column_name: transshipment_to_del
+                  db_tag: transshipment_to_del
+                  json_tag: transshipment_to_del
+                  xml_tag: transshipment_to_del
+                  yaml_tag: transshipment_to_del
+                  xls_tag: transshipment_to_del
+                  validate_rule: omitempty,gte=0
+                - status: ENABLED
+                  order: 50
+                  name: Description
+                  type: null.String
+                  display_name: Примечание
+                  full_name: Description (Примечание)
+                  db_column_name: description
+                  db_tag: description
+                  json_tag: description
+                  xml_tag: description
+                  yaml_tag: description
+                  xls_tag: Примечание
+                  validate_rule: '-'
+                - status: ENABLED
+                  order: 51
+                  name: EnabledFlag
+                  type: string
+                  display_name: Признак активной записи
+                  full_name: EnabledFlag (Признак активной записи)
+                  db_column_name: enabled_flag
+                  db_tag: enabled_flag
+                  json_tag: enabled_flag
+                  xml_tag: enabled_flag
+                  yaml_tag: enabled_flag
+                  xls_tag: enabled_flag
+                  validate_rule: required,oneof=Y N
+                - status: ENABLED
+                  order: 80
+                  name: BerthFrom
+                  type: '*Berth'
+                  key_type: FK1M
+                  display_name: Причал погрузки
+                  full_name: BerthFrom (Причал погрузки)
+                  db_tag: '-'
+                  json_tag: berth_from,omitempty
+                  xls_tag: Причал погрузки
+                  validate_rule: '-'
+                  master_ref_entity: Berth
+                  master_ref_field: Code
+                  ref_field: BerthCodeFrom
+                - status: ENABLED
+                  order: 81
+                  name: BerthTo
+                  type: '*Berth'
+                  key_type: FK1M
+                  display_name: Причал выгрузки
+                  full_name: BerthTo (Причал выгрузки)
+                  db_tag: '-'
+                  json_tag: berth_to,omitempty
+                  xls_tag: Причал выгрузки
+                  validate_rule: '-'
+                  master_ref_entity: Berth
+                  master_ref_field: Code
+                  ref_field: BerthCodeTo
+                - status: ENABLED
+                  order: 81
+                  name: RouteLegs
+                  type: map[string]*RouteLeg
+                  key_type: FKM1
+                  display_name: Участки маршрута
+                  full_name: BerthTo (Участки маршрута)
+                  db_tag: '-'
+                  json_tag: route_legs
+                  xls_tag: Участки маршрута
+                  validate_rule: '-'
+                  ref_field: Code
+                  child_ref_entity: RouteLeg
+                  child_ref_field: RouteCode
+            cascadeupmap: {}
+            cascadedownmap: {}
+crud_db_service:
+    postgres:
+        host: dev-app-db
+        port: "5432"
+        dbname: postgres
+        ssl_mode: disable
+        user: postgres
+        pass: postgres
+        conn_max_lifetime: 1s
+        max_open_conns: 16
+        max_idle_conns: 8
+        driver_name: pgx
+worker_pool_service:
+    total_timeout: 10m0s
+    worker_pool:
+        concurrency: 8
+        buffer_size: 0
+        task_timeout: 10m0s
+        worker_timeout: 10m0s
+        worker_spot_timeout: 30s
+        hard_shutdown: false
+metrics:
+    metrics_namespace: com
+    metrics_subsystem: go_app
+    collect_db_count_vec: true
+    collect_db_duration_vec: false
+    collect_http_requests_count_vec: true
+    collect_http_error_requests_count_vec: true
+    collect_http_requests_duration_vec: true
+    collect_http_active_requests_count: true
+    collect_http_requests_duration: true
+    collect_http_client_call_count_vec: true
+    collect_http_client_call_duration_vec: true
+    collect_calc_count_vec: true
+    collect_calc_duration_vec: true
+    collect_marshaling_duration_vec: true
+    collect_un_marshaling_duration_vec: false
+    collect_wp_task_queue_buffer_len: true
+    collect_wp_add_task_wait_count: true
+    collect_wp_worker_process_count: true
+    collect_wp_task_queue_buffer_len_vec: true
+    collect_wp_add_task_wait_count_vec: true
+    collect_wp_worker_process_count_vec: true
+']
+2023-02-12 18:26:25.957459    info    metrics/metrics.go:95    New() - Creating new metrics service
+2023-02-12 18:26:25.958229    info    metrics/metrics.go:131    New() - Dependency: ['
+app_name
+  github.com/beorn7/perks:  v1.0.1
+  github.com/cespare/xxhash/v2:  v2.2.0
+  github.com/cpuguy83/go-md2man/v2:  v2.0.2
+  github.com/dgraph-io/ristretto:  v0.1.1
+  github.com/dgrijalva/jwt-go:  v3.2.0&#43;incompatible
+  github.com/dustin/go-humanize:  v1.0.1
+  github.com/go-playground/locales:  v0.14.1
+  github.com/go-playground/universal-translator:  v0.18.1
+  github.com/go-playground/validator/v10:  v10.11.2
+  github.com/golang/glog:  v1.0.0
+  github.com/golang/protobuf:  v1.5.2
+  github.com/gorilla/mux:  v1.8.0
+  github.com/jackc/pgx:  v3.6.2&#43;incompatible
+  github.com/jmoiron/sqlx:  v1.3.5
+  github.com/leodido/go-urn:  v1.2.1
+  github.com/lib/pq:  v1.10.7
+  github.com/matttproud/golang_protobuf_extensions:  v1.0.4
+  github.com/mohae/deepcopy:  v0.0.0-20170929034955-c48cc78d4826
+  github.com/pkg/errors:  v0.9.1
+  github.com/povilasv/prommod:  v0.0.12
+  github.com/prometheus/client_golang:  v1.14.0
+  github.com/prometheus/client_model:  v0.3.0
+  github.com/prometheus/common:  v0.39.0
+  github.com/prometheus/procfs:  v0.9.0
+  github.com/richardlehane/mscfb:  v1.0.4
+  github.com/richardlehane/msoleps:  v1.0.3
+  github.com/romapres2010/goapp:  (devel)
+  github.com/russross/blackfriday/v2:  v2.1.0
+  github.com/tidwall/gjson:  v1.14.4
+  github.com/tidwall/match:  v1.1.1
+  github.com/tidwall/pretty:  v1.2.1
+  github.com/ugorji/go/codec:  v1.2.9
+  github.com/urfave/cli:  v1.22.12
+  github.com/xuri/efp:  v0.0.0-20220603152613-6918739fd470
+  github.com/xuri/excelize/v2:  v2.7.0
+  github.com/xuri/nfp:  v0.0.0-20220409054826-5e722a1d9e22
+  go.uber.org/atomic:  v1.10.0
+  go.uber.org/multierr:  v1.9.0
+  go.uber.org/zap:  v1.24.0
+  golang.org/x/crypto:  v0.6.0
+  golang.org/x/exp:  v0.0.0-20230210204819-062eb4c674ab
+  golang.org/x/net:  v0.6.0
+  golang.org/x/sys:  v0.5.0
+  golang.org/x/text:  v0.7.0
+  google.golang.org/protobuf:  v1.28.1
+  gopkg.in/asn1-ber.v1:  v1.0.0-20181015200546-f715ec2f112d
+  gopkg.in/guregu/null.v4:  v4.0.0
+  gopkg.in/korylprince/go-ad-auth.v2:  v2.2.0
+  gopkg.in/ldap.v3:  v3.1.0
+  gopkg.in/natefinch/lumberjack.v2:  v2.2.1
+  gopkg.in/yaml.v3:  v3.0.1']
+2023-02-12 18:26:25.958548    info    app/main.go:212    main.func1() - Set Memory Limit: MemoryLimit['2000000000']
+2023-02-12 18:26:25.958617    info    daemon/daemon.go:67    New() - Create new daemon
+2023-02-12 18:26:25.958661    info    httplog/httplog.go:42    New() - Creating new HTTP traffic logger
+2023-02-12 18:26:25.958712    info    httplog/httplog.go:72    (*Logger).SetConfig() - Set HTTP logger config: cfg['{false true true true true true 0xc0004e7140}']
+2023-02-12 18:26:25.958754    info    dbservice/dbservice.go:30    New() - Creating new CRUD service
+2023-02-12 18:26:25.958804    info    sqlxx/sqlxx.go:89    New() - Testing connect to DB server: host, port, dbname, sslmode, user['dev-app-db', '5432', 'postgres', 'disable', 'postgres']
+2023-02-12 18:26:26.008524    info    sqlxx/sqlxx.go:108    New() - Success connect to DB server
+2023-02-12 18:26:26.008663    info    dbservice/dbservice.go:57    New() - CRUD service was created
+2023-02-12 18:26:26.008751    info    crudservice/crudservice.go:58    New() - Creating new crudservice service
+2023-02-12 18:26:26.009698    info    crudservice/crudservice.go:135    (*Service).InitValidator() - Configure validator
+2023-02-12 18:26:26.037321    info    crudservice/crudservice.go:123    New() - Backend service was created
+2023-02-12 18:26:26.037420    info    dbservice/dbservice.go:30    New() - Creating new DB service
+2023-02-12 18:26:26.041597    info    sqlxx/sqlxx.go:89    New() - Testing connect to DB server: host, port, dbname, sslmode, user['dev-app-db', '5432', 'postgres', 'disable', 'postgres']
+2023-02-12 18:26:26.132447    info    sqlxx/sqlxx.go:140    (*DB).PreparexAll() - SQL statement was prepared: SQL['SELECT berth_id as berth_id, segment_code, port_code as port_id, port_code, berth_code, berth_name, from_date, to_date, max_draft, max_beam, max_loa, pod_cranes, turnover_time, time_type, time_type_coefficient, berth_name_alt, description, enabled_flag FROM app.berths WHERE segment_code = $1 and to_date($2, 'YYYY/MM/DD') BETWEEN from_date AND to_date']
+2023-02-12 18:26:26.134997    info    sqlxx/sqlxx.go:140    (*DB).PreparexAll() - SQL statement was prepared: SQL['SELECT port_id as port_id, segment_code, port_code, port_name, from_date, to_date, port_name_alt, country_code as country_id, country_code, is_eca_zone, is_hra_zone, water_type, currency_code as currency_id, currency_code, description, enabled_flag FROM app.ports WHERE segment_code = $1 and to_date($2, 'YYYY/MM/DD') BETWEEN from_date AND to_date']
+2023-02-12 18:26:26.136002    info    sqlxx/sqlxx.go:140    (*DB).PreparexAll() - SQL statement was prepared: SQL['SELECT country_id as country_id, country_code, country_name, country_name_alt, description, enabled_flag FROM app.countries']
+2023-02-12 18:26:26.139213    info    sqlxx/sqlxx.go:140    (*DB).PreparexAll() - SQL statement was prepared: SQL['SELECT currency_id as currency_id, currency_code, currency_name, currency_name_alt, description, enabled_flag FROM app.currencies']
+2023-02-12 18:26:26.139336    info    sqlxx/sqlxx.go:108    New() - Success connect to DB server
+2023-02-12 18:26:26.139368    info    dbservice/dbservice.go:57    New() - DB service was created
+2023-02-12 18:26:26.139428    info    workerpoolservice/workerpool_service.go:36    New() - Creating new WorkerPool service: WorkerPoolName['WorkerPoolRoute - background']
+2023-02-12 18:26:26.139463    info    workerpoolservice/workerpool_service.go:59    New() - Create worker pool: WorkerPoolName, Concurrency['WorkerPoolRoute - background', '8']
+2023-02-12 18:26:26.139549    info    workerpoolservice/workerpool_service.go:63    New() - WorkerPool service was created: WorkerPoolName['WorkerPoolRoute - background']
+2023-02-12 18:26:26.139716    info    workerpoolservice/workerpool_service.go:36    New() - Creating new WorkerPool service: WorkerPoolName['WorkerPoolBerth - background']
+2023-02-12 18:26:26.139780    info    workerpoolservice/workerpool_service.go:59    New() - Create worker pool: WorkerPoolName, Concurrency['WorkerPoolBerth - background', '8']
+2023-02-12 18:26:26.139821    info    workerpoolservice/workerpool_service.go:63    New() - WorkerPool service was created: WorkerPoolName['WorkerPoolBerth - background']
+2023-02-12 18:26:26.139895    info    httpservice/httpservice.go:135    New() - Creating new HTTP service
+2023-02-12 18:26:26.139964    info    httpservice/httpservice.go:175    New() - HTTP service was created
+2023-02-12 18:26:26.140027    info    httphandler/httphandler.go:36    New() - Creating new HTTP service
+2023-02-12 18:26:26.140076    info    httphandler/httphandler.go:60    New() - HTTP service was created
+2023-02-12 18:26:26.140151    info    httpservice/httpservice.go:183    (*Service).SetHttpHandler() - Register HTTP handlers
+2023-02-12 18:26:26.140243    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudSelectHandler', 'GET', '/app/system/entities']
+2023-02-12 18:26:26.140352    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudCreateHandler', 'POST', '/app/system/entities']
+2023-02-12 18:26:26.140417    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudGetEntityMetaHandler', 'GET', '/app/system/entity_meta']
+2023-02-12 18:26:26.140488    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudCreateEntityMetaHandler', 'POST', '/app/system/entity_meta']
+2023-02-12 18:26:26.140555    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudUpdateEntityMetaHandler', 'PUT', '/app/system/entity_meta']
+2023-02-12 18:26:26.140600    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['HealthHandler', 'GET', '/app/system/health']
+2023-02-12 18:26:26.140674    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['ReadyHandler', 'GET', '/app/system/ready']
+2023-02-12 18:26:26.140757    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['StructValidateHandler', 'POST', '/app/system/struct_validate']
+2023-02-12 18:26:26.140854    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['CrudGetHandler', 'GET', '/app/system/entities']
+2023-02-12 18:26:26.140927    info    httpserver/httpserver.go:57    New() - Creating new HTTP server
+2023-02-12 18:26:26.141255    info    httpserver/httpserver.go:165    New() - Created new TCP listener: network = 'tcp', address['0.0.0.0:8080']
+2023-02-12 18:26:26.141463    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/health', 'GET']
+2023-02-12 18:26:26.141557    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/ready', 'GET']
+2023-02-12 18:26:26.141663    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/signin', 'POST']
+2023-02-12 18:26:26.141801    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/refresh', 'POST']
+2023-02-12 18:26:26.141943    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'GET']
+2023-02-12 18:26:26.142126    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entities/{entity}/{format}', 'POST']
+2023-02-12 18:26:26.142225    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/struct_validate', 'POST']
+2023-02-12 18:26:26.142411    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entities/{entity}/{id}/{format}', 'GET']
+2023-02-12 18:26:26.142503    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httplog', 'POST']
+2023-02-12 18:26:26.142595    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/loglevel', 'POST']
+2023-02-12 18:26:26.142697    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'POST']
+2023-02-12 18:26:26.142900    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entity_meta/{entity}/{format}', 'GET']
+2023-02-12 18:26:26.143040    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entity_meta/{entity}/{format}', 'PUT']
+2023-02-12 18:26:26.143173    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/echo', 'POST']
+2023-02-12 18:26:26.143378    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httperrlog', 'POST']
+2023-02-12 18:26:26.143543    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entities/{entity}/{format}', 'GET']
+2023-02-12 18:26:26.143651    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/entity_meta/{format}', 'POST']
+2023-02-12 18:26:26.143715    info    httpserver/httpserver.go:212    New() - HTTP server is created
+2023-02-12 18:26:26.143784    info    daemon/daemon.go:156    New() - New daemon was created
+2023-02-12 18:26:26.143848    info    app/main.go:222    main.func1() - Server is startup: Version['version '2.0.0', commit '', build time '2023-02-12_18:24:58'']
+2023-02-12 18:26:26.143902    info    daemon/daemon.go:163    (*Daemon).Run() - Starting daemon
+2023-02-12 18:26:26.143969    info    daemon/daemon.go:174    (*Daemon).Run() - Daemon was running. For exit <CTRL-c>
+2023-02-12 18:26:26.144128    info    workerpoolservice/workerpool_service.go:159    (*Service).Run() - Run WorkerPool service: WorkerPoolName['WorkerPoolRoute - background']
+2023-02-12 18:26:26.144249    info    workerpool/pool.go:240    (*Pool).RunBackground() - Pool background - START: ExternalId, PoolName, ActiveTaskCount['0', 'WorkerPoolRoute - background', '0']
+2023-02-12 18:26:26.144559    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '8', '0']
+2023-02-12 18:26:26.144723    info    workerpoolservice/workerpool_service.go:159    (*Service).Run() - Run WorkerPool service: WorkerPoolName['WorkerPoolBerth - background']
+2023-02-12 18:26:26.144871    info    workerpool/pool.go:240    (*Pool).RunBackground() - Pool background - START: ExternalId, PoolName, ActiveTaskCount['0', 'WorkerPoolBerth - background', '0']
+2023-02-12 18:26:26.145047    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '8', '0']
+2023-02-12 18:26:26.145214    info    httpserver/httpserver.go:234    (*Server).Run() - Starting HTTP server
+2023-02-12 18:26:26.146388    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '7', '0']
+2023-02-12 18:26:26.146739    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '1', '0']
+2023-02-12 18:26:26.146756    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '1', '0']
+2023-02-12 18:26:26.147015    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '3', '0']
+2023-02-12 18:26:26.146927    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '2', '0']
+2023-02-12 18:26:26.147175    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '4', '0']
+2023-02-12 18:26:26.147081    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '2', '0']
+2023-02-12 18:26:26.147233    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '3', '0']
+2023-02-12 18:26:26.147417    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '6', '0']
+2023-02-12 18:26:26.147586    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '4', '0']
+2023-02-12 18:26:26.147452    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '7', '0']
+2023-02-12 18:26:26.147518    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '5', '0']
+2023-02-12 18:26:26.147681    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolRoute - background', '6', '0']
+2023-02-12 18:26:26.147383    info    workerpool/worker.go:73    (*Worker).startBackground() - Worker background - START: PoolName, WorkerId, WorkerExternalId['WorkerPoolBerth - background', '5', '0']

@@ -1,0 +1,15 @@
+
+Delete all resources
+pod "dev-app-api-59b6ff97b4-8dnz4" deleted
+pod "dev-app-api-59b6ff97b4-f75fq" deleted
+pod "dev-app-db-58bbb867d8-vhcfq" deleted
+pod "dev-app-liquibase" deleted
+service "dev-app-api" deleted
+service "dev-app-db" deleted
+deployment.apps "dev-app-api" deleted
+deployment.apps "dev-app-db" deleted
+configmap "dev-app-config" deleted
+secret "dev-app-secret" deleted
+Error from server (NotFound): networkpolicies.networking.k8s.io "app-net" not found
+namespace "go-app" deleted
+

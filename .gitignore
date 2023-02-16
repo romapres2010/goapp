@@ -15,7 +15,6 @@ venv
 vendor2
 pl
 lib/liquibase
-*.log
 *.exe
 ~$*.xlsx
 ~$*.xlsm

@@ -1,0 +1,960 @@
+Defaulted container "app-api" out of: app-api, init-app-api (init)
+Defaulted container "app-api" out of: app-api, init-app-api (init)
+2023-02-16 09:02:56.578951    info    app/main.go:228    main() - Starting up server
+2023-02-16 09:02:56.579072    info    app/main.go:185    main.func1() - Load config file 'configfile'='/app/defcfg/app.global.yaml' from environment 'APP_CONFIG_FILE'
+2023-02-16 09:02:56.579096    info    config/config.go:118    (*Config).LoadYamlConfig() - Loading config from file: FileName['/app/defcfg/app.global.yaml']
+2023-02-16 09:02:56.579145    info    config/config.go:126    (*Config).LoadYamlConfig() - Config file exist: FileName, FileInfo['/app/defcfg/app.global.yaml', '&{app.global.yaml 13173 493 {613425600 63811886804 0xf07a00} {1048755 256483 1 33261 0 0 0 0 13173 4096 32 {1676290796 540183000} {1676290004 613425600} {1676290796 470183000} [0 0 0]}}']
+2023-02-16 09:02:56.580435    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'http_server.listen_spec'='0.0.0.0:8080' was replaced with environment 'APP_HTTP_LISTEN_SPEC'='0.0.0.0:8080'
+2023-02-16 09:02:56.580454    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'logger.global_level'='INFO' was replaced with environment 'APP_LOG_LEVEL'='DEBUG'
+2023-02-16 09:02:56.580463    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'logger.log_file'='/app/log/app.log' was replaced with environment 'APP_LOG_FILE'='/app/log/app.log'
+2023-02-16 09:02:56.580486    error    logger/logger.go:419    CloseLogger() - sync /dev/stdout: invalid argument
+github.com/romapres2010/goapp/pkg/common/logger.CloseLogger
+	/app/pkg/common/logger/logger.go:419
+github.com/romapres2010/goapp/pkg/common/logger.SetGlobalConfig
+	/app/pkg/common/logger/logger.go:185
+main.main.func1
+	/app/cmd/app/main.go:195
+github.com/urfave/cli.HandleAction
+	/app/vendor/github.com/urfave/cli/app.go:524
+github.com/urfave/cli.(*App).Run
+	/app/vendor/github.com/urfave/cli/app.go:286
+main.main
+	/app/cmd/app/main.go:231
+runtime.main
+	/usr/local/go/src/runtime/proc.go:250
+2023-02-16 09:02:56.580523    info    logger/logger.go:154    gClose() - Logger - close all
+2023-02-16 09:02:56.580554    info    logger/logger.go:250    newZapLogger() - Setup zap logger
+2023-02-16 09:02:56.580612    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', 'INFO', 'lumberjack', 'console']
+2023-02-16 09:02:56.580648    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.debug.log']
+2023-02-16 09:02:56.580675    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['ERROR', '', 'lumberjack', 'console']
+2023-02-16 09:02:56.580710    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.error.log']
+2023-02-16 09:02:56.580746    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', '', 'stdout', 'console']
+2023-02-16 09:02:56.580807    info    logger/logger.go:313    newZapLogger() - Zap logger - core DISABLE: log_to, encoding['stderr', 'console']
+2023-02-16 09:02:56.580881    info    logger/logger.go:202    SetGlobalConfig() - Logger settings applied: cfg['{true DEBUG /app/log/app.log {true false false error false [{true  INFO lumberjack  console 0xc000327bf0 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true ERROR  lumberjack  console 0xc000327c80 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true   stdout  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {false ERROR  stderr  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }}] <nil>}}']
+2023-02-16 09:02:56.582062    info    app/main.go:203    main.func1() - Configuration: 
+['
+memory_limit: 2000000000
+config_file: /app/defcfg/app.global.yaml
+args_config_file: ""
+args_http_listen_spec: ""
+args_http_user: ""
+args_http_pass: ""
+args_jwt_key: ""
+args_log_level: ""
+args_log_file: ""
+args_pg_host: ""
+args_pg_port: ""
+args_pg_dbname: ""
+args_pg_user: ""
+args_pg_pass: ""
+env_config_file: /app/defcfg/app.global.yaml
+env_http_listen_spec: 0.0.0.0:8080
+env_http_user: ""
+env_http_pass: ""
+env_jwt_key: ""
+env_log_level: DEBUG
+env_log_file: /app/log/app.log
+env_pg_host: dev-app-db
+env_pg_port: "5432"
+env_pg_dbname: postgres
+env_pg_user: postgres
+env_pg_pass: postgres
+logger:
+    enable: true
+    global_level: DEBUG
+    global_filename: /app/log/app.log
+    zap:
+        enable: true
+        disable_caller: false
+        disable_stacktrace: false
+        stacktrace_level: error
+        development: false
+        core:
+            - enable: true
+              min_level: ""
+              max_level: INFO
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .debug.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ERROR
+              max_level: ""
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .error.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ""
+              max_level: ""
+              log_to: stdout
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: false
+              min_level: ERROR
+              max_level: ""
+              log_to: stderr
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+        sampling: null
+http_server:
+    listen_spec: 0.0.0.0:8080
+    read_timeout: 1h0m0s
+    write_timeout: 1h0m0s
+    idle_timeout: 1h0m0s
+    shutdown_timeout: 30s
+    max_header_bytes: 262144
+    use_go_profile: false
+    use_tls: false
+    tls_cert_file: ""
+    tls_key_file: ""
+    tls_min_version: 0
+    tls_max_version: 0
+http_service:
+    auth_type: NONE
+    max_body_bytes: 0
+    use_hsts: false
+    use_jwt: false
+    jwt_expires_at: 0
+    msad_server: ""
+    msad_port: 0
+    msad_base_dn: ""
+    msad_security: 0
+    use_buf_pool: false
+    buf_pooled_size: 65536
+    buf_pooled_max_size: 131072
+    log_error_to_http_header: true
+    log_error_to_http_body: true
+    http_header_max_size: 512
+    handlers:
+        HealthHandler:
+            enabled: true
+            application: app
+            module: system
+            service: health
+            version: v1.0.0
+            full_path: /app/system/health
+            params: ""
+            method: GET
+            handler_name: HealthHandler
+        ReadyHandler:
+            enabled: true
+            application: app
+            module: system
+            service: ready
+            version: v1.0.0
+            full_path: /app/system/ready
+            params: ""
+            method: GET
+            handler_name: ReadyHandler
+http_handler: {}
+http_logger:
+    enable: false
+    log_in_req: true
+    log_out_req: true
+    log_in_resp: true
+    log_out_resp: true
+    log_body: true
+    file:
+        filename: /app/log/app_http.log
+        max_size: 10
+        max_age: 7
+        max_backups: 10
+        local_time: true
+        compress: false
+metrics:
+    metrics_namespace: com
+    metrics_subsystem: go_app
+    collect_db_count_vec: true
+    collect_db_duration_vec: false
+    collect_http_requests_count_vec: true
+    collect_http_error_requests_count_vec: true
+    collect_http_requests_duration_vec: true
+    collect_http_active_requests_count: true
+    collect_http_requests_duration: true
+    collect_http_client_call_count_vec: true
+    collect_http_client_call_duration_vec: true
+    collect_wp_task_queue_buffer_len: true
+    collect_wp_add_task_wait_count: true
+    collect_wp_worker_process_count: true
+    collect_wp_task_queue_buffer_len_vec: true
+    collect_wp_add_task_wait_count_vec: true
+    collect_wp_worker_process_count_vec: true
+']
+2023-02-16 09:02:56.582303    info    metrics/metrics.go:79    New() - Creating new metrics service
+2023-02-16 09:02:56.582915    info    metrics/metrics.go:112    New() - Dependency: ['
+app_name
+  github.com/beorn7/perks:  v1.0.1
+  github.com/cespare/xxhash/v2:  v2.2.0
+  github.com/cpuguy83/go-md2man/v2:  v2.0.2
+  github.com/dgrijalva/jwt-go:  v3.2.0&#43;incompatible
+  github.com/golang/protobuf:  v1.5.2
+  github.com/gorilla/mux:  v1.8.0
+  github.com/jmoiron/sqlx:  v1.3.5
+  github.com/matttproud/golang_protobuf_extensions:  v1.0.4
+  github.com/pkg/errors:  v0.9.1
+  github.com/povilasv/prommod:  v0.0.12
+  github.com/prometheus/client_golang:  v1.14.0
+  github.com/prometheus/client_model:  v0.3.0
+  github.com/prometheus/common:  v0.39.0
+  github.com/prometheus/procfs:  v0.9.0
+  github.com/romapres2010/goapp:  (devel)
+  github.com/russross/blackfriday/v2:  v2.1.0
+  github.com/urfave/cli:  v1.22.12
+  go.uber.org/atomic:  v1.10.0
+  go.uber.org/multierr:  v1.9.0
+  go.uber.org/zap:  v1.24.0
+  golang.org/x/sys:  v0.5.0
+  golang.org/x/text:  v0.7.0
+  google.golang.org/protobuf:  v1.28.1
+  gopkg.in/asn1-ber.v1:  v1.0.0-20181015200546-f715ec2f112d
+  gopkg.in/korylprince/go-ad-auth.v2:  v2.2.0
+  gopkg.in/ldap.v3:  v3.1.0
+  gopkg.in/natefinch/lumberjack.v2:  v2.2.1
+  gopkg.in/yaml.v3:  v3.0.1']
+2023-02-16 09:02:56.583053    info    app/main.go:212    main.func1() - Set Memory Limit: MemoryLimit['2000000000']
+2023-02-16 09:02:56.583085    info    daemon/daemon.go:43    New() - Create new daemon
+2023-02-16 09:02:56.583101    info    httplog/httplog.go:42    New() - Creating new HTTP traffic logger
+2023-02-16 09:02:56.583118    info    httplog/httplog.go:72    (*Logger).SetConfig() - Set HTTP logger config: cfg['{false true true true true true 0xc000327dd0}']
+2023-02-16 09:02:56.583136    info    httpservice/httpservice.go:135    New() - Creating new HTTP service
+2023-02-16 09:02:56.583175    info    httpservice/httpservice.go:175    New() - HTTP service was created
+2023-02-16 09:02:56.583264    info    httphandler/httphandler.go:32    New() - Creating new HTTP service
+2023-02-16 09:02:56.583315    info    httphandler/httphandler.go:55    New() - HTTP service was created
+2023-02-16 09:02:56.583441    info    httpservice/httpservice.go:183    (*Service).SetHttpHandler() - Register HTTP handlers
+2023-02-16 09:02:56.583512    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['HealthHandler', 'GET', '/app/system/health']
+2023-02-16 09:02:56.583568    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['ReadyHandler', 'GET', '/app/system/ready']
+2023-02-16 09:02:56.583610    info    httpserver/httpserver.go:57    New() - Creating new HTTP server
+2023-02-16 09:02:56.584065    info    httpserver/httpserver.go:165    New() - Created new TCP listener: network = 'tcp', address['0.0.0.0:8080']
+2023-02-16 09:02:56.584224    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/echo', 'POST']
+2023-02-16 09:02:56.584320    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/signin', 'POST']
+2023-02-16 09:02:56.584395    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/refresh', 'POST']
+2023-02-16 09:02:56.584541    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httplog', 'POST']
+2023-02-16 09:02:56.584625    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httperrlog', 'POST']
+2023-02-16 09:02:56.584710    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'GET']
+2023-02-16 09:02:56.584774    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'POST']
+2023-02-16 09:02:56.584855    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/ready', 'GET']
+2023-02-16 09:02:56.584932    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/loglevel', 'POST']
+2023-02-16 09:02:56.585009    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/health', 'GET']
+2023-02-16 09:02:56.585054    info    httpserver/httpserver.go:212    New() - HTTP server is created
+2023-02-16 09:02:56.585077    info    daemon/daemon.go:92    New() - New daemon was created
+2023-02-16 09:02:56.585114    info    app/main.go:222    main.func1() - Server is startup: Version['version '2.0.0', commit 'unset', build time '2023-02-13_15:19:45'']
+2023-02-16 09:02:56.585155    info    daemon/daemon.go:99    (*Daemon).Run() - Starting daemon
+2023-02-16 09:02:56.585173    info    daemon/daemon.go:104    (*Daemon).Run() - Daemon was running. For exit <CTRL-c>
+2023-02-16 09:02:56.585279    info    httpserver/httpserver.go:234    (*Server).Run() - Starting HTTP server
+2023-02-16 09:03:02.611097    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:02.611243    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['1', 'GET', 'GET']
+2023-02-16 09:03:02.611322    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['1', 'NONE']
+2023-02-16 09:03:02.611377    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['1']
+2023-02-16 09:03:02.611406    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['1', '0']
+2023-02-16 09:03:02.611456    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['1', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:02.611494    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['1']
+2023-02-16 09:03:02.611519    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['1']
+2023-02-16 09:03:02.611541    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['1']
+2023-02-16 09:03:02.611569    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['1', 'OK']
+2023-02-16 09:03:02.611606    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:02.611633    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:12.610112    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:12.610211    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['2', 'GET', 'GET']
+2023-02-16 09:03:12.610247    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['2', 'NONE']
+2023-02-16 09:03:12.610264    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['2']
+2023-02-16 09:03:12.610282    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['2', '0']
+2023-02-16 09:03:12.610345    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['2', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:12.610390    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['2']
+2023-02-16 09:03:12.610413    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['2']
+2023-02-16 09:03:12.610432    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['2']
+2023-02-16 09:03:12.610479    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['2', 'OK']
+2023-02-16 09:03:12.610532    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:12.610557    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:22.610284    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:22.610475    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['3', 'GET', 'GET']
+2023-02-16 09:03:22.610566    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['3', 'NONE']
+2023-02-16 09:03:22.610613    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['3']
+2023-02-16 09:03:22.610660    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['3', '0']
+2023-02-16 09:03:22.610777    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['3', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:22.610904    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['3']
+2023-02-16 09:03:22.610964    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['3']
+2023-02-16 09:03:22.611015    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['3']
+2023-02-16 09:03:22.611079    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['3', 'OK']
+2023-02-16 09:03:22.611214    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:22.611282    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:32.610279    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:32.610279    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:32.610478    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['4', 'GET', 'GET']
+2023-02-16 09:03:32.610513    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['4', 'NONE']
+2023-02-16 09:03:32.610505    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['5', 'GET', 'GET']
+2023-02-16 09:03:32.610529    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['4']
+2023-02-16 09:03:32.610561    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['5', 'NONE']
+2023-02-16 09:03:32.610582    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['4', '0']
+2023-02-16 09:03:32.610626    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['5']
+2023-02-16 09:03:32.610634    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['4', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:32.610973    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['4']
+2023-02-16 09:03:32.610700    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['5', '0']
+2023-02-16 09:03:32.611049    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['4']
+2023-02-16 09:03:32.611110    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['5', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:32.611189    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['5']
+2023-02-16 09:03:32.611191    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['4']
+2023-02-16 09:03:32.611208    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['5']
+2023-02-16 09:03:32.611222    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['4', 'OK']
+2023-02-16 09:03:32.611251    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:32.611271    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:32.611226    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['5']
+2023-02-16 09:03:32.611333    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['5', 'OK']
+2023-02-16 09:03:32.611364    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:32.611483    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:42.610341    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:42.610446    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['6', 'GET', 'GET']
+2023-02-16 09:03:42.610493    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['6', 'NONE']
+2023-02-16 09:03:42.610341    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:42.610558    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['7', 'GET', 'GET']
+2023-02-16 09:03:42.610632    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['7', 'NONE']
+2023-02-16 09:03:42.610515    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['6']
+2023-02-16 09:03:42.610695    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['6', '0']
+2023-02-16 09:03:42.610661    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['7']
+2023-02-16 09:03:42.610815    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['7', '0']
+2023-02-16 09:03:42.610759    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['6', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:42.610881    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['7', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:42.610908    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['6']
+2023-02-16 09:03:42.610921    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['7']
+2023-02-16 09:03:42.610980    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['6']
+2023-02-16 09:03:42.611050    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['6']
+2023-02-16 09:03:42.611091    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['6', 'OK']
+2023-02-16 09:03:42.610989    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['7']
+2023-02-16 09:03:42.611214    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['7']
+2023-02-16 09:03:42.611279    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['7', 'OK']
+2023-02-16 09:03:42.611159    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:42.611355    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:42.611320    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:42.611502    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:52.610287    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:52.610379    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['8', 'GET', 'GET']
+2023-02-16 09:03:52.610423    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['8', 'NONE']
+2023-02-16 09:03:52.610438    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['8']
+2023-02-16 09:03:52.610287    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:52.610539    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['9', 'GET', 'GET']
+2023-02-16 09:03:52.610617    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['9', 'NONE']
+2023-02-16 09:03:52.610458    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['8', '0']
+2023-02-16 09:03:52.610666    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['8', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:52.610694    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['8']
+2023-02-16 09:03:52.610713    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['8']
+2023-02-16 09:03:52.610755    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['8']
+2023-02-16 09:03:52.610821    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['8', 'OK']
+2023-02-16 09:03:52.610854    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:52.610895    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:52.610638    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['9']
+2023-02-16 09:03:52.611081    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['9', '0']
+2023-02-16 09:03:52.611112    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['9', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:52.611154    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['9']
+2023-02-16 09:03:52.611176    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['9']
+2023-02-16 09:03:52.611216    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['9']
+2023-02-16 09:03:52.611244    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['9', 'OK']
+2023-02-16 09:03:52.611292    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:52.611315    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:02.610035    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:02.610035    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:02.610126    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['10', 'GET', 'GET']
+2023-02-16 09:04:02.610150    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['11', 'GET', 'GET']
+2023-02-16 09:04:02.610188    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['11', 'NONE']
+2023-02-16 09:04:02.610230    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['11']
+2023-02-16 09:04:02.610163    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['10', 'NONE']
+2023-02-16 09:04:02.610277    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['11', '0']
+2023-02-16 09:04:02.610301    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['11', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:02.610321    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['11']
+2023-02-16 09:04:02.610323    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['10']
+2023-02-16 09:04:02.610343    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['11']
+2023-02-16 09:04:02.610404    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['11']
+2023-02-16 09:04:02.610456    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['11', 'OK']
+2023-02-16 09:04:02.610489    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:02.610552    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:02.610348    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['10', '0']
+2023-02-16 09:04:02.610676    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['10', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:02.610734    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['10']
+2023-02-16 09:04:02.610772    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['10']
+2023-02-16 09:04:02.610791    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['10']
+2023-02-16 09:04:02.610815    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['10', 'OK']
+2023-02-16 09:04:02.610863    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:02.610909    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:12.609858    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:12.609880    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:12.609952    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['12', 'GET', 'GET']
+2023-02-16 09:04:12.609966    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['13', 'GET', 'GET']
+2023-02-16 09:04:12.609987    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['12', 'NONE']
+2023-02-16 09:04:12.609998    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['13', 'NONE']
+2023-02-16 09:04:12.610015    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['13']
+2023-02-16 09:04:12.610080    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['13', '0']
+2023-02-16 09:04:12.610128    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['13', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:12.610151    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['13']
+2023-02-16 09:04:12.610192    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['13']
+2023-02-16 09:04:12.610003    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['12']
+2023-02-16 09:04:12.610237    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['13']
+2023-02-16 09:04:12.610245    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['12', '0']
+2023-02-16 09:04:12.610266    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['13', 'OK']
+2023-02-16 09:04:12.610301    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['12', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:12.610321    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:12.610346    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:12.610349    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['12']
+2023-02-16 09:04:12.610457    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['12']
+2023-02-16 09:04:12.610478    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['12']
+2023-02-16 09:04:12.610520    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['12', 'OK']
+2023-02-16 09:04:12.610546    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:12.610585    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:02:56.578752    info    app/main.go:228    main() - Starting up server
+2023-02-16 09:02:56.578969    info    app/main.go:185    main.func1() - Load config file 'configfile'='/app/defcfg/app.global.yaml' from environment 'APP_CONFIG_FILE'
+2023-02-16 09:02:56.579006    info    config/config.go:118    (*Config).LoadYamlConfig() - Loading config from file: FileName['/app/defcfg/app.global.yaml']
+2023-02-16 09:02:56.579072    info    config/config.go:126    (*Config).LoadYamlConfig() - Config file exist: FileName, FileInfo['/app/defcfg/app.global.yaml', '&{app.global.yaml 13173 493 {613425600 63811886804 0xf07a00} {1048757 256483 1 33261 0 0 0 0 13173 4096 32 {1676290796 540183000} {1676290004 613425600} {1676290796 470183000} [0 0 0]}}']
+2023-02-16 09:02:56.580064    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'http_server.listen_spec'='0.0.0.0:8080' was replaced with environment 'APP_HTTP_LISTEN_SPEC'='0.0.0.0:8080'
+2023-02-16 09:02:56.580102    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'logger.global_level'='INFO' was replaced with environment 'APP_LOG_LEVEL'='DEBUG'
+2023-02-16 09:02:56.580113    info    config/config.go:101    replaceCfgArgsEnv() - YAML config parameter 'logger.log_file'='/app/log/app.log' was replaced with environment 'APP_LOG_FILE'='/app/log/app.log'
+2023-02-16 09:02:56.580316    error    logger/logger.go:419    CloseLogger() - sync /dev/stdout: invalid argument
+github.com/romapres2010/goapp/pkg/common/logger.CloseLogger
+	/app/pkg/common/logger/logger.go:419
+github.com/romapres2010/goapp/pkg/common/logger.SetGlobalConfig
+	/app/pkg/common/logger/logger.go:185
+main.main.func1
+	/app/cmd/app/main.go:195
+github.com/urfave/cli.HandleAction
+	/app/vendor/github.com/urfave/cli/app.go:524
+github.com/urfave/cli.(*App).Run
+	/app/vendor/github.com/urfave/cli/app.go:286
+main.main
+	/app/cmd/app/main.go:231
+runtime.main
+	/usr/local/go/src/runtime/proc.go:250
+2023-02-16 09:02:56.580397    info    logger/logger.go:154    gClose() - Logger - close all
+2023-02-16 09:02:56.580418    info    logger/logger.go:250    newZapLogger() - Setup zap logger
+2023-02-16 09:02:56.580455    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', 'INFO', 'lumberjack', 'console']
+2023-02-16 09:02:56.580468    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.debug.log']
+2023-02-16 09:02:56.580482    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['ERROR', '', 'lumberjack', 'console']
+2023-02-16 09:02:56.580515    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.error.log']
+2023-02-16 09:02:56.580532    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', '', 'stdout', 'console']
+2023-02-16 09:02:56.580543    info    logger/logger.go:313    newZapLogger() - Zap logger - core DISABLE: log_to, encoding['stderr', 'console']
+2023-02-16 09:02:56.580621    info    logger/logger.go:202    SetGlobalConfig() - Logger settings applied: cfg['{true DEBUG /app/log/app.log {true false false error false [{true  INFO lumberjack  console 0xc00027c6f0 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true ERROR  lumberjack  console 0xc00027c780 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true   stdout  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {false ERROR  stderr  console <nil> {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }}] <nil>}}']
+2023-02-16 09:02:56.581457    info    app/main.go:203    main.func1() - Configuration: 
+['
+memory_limit: 2000000000
+config_file: /app/defcfg/app.global.yaml
+args_config_file: ""
+args_http_listen_spec: ""
+args_http_user: ""
+args_http_pass: ""
+args_jwt_key: ""
+args_log_level: ""
+args_log_file: ""
+args_pg_host: ""
+args_pg_port: ""
+args_pg_dbname: ""
+args_pg_user: ""
+args_pg_pass: ""
+env_config_file: /app/defcfg/app.global.yaml
+env_http_listen_spec: 0.0.0.0:8080
+env_http_user: ""
+env_http_pass: ""
+env_jwt_key: ""
+env_log_level: DEBUG
+env_log_file: /app/log/app.log
+env_pg_host: dev-app-db
+env_pg_port: "5432"
+env_pg_dbname: postgres
+env_pg_user: postgres
+env_pg_pass: postgres
+logger:
+    enable: true
+    global_level: DEBUG
+    global_filename: /app/log/app.log
+    zap:
+        enable: true
+        disable_caller: false
+        disable_stacktrace: false
+        stacktrace_level: error
+        development: false
+        core:
+            - enable: true
+              min_level: ""
+              max_level: INFO
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .debug.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ERROR
+              max_level: ""
+              log_to: lumberjack
+              logging_path: ""
+              encoding: console
+              file:
+                filename: .error.log
+                max_size: 10
+                max_age: 7
+                max_backups: 10
+                local_time: true
+                compress: false
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: true
+              min_level: ""
+              max_level: ""
+              log_to: stdout
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+            - enable: false
+              min_level: ERROR
+              max_level: ""
+              log_to: stderr
+              logging_path: ""
+              encoding: console
+              file: null
+              encoder_config:
+                message_key: msg
+                level_key: level
+                time_key: ts
+                name_key: log
+                caller_key: caller
+                function_key: ""
+                stacktrace_key: stacktrace
+                skip_line_ending: false
+                line_ending: |4+
+                encode_level: lower
+                encode_time: iso8601
+                encode_time_custom: "2006-01-02 15:04:05.000000"
+                encode_duration: ms
+                encode_caller: short
+                console_separator: '    '
+        sampling: null
+http_server:
+    listen_spec: 0.0.0.0:8080
+    read_timeout: 1h0m0s
+    write_timeout: 1h0m0s
+    idle_timeout: 1h0m0s
+    shutdown_timeout: 30s
+    max_header_bytes: 262144
+    use_go_profile: false
+    use_tls: false
+    tls_cert_file: ""
+    tls_key_file: ""
+    tls_min_version: 0
+    tls_max_version: 0
+http_service:
+    auth_type: NONE
+    max_body_bytes: 0
+    use_hsts: false
+    use_jwt: false
+    jwt_expires_at: 0
+    msad_server: ""
+    msad_port: 0
+    msad_base_dn: ""
+    msad_security: 0
+    use_buf_pool: false
+    buf_pooled_size: 65536
+    buf_pooled_max_size: 131072
+    log_error_to_http_header: true
+    log_error_to_http_body: true
+    http_header_max_size: 512
+    handlers:
+        HealthHandler:
+            enabled: true
+            application: app
+            module: system
+            service: health
+            version: v1.0.0
+            full_path: /app/system/health
+            params: ""
+            method: GET
+            handler_name: HealthHandler
+        ReadyHandler:
+            enabled: true
+            application: app
+            module: system
+            service: ready
+            version: v1.0.0
+            full_path: /app/system/ready
+            params: ""
+            method: GET
+            handler_name: ReadyHandler
+http_handler: {}
+http_logger:
+    enable: false
+    log_in_req: true
+    log_out_req: true
+    log_in_resp: true
+    log_out_resp: true
+    log_body: true
+    file:
+        filename: /app/log/app_http.log
+        max_size: 10
+        max_age: 7
+        max_backups: 10
+        local_time: true
+        compress: false
+metrics:
+    metrics_namespace: com
+    metrics_subsystem: go_app
+    collect_db_count_vec: true
+    collect_db_duration_vec: false
+    collect_http_requests_count_vec: true
+    collect_http_error_requests_count_vec: true
+    collect_http_requests_duration_vec: true
+    collect_http_active_requests_count: true
+    collect_http_requests_duration: true
+    collect_http_client_call_count_vec: true
+    collect_http_client_call_duration_vec: true
+    collect_wp_task_queue_buffer_len: true
+    collect_wp_add_task_wait_count: true
+    collect_wp_worker_process_count: true
+    collect_wp_task_queue_buffer_len_vec: true
+    collect_wp_add_task_wait_count_vec: true
+    collect_wp_worker_process_count_vec: true
+']
+2023-02-16 09:02:56.581495    info    metrics/metrics.go:79    New() - Creating new metrics service
+2023-02-16 09:02:56.581871    info    metrics/metrics.go:112    New() - Dependency: ['
+app_name
+  github.com/beorn7/perks:  v1.0.1
+  github.com/cespare/xxhash/v2:  v2.2.0
+  github.com/cpuguy83/go-md2man/v2:  v2.0.2
+  github.com/dgrijalva/jwt-go:  v3.2.0&#43;incompatible
+  github.com/golang/protobuf:  v1.5.2
+  github.com/gorilla/mux:  v1.8.0
+  github.com/jmoiron/sqlx:  v1.3.5
+  github.com/matttproud/golang_protobuf_extensions:  v1.0.4
+  github.com/pkg/errors:  v0.9.1
+  github.com/povilasv/prommod:  v0.0.12
+  github.com/prometheus/client_golang:  v1.14.0
+  github.com/prometheus/client_model:  v0.3.0
+  github.com/prometheus/common:  v0.39.0
+  github.com/prometheus/procfs:  v0.9.0
+  github.com/romapres2010/goapp:  (devel)
+  github.com/russross/blackfriday/v2:  v2.1.0
+  github.com/urfave/cli:  v1.22.12
+  go.uber.org/atomic:  v1.10.0
+  go.uber.org/multierr:  v1.9.0
+  go.uber.org/zap:  v1.24.0
+  golang.org/x/sys:  v0.5.0
+  golang.org/x/text:  v0.7.0
+  google.golang.org/protobuf:  v1.28.1
+  gopkg.in/asn1-ber.v1:  v1.0.0-20181015200546-f715ec2f112d
+  gopkg.in/korylprince/go-ad-auth.v2:  v2.2.0
+  gopkg.in/ldap.v3:  v3.1.0
+  gopkg.in/natefinch/lumberjack.v2:  v2.2.1
+  gopkg.in/yaml.v3:  v3.0.1']
+2023-02-16 09:02:56.582219    info    app/main.go:212    main.func1() - Set Memory Limit: MemoryLimit['2000000000']
+2023-02-16 09:02:56.582323    info    daemon/daemon.go:43    New() - Create new daemon
+2023-02-16 09:02:56.582354    info    httplog/httplog.go:42    New() - Creating new HTTP traffic logger
+2023-02-16 09:02:56.582389    info    httplog/httplog.go:72    (*Logger).SetConfig() - Set HTTP logger config: cfg['{false true true true true true 0xc00027c8d0}']
+2023-02-16 09:02:56.582473    info    httpservice/httpservice.go:135    New() - Creating new HTTP service
+2023-02-16 09:02:56.582520    info    httpservice/httpservice.go:175    New() - HTTP service was created
+2023-02-16 09:02:56.582562    info    httphandler/httphandler.go:32    New() - Creating new HTTP service
+2023-02-16 09:02:56.582586    info    httphandler/httphandler.go:55    New() - HTTP service was created
+2023-02-16 09:02:56.582617    info    httpservice/httpservice.go:183    (*Service).SetHttpHandler() - Register HTTP handlers
+2023-02-16 09:02:56.582653    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['HealthHandler', 'GET', '/app/system/health']
+2023-02-16 09:02:56.582687    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['ReadyHandler', 'GET', '/app/system/ready']
+2023-02-16 09:02:56.582728    info    httpserver/httpserver.go:57    New() - Creating new HTTP server
+2023-02-16 09:02:56.582956    info    httpserver/httpserver.go:165    New() - Created new TCP listener: network = 'tcp', address['0.0.0.0:8080']
+2023-02-16 09:02:56.583061    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httplog', 'POST']
+2023-02-16 09:02:56.583114    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httperrlog', 'POST']
+2023-02-16 09:02:56.583171    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/loglevel', 'POST']
+2023-02-16 09:02:56.583234    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'GET']
+2023-02-16 09:02:56.583285    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/health', 'GET']
+2023-02-16 09:02:56.583576    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/echo', 'POST']
+2023-02-16 09:02:56.583615    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/refresh', 'POST']
+2023-02-16 09:02:56.583663    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/ready', 'GET']
+2023-02-16 09:02:56.583721    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/signin', 'POST']
+2023-02-16 09:02:56.583769    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'POST']
+2023-02-16 09:02:56.583798    info    httpserver/httpserver.go:212    New() - HTTP server is created
+2023-02-16 09:02:56.583821    info    daemon/daemon.go:92    New() - New daemon was created
+2023-02-16 09:02:56.583845    info    app/main.go:222    main.func1() - Server is startup: Version['version '2.0.0', commit 'unset', build time '2023-02-13_15:19:45'']
+2023-02-16 09:02:56.583896    info    daemon/daemon.go:99    (*Daemon).Run() - Starting daemon
+2023-02-16 09:02:56.583972    info    daemon/daemon.go:104    (*Daemon).Run() - Daemon was running. For exit <CTRL-c>
+2023-02-16 09:02:56.584088    info    httpserver/httpserver.go:234    (*Server).Run() - Starting HTTP server
+2023-02-16 09:03:02.910958    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:02.911052    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['1', 'GET', 'GET']
+2023-02-16 09:03:02.911095    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['1', 'NONE']
+2023-02-16 09:03:02.911111    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['1']
+2023-02-16 09:03:02.911169    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['1', '0']
+2023-02-16 09:03:02.911238    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['1', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:02.911266    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['1']
+2023-02-16 09:03:02.911284    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['1']
+2023-02-16 09:03:02.911302    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['1']
+2023-02-16 09:03:02.911349    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['1', 'OK']
+2023-02-16 09:03:02.911408    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:02.911480    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:12.910749    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:12.910851    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['2', 'GET', 'GET']
+2023-02-16 09:03:12.910887    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['2', 'NONE']
+2023-02-16 09:03:12.910905    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['2']
+2023-02-16 09:03:12.910948    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['2', '0']
+2023-02-16 09:03:12.910976    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['2', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:12.911018    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['2']
+2023-02-16 09:03:12.911064    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['2']
+2023-02-16 09:03:12.911088    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['2']
+2023-02-16 09:03:12.911134    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['2', 'OK']
+2023-02-16 09:03:12.911189    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:12.911213    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:22.912558    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:22.913081    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['3', 'GET', 'GET']
+2023-02-16 09:03:22.913129    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['3', 'NONE']
+2023-02-16 09:03:22.913148    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['3']
+2023-02-16 09:03:22.913167    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['3', '0']
+2023-02-16 09:03:22.913186    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['3', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:22.913204    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['3']
+2023-02-16 09:03:22.913222    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['3']
+2023-02-16 09:03:22.913264    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['3']
+2023-02-16 09:03:22.913315    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['3', 'OK']
+2023-02-16 09:03:22.913348    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:22.913390    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:32.910281    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:32.910379    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['4', 'GET', 'GET']
+2023-02-16 09:03:32.910415    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['4', 'NONE']
+2023-02-16 09:03:32.910432    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['4']
+2023-02-16 09:03:32.910293    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:32.910474    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['4', '0']
+2023-02-16 09:03:32.910485    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['5', 'GET', 'GET']
+2023-02-16 09:03:32.910498    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['4', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:32.910550    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['4']
+2023-02-16 09:03:32.910572    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['4']
+2023-02-16 09:03:32.910634    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['4']
+2023-02-16 09:03:32.910669    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['4', 'OK']
+2023-02-16 09:03:32.910699    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:32.910752    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:32.910550    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['5', 'NONE']
+2023-02-16 09:03:32.910820    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['5']
+2023-02-16 09:03:32.910866    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['5', '0']
+2023-02-16 09:03:32.910914    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['5', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:32.910937    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['5']
+2023-02-16 09:03:32.910975    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['5']
+2023-02-16 09:03:32.911020    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['5']
+2023-02-16 09:03:32.911072    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['5', 'OK']
+2023-02-16 09:03:32.911125    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:32.911149    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:42.910536    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:42.910557    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:42.910641    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['6', 'GET', 'GET']
+2023-02-16 09:03:42.910684    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['6', 'NONE']
+2023-02-16 09:03:42.910693    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['7', 'GET', 'GET']
+2023-02-16 09:03:42.910833    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['7', 'NONE']
+2023-02-16 09:03:42.910912    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['7']
+2023-02-16 09:03:42.911023    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['7', '0']
+2023-02-16 09:03:42.911081    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['7', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:42.911109    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['7']
+2023-02-16 09:03:42.910733    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['6']
+2023-02-16 09:03:42.911131    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['7']
+2023-02-16 09:03:42.911241    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['7']
+2023-02-16 09:03:42.911305    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['7', 'OK']
+2023-02-16 09:03:42.911170    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['6', '0']
+2023-02-16 09:03:42.911381    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:42.911392    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['6', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:42.911411    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:42.911425    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['6']
+2023-02-16 09:03:42.911475    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['6']
+2023-02-16 09:03:42.911534    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['6']
+2023-02-16 09:03:42.911567    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['6', 'OK']
+2023-02-16 09:03:42.911610    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:42.911634    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:52.910224    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:52.910224    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:03:52.910358    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['9', 'GET', 'GET']
+2023-02-16 09:03:52.910397    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['9', 'NONE']
+2023-02-16 09:03:52.910415    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['9']
+2023-02-16 09:03:52.910458    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['9', '0']
+2023-02-16 09:03:52.910359    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['8', 'GET', 'GET']
+2023-02-16 09:03:52.910487    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['9', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:52.910494    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['8', 'NONE']
+2023-02-16 09:03:52.910506    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['9']
+2023-02-16 09:03:52.910513    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['8']
+2023-02-16 09:03:52.910523    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['9']
+2023-02-16 09:03:52.910541    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['9']
+2023-02-16 09:03:52.910613    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['9', 'OK']
+2023-02-16 09:03:52.910667    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:52.910716    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:03:52.910548    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['8', '0']
+2023-02-16 09:03:52.910873    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['8', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:03:52.910947    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['8']
+2023-02-16 09:03:52.910991    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['8']
+2023-02-16 09:03:52.911017    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['8']
+2023-02-16 09:03:52.911064    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['8', 'OK']
+2023-02-16 09:03:52.911111    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:03:52.911134    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:02.911056    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:02.911141    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:02.911180    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['10', 'GET', 'GET']
+2023-02-16 09:04:02.911195    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['11', 'GET', 'GET']
+2023-02-16 09:04:02.911235    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['10', 'NONE']
+2023-02-16 09:04:02.911242    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['11', 'NONE']
+2023-02-16 09:04:02.911261    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['10']
+2023-02-16 09:04:02.911268    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['11']
+2023-02-16 09:04:02.911296    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['11', '0']
+2023-02-16 09:04:02.911382    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['11', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:02.911467    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['11']
+2023-02-16 09:04:02.911295    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['10', '0']
+2023-02-16 09:04:02.911678    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['10', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:02.911539    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['11']
+2023-02-16 09:04:02.911759    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['10']
+2023-02-16 09:04:02.911796    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['10']
+2023-02-16 09:04:02.911798    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['11']
+2023-02-16 09:04:02.911828    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['10']
+2023-02-16 09:04:02.911955    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['10', 'OK']
+2023-02-16 09:04:02.911853    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['11', 'OK']
+2023-02-16 09:04:02.912044    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:02.912084    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:02.912094    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:02.912296    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:12.911064    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:12.911135    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['12', 'GET', 'GET']
+2023-02-16 09:04:12.911166    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['12', 'NONE']
+2023-02-16 09:04:12.911184    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['12']
+2023-02-16 09:04:12.911203    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['12', '0']
+2023-02-16 09:04:12.911247    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['12', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:12.911374    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['12']
+2023-02-16 09:04:12.911400    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['12']
+2023-02-16 09:04:12.911420    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['12']
+2023-02-16 09:04:12.911064    debug    httphandler/handler_health.go:15    (*Service).HealthHandler() - START   ==================================================================================
+2023-02-16 09:04:12.911468    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['12', 'OK']
+2023-02-16 09:04:12.911483    debug    httpservice/httpservice.go:301    (*Service).Process() - Check allowed HTTP method: requestID, request.Method, method['13', 'GET', 'GET']
+2023-02-16 09:04:12.911500    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:12.911517    debug    httpservice/httpservice.go:309    (*Service).Process() - Check authentication method: requestID, AuthType['13', 'NONE']
+2023-02-16 09:04:12.911583    debug    httpservice/httpservice.go:351    (*Service).Process() - Reading request body: requestID['13']
+2023-02-16 09:04:12.911648    debug    httpservice/httpservice.go:358    (*Service).Process() - Read request body: requestID, len(body)['13', '0']
+2023-02-16 09:04:12.911520    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================
+2023-02-16 09:04:12.911672    debug    httpservice/httpservice.go:369    (*Service).Process() - Calling external function handler: requestID, function['13', '<func(context.Context, []uint8, []uint8) ([]uint8, httpservice.Header, int, error) Value>']
+2023-02-16 09:04:12.911707    debug    httphandler/handler_health.go:21    (*Service).HealthHandler.func1() - START: requestID['13']
+2023-02-16 09:04:12.911759    debug    httphandler/handler_health.go:33    (*Service).HealthHandler.func1() - SUCCESS['13']
+2023-02-16 09:04:12.911799    debug    httpservice/httpservice.go:398    (*Service).Process() - Set HTTP response headers: requestID['13']
+2023-02-16 09:04:12.911876    debug    httpservice/httpservice.go:412    (*Service).Process() - Set HTTP response status: requestID, Status['13', 'OK']
+2023-02-16 09:04:12.911949    debug    httpservice/httpservice.go:428    (*Service).Process() - HTTP response body is empty
+2023-02-16 09:04:12.911974    debug    httphandler/handler_health.go:39    (*Service).HealthHandler() - SUCCESS ==================================================================================

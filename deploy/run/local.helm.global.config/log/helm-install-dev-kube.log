@@ -1,0 +1,825 @@
+install.go:192: [debug] Original chart version: ""
+install.go:209: [debug] CHART PATH: D:\Projects\go\http\deploy\helm\app
+
+client.go:128: [debug] creating 1 resource(s)
+client.go:128: [debug] creating 10 resource(s)
+client.go:310: [debug] Starting delete for "dev-app-liquibase-install-empty" Job
+client.go:128: [debug] creating 1 resource(s)
+client.go:540: [debug] Watching for changes to Job dev-app-liquibase-install-empty with timeout of 5m0s
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: ADDED
+client.go:607: [debug] dev-app-liquibase-install-empty: Jobs active: 0, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-empty: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-empty: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-empty: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-empty: Jobs active: 0, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-empty: MODIFIED
+client.go:310: [debug] Starting delete for "dev-app-liquibase-install-testdata" Job
+client.go:128: [debug] creating 1 resource(s)
+client.go:540: [debug] Watching for changes to Job dev-app-liquibase-install-testdata with timeout of 5m0s
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: ADDED
+client.go:607: [debug] dev-app-liquibase-install-testdata: Jobs active: 0, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-testdata: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-testdata: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-testdata: Jobs active: 1, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: MODIFIED
+client.go:607: [debug] dev-app-liquibase-install-testdata: Jobs active: 0, jobs failed: 0, jobs succeeded: 0
+client.go:568: [debug] Add/Modify event for dev-app-liquibase-install-testdata: MODIFIED
+NAME: dev
+LAST DEPLOYED: Sun Feb 12 21:25:51 2023
+NAMESPACE: go-app
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+USER-SUPPLIED VALUES:
+appApi:
+  autoscaling:
+    enabled: true
+    maxReplicas: 3
+    minReplicas: 1
+    packetsPerSecond: ""
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+  image:
+    repository: romapres2010/app-api
+    tag: 2.0.0
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 300Mi
+  service:
+    port: 3000
+    type: LoadBalancer
+configData:
+  appConfigFile: /app/defcfg/app.global.yaml
+  appHttpListenSpec: 0.0.0.0:8080
+  appHttpPort: "8080"
+  appLogFile: /app/log/app.log
+  appLogLevel: INFO
+  appPgDbname: postgres
+  appPgInstallEmptyChangelog: db.changelog-root.xml
+  appPgInstallTestdataChangelog: db.changelog-1.0_testData.xml
+  appPgPort: "5432"
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  className: ""
+  enabled: true
+  hosts:
+  - host: localhost
+    paths:
+    - path: /app-local
+      pathType: ImplementationSpecific
+  tls: []
+namespace: ""
+secretData:
+  appPgPass: postgres
+  appPgUser: postgres
+variant: ""
+version: 2.0.0
+
+COMPUTED VALUES:
+appApi:
+  affinity: {}
+  autoscaling:
+    enabled: true
+    maxReplicas: 3
+    minReplicas: 1
+    packetsPerSecond: ""
+    targetCPUUtilizationPercentage: 90
+    targetMemoryUtilizationPercentage: 90
+  image:
+    hostname: docker.io
+    pullPolicy: IfNotPresent
+    repository: romapres2010/app-api
+    tag: 2.0.0
+  imagePullSecrets: []
+  nodeSelector: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 300Mi
+  restartPolicy: Always
+  securityContext: {}
+  service:
+    port: 3000
+    type: LoadBalancer
+  terminationGracePeriodSeconds: 60
+  tierSuffix: api
+  tolerations: []
+appDb:
+  affinity: {}
+  autoscaling:
+    enabled: false
+  image:
+    hostname: docker.io
+    pullPolicy: IfNotPresent
+    repository: postgres
+    tag: 14.5-alpine
+  imagePullSecrets: []
+  nodeSelector: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  replicaCount: 1
+  resources: {}
+  restartPolicy: Always
+  securityContext: {}
+  service:
+    port: 5432
+    type: NodePort
+  terminationGracePeriodSeconds: 30
+  tierSuffix: db
+  tolerations: []
+appLiquibase:
+  image:
+    hostname: docker.io
+    pullPolicy: IfNotPresent
+    repository: romapres2010/app-liquibase
+    tag: ""
+  podAnnotations: {}
+  restartPolicy: Never
+  tierSuffix: liquibase
+configData:
+  appConfigFile: /app/defcfg/app.global.yaml
+  appHttpListenSpec: 0.0.0.0:8080
+  appHttpPort: "8080"
+  appLogFile: /app/log/app.log
+  appLogLevel: INFO
+  appPgDbname: postgres
+  appPgInstallEmptyChangelog: db.changelog-root.xml
+  appPgInstallTestdataChangelog: db.changelog-1.0_testData.xml
+  appPgPort: "5432"
+  appPgUpgradeChangelog: ""
+fullnameOverride: ""
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  className: ""
+  enabled: true
+  hosts:
+  - host: localhost
+    paths:
+    - path: /app-local
+      pathType: ImplementationSpecific
+  tls: []
+nameOverride: ""
+namespace: ""
+secretData:
+  appPgPass: postgres
+  appPgUser: postgres
+serviceAccount:
+  annotations: {}
+  create: false
+  name: ""
+variant: ""
+version: 2.0.0
+
+HOOKS:
+---
+# Source: app/templates/app-liquibase-install-empty-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dev-app-liquibase-install-empty
+  labels:
+    variant: dev
+    tier: app-liquibase-install-empty
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        variant: dev
+        tier: app-liquibase-install-empty
+        app.kubernetes.io/name: app
+        app.kubernetes.io/instance: dev
+    spec:
+      initContainers:
+        - name: init-app-liquibase-install-empty
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"] # wait for db to be ready
+      containers:
+        - name: dev-app-liquibase
+          image: "romapres2010/app-liquibase:2.0.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+            - name: APP_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_USER
+            - name: APP_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_PASS
+            - name: APP_PG_INSTALL_EMPTY_CHANGELOG
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_INSTALL_EMPTY_CHANGELOG
+          command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_EMPTY_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
+      restartPolicy: Never
+---
+# Source: app/templates/app-liquibase-install-testdata-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dev-app-liquibase-install-testdata
+  labels:
+    variant: dev
+    tier: app-liquibase-install-testdata
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        variant: dev
+        tier: app-liquibase-install-testdata
+        app.kubernetes.io/name: app
+        app.kubernetes.io/instance: dev
+    spec:
+      initContainers:
+        - name: init-app-liquibase-install-testdata
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"] # wait for db to be ready
+      containers:
+        - name: dev-app-liquibase
+          image: "romapres2010/app-liquibase:2.0.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+            - name: APP_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_USER
+            - name: APP_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_PASS
+            - name: APP_PG_INSTALL_TESTDATA_CHANGELOG
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_INSTALL_TESTDATA_CHANGELOG
+          command: ['sh', '-c', "docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_TESTDATA_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update"]
+      restartPolicy: Never
+MANIFEST:
+---
+# Source: app/templates/app-secret-cfg.yaml
+#https://helm.sh/docs/chart_template_guide/accessing_files/#lines
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-app-secret-cfg
+  labels:
+    variant: dev
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+type: Opaque
+stringData:
+  APP_PG_USER: postgres  APP_PG_PASS: postgres
+---
+# Source: app/templates/app-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-app-secret
+  labels:
+    variant: dev
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+type: Opaque
+stringData:
+  APP_PG_USER: postgres
+  APP_PG_PASS: postgres
+---
+# Source: app/templates/app-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-app-config
+  labels:
+    variant: dev
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+data:
+  APP_CONFIG_FILE: /app/defcfg/app.global.yaml
+  APP_HTTP_PORT: "8080"
+  APP_HTTP_LISTEN_SPEC: 0.0.0.0:8080
+  APP_LOG_LEVEL: INFO
+  APP_LOG_FILE: /app/log/app.log
+  APP_PG_HOST: dev-app-db
+  APP_PG_PORT: "5432"
+  APP_PG_DBNAME: postgres
+  APP_PG_INSTALL_EMPTY_CHANGELOG: db.changelog-root.xml
+  APP_PG_INSTALL_TESTDATA_CHANGELOG: db.changelog-1.0_testData.xml
+  APP_PG_UPGRADE_CHANGELOG:
+---
+# Source: app/templates/app-db-persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dev-app-db-claim
+  labels:
+    variant: dev
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+# Source: app/templates/app-api-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-app-api
+  labels:
+    variant: dev
+    tier: app-api
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: apiport
+      protocol: TCP
+      name: apiport
+  selector:
+    tier: app-api
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+---
+# Source: app/templates/app-db-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-app-db
+  labels:
+    variant: dev
+    tier: app-db
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: pgport
+      protocol: TCP
+      name: pgport
+  selector:
+    tier: app-db
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+---
+# Source: app/templates/app-api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app-api
+  labels:
+    variant: dev
+    tier: app-api
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  selector:
+    matchLabels:
+      variant: dev
+      tier: app-api
+      app.kubernetes.io/name: app
+      app.kubernetes.io/instance: dev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        variant: dev
+        tier: app-api
+        app.kubernetes.io/name: app
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: init-app-api
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+          image: busybox:1.28
+          command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"] # wait for db to be ready
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: app-api
+          securityContext:
+            {}
+          image: "romapres2010/app-api:2.0.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_HOST
+            - name: APP_PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_PORT
+            - name: APP_PG_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+            - name: APP_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_USER
+            - name: APP_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_PASS
+            - name: APP_CONFIG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_CONFIG_FILE
+            - name: APP_HTTP_LISTEN_SPEC
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_HTTP_LISTEN_SPEC
+            - name: APP_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_LOG_LEVEL
+            - name: APP_LOG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_LOG_FILE
+          ports:
+            - name: apiport
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet: &health
+              path: /app/system/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30  # Time to start
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: *health
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+      restartPolicy: Always
+---
+# Source: app/templates/app-db-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app-db
+  labels:
+    variant: dev
+    tier: app-db
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  replicas: 1
+  minReadySeconds: 20
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      variant: dev
+      tier: app-db
+      app.kubernetes.io/name: app
+      app.kubernetes.io/instance: dev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        variant: dev
+        tier: app-db
+        app.kubernetes.io/name: app
+        app.kubernetes.io/instance: dev
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: app-db
+          securityContext:
+            {}
+          image: "postgres:14.5-alpine"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_PASS
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: dev-app-config
+                  key: APP_PG_DBNAME
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_USER
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: dev-app-secret
+                  key: APP_PG_USER
+          ports:
+            - name: pgport
+              containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+            initialDelaySeconds: 10  # Time to create a new DB
+            failureThreshold: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            {}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: dev-app-db-volume
+      restartPolicy: Always
+      volumes:
+        - name: dev-app-db-volume
+          persistentVolumeClaim:
+            claimName: dev-app-db-claim
+---
+# Source: app/templates/app-api-hpa.yaml
+#https://dev.to/docker/enable-kubernetes-metrics-server-on-docker-desktop-5434
+#https://blog.mi.hdm-stuttgart.de/index.php/2020/03/01/autoscaling-of-docker-containers-in-google-kubernetes-engine/
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dev-app-api-hpa
+  labels:
+    variant: dev
+    tier: app-api
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  namespace: go-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: dev-app-api
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90
+---
+# Source: app/templates/app-api-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dev-app-api-ingress
+  labels:
+    variant: dev
+    tier: app-api
+    helm.sh/chart: app-1.1.1
+    app.kubernetes.io/name: app
+    app.kubernetes.io/instance: dev
+    app.kubernetes.io/version: "latest"
+    
+    
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: go-app
+spec:
+  rules:
+    - host: "localhost"
+      http:
+        paths:
+          - path: /app-local
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dev-app-api
+                port:
+                  number: 3000
+

@@ -1,0 +1,704 @@
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:15:53 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:15:54] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:15:54] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:15:55] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 3ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 5272ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:16:00] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:16:08 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:16:09] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:16:09] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:16:09] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:16:11] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:16:11] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:16:12] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:16:12] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:16:14] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:16:14] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4931ms
+[2023-02-12 18:16:14] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:15:53 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:15:54] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:15:54] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:15:55] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 3ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 5272ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:16:00] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:16:08 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:16:09] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:16:09] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:16:09] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:16:11] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:16:11] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:16:12] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:16:12] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:16:14] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:16:14] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4931ms
+[2023-02-12 18:16:14] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:15:53 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:15:54] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:15:54] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:15:55] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 3ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:15:55] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:16:00] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 5272ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:16:00] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:16:00] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:16:00] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:16:08 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:16:09] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:16:09] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:16:09] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:16:10] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:16:10] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:16:11] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:16:11] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:16:12] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:16:12] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:16:14] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:16:14] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4931ms
+[2023-02-12 18:16:14] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:23:24 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:23:24] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:23:25] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:23:25] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:23:25] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:23:26] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:23:26] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 1ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:23:26] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:23:29] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:23:29] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:23:29] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:23:29] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 3751ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:23:29] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:23:29] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 0ms
+[2023-02-12 18:23:29] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:23:37 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:23:38] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:23:38] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:23:39] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:23:40] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:23:40] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:23:40] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:23:40] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:23:42] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:23:42] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:23:44] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:23:44] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 5176ms
+[2023-02-12 18:23:44] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:23:24 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:23:24] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:23:25] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:23:25] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:23:25] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:23:26] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:23:26] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 1ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:23:26] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:23:29] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:23:29] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:23:29] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:23:29] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 3751ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:23:29] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:23:29] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 0ms
+[2023-02-12 18:23:29] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:23:37 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:23:38] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:23:38] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:23:39] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:23:39] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:23:40] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:23:40] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:23:40] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:23:40] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:23:42] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:23:42] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:23:44] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:23:44] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 5176ms
+[2023-02-12 18:23:44] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:11 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:12] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:12] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:26:13] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 1ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 4502ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:26:17] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:27 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:28] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:28] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:26:33] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:26:33] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:26:34] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:26:34] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4553ms
+[2023-02-12 18:26:34] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:11 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:12] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:12] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:26:13] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 1ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 4502ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:26:17] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:27 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:28] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:28] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:26:33] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:26:33] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:26:34] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:26:34] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4553ms
+[2023-02-12 18:26:34] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:11 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:12] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:12] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Creating database history table with name: public.databasechangelog
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-root.xml::v0.0.0::romapres
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Tag 'v0.0.0' applied to database
+[2023-02-12 18:26:13] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-root.xml::v0.0.0::romapres ran successfully in 1ms
+Running Changeset: changelog/db.changelog-1.0.xml::1::romapres
+Initialing schema: schemaName=app
+[2023-02-12 18:26:13] INFO [liquibase.changelog] Output: Initialing schema: schemaName=app
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/db.sql executed
+Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Output: Droping all foreign keys
+[2023-02-12 18:26:17] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0/drop_all_fk.sql executed
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::1::romapres ran successfully in 4502ms
+Running Changeset: changelog/db.changelog-1.0.xml::v1.0.0::romapres
+[2023-02-12 18:26:17] INFO [liquibase.changelog] Tag 'v1.0.0' applied to database
+[2023-02-12 18:26:17] INFO [liquibase.changelog] ChangeSet changelog/db.changelog-1.0.xml::v1.0.0::romapres ran successfully in 1ms
+[2023-02-12 18:26:17] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Install Mdg =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+####################################################
+##   _     _             _ _                      ##
+##  | |   (_)           (_) |                     ##
+##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##
+##  | |   | |/ _` | | | | | '_ \ / _` / __|/ _ \  ##
+##  | |___| | (_| | |_| | | |_) | (_| \__ \  __/  ##
+##  \_____/_|\__, |\__,_|_|_.__/ \__,_|___/\___|  ##
+##              | |                               ##
+##              |_|                               ##
+##                                                ## 
+##  Get documentation at docs.liquibase.com       ##
+##  Get certified courses at learn.liquibase.com  ## 
+##  Free schema change activity reports at        ##
+##      https://hub.liquibase.com                 ##
+##                                                ##
+####################################################
+Starting Liquibase at 18:26:27 (version 4.9.1 #1978 built at 2022-03-28 19:39+0000)
+Liquibase Version: 4.9.1
+Liquibase Community 4.9.1 by Liquibase
+[2023-02-12 18:26:28] INFO [liquibase.database] Set default schema name to public
+[2023-02-12 18:26:28] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Reading from public.databasechangelog
+Running Changeset: ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres
+Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Clean tables
+[2023-02-12 18:26:30] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/clean_all_tables.sql executed
+Loading test data: tableName=countries
+[2023-02-12 18:26:30] INFO [liquibase.changelog] Output: Loading test data: tableName=countries
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_countries.sql executed
+Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=currencies
+[2023-02-12 18:26:31] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_currencies.sql executed
+Loading test data: tableName=ports
+[2023-02-12 18:26:31] INFO [liquibase.changelog] Output: Loading test data: tableName=ports
+[2023-02-12 18:26:33] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_ports.sql executed
+Loading test data: tableName=berths
+[2023-02-12 18:26:33] INFO [liquibase.changelog] Output: Loading test data: tableName=berths
+[2023-02-12 18:26:34] INFO [liquibase.changelog] SQL in file ../sql/1.0/1.0.0-test-data/postgres_app_berths.sql executed
+[2023-02-12 18:26:34] INFO [liquibase.changelog] ChangeSet ./changelog/db.changelog-1.0_testData.xml::TD-valid-1::romapres ran successfully in 4553ms
+[2023-02-12 18:26:34] INFO [liquibase.lockservice] Successfully released change log lock
+Liquibase command 'update' was executed successfully.
+================= APP liquibase Upgrade =================
+No resources found in go-app namespace.
