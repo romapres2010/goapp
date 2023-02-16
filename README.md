@@ -1,4 +1,4 @@
-# Шаблон backend сервера на Golang — часть 3 (Docker Compose Kubernetes Helm)
+# Шаблон backend сервера на Golang — часть 3 (Docker, Docker Compose, Kubernetes (kustomize)
 
 ![Схема развертывания в Kubernetes](https://github.com/romapres2010/goapp/raw/master/doc/diagram/APP%20-%20Kebernates.jpg)
 
@@ -6,7 +6,9 @@
 
 [Вторая часть](https://habr.com/ru/post/500554/) шаблона была посвящена прототипированию REST API.
 
-Третья часть посвящена развертыванию в Kubernetes и настройке Horizontal Autoscaler.
+[Третья часть](https://habr.com/ru/post/716634/) посвящена развертыванию шаблона в Docker, Docker Compose, Kubernetes (kustomize).
+
+Четвертая часть будет посвящена развертыванию в Kubernetes с Helm chart и настройке Horizontal Autoscaler.
 
 Для корректного развертывания в Kubernetes, в шаблон пришлось внести изменения: 
 - способа конфигурирования - YAML, ENV, [Kustomize](https://kustomize.io/)
@@ -14,23 +16,21 @@
 - способа развертывания схемы БД - переход на [liquibase](https://www.liquibase.org/)
 - добавление метрик [prometheus](https://prometheus.io/)
 
-Ссылка на новый [репозиторий проекта](https://github.com/romapres2010/goapp).
+Ссылка на новый [репозиторий](https://github.com/romapres2010/goapp).
 
-Шаблон в репозитории представлен в виде полностью готового к развертыванию кода в Docker Composer или Kubernetes (helm).
+Шаблон в репозитории представлен в виде полностью готового к развертыванию кода в Docker, Docker Compose, Kubernetes (kustomize).
 
 ## Содержание
 1. Изменение подхода к конфигурированию
-2. Изменение подхода к логированию
-3. Развертывание схемы БД
-4. Сборка Docker image
-5. Сборка Docker-Compose 
-6. Схема развертывания в Kubernetes
-7. Подготовка YAML для Kubernetes
-8. Kustomization YAML для Kubernetes
-9. Тестирование Kubernetes с kustomize
-10. Переход на Helm chart
-11. Тестирование Kubernetes с Helm
-12. Настройка Horizontal Autoscaler
+2. Добавление метрик [prometheus](https://prometheus.io/)
+3. Изменение подхода к логированию
+4. Развертывание схемы БД
+5. Сборка Docker image
+6. Сборка Docker-Compose 
+7. Схема развертывания в Kubernetes
+8. Подготовка YAML для Kubernetes
+9. Kustomization YAML для Kubernetes
+10. Тестирование Kubernetes с kustomize
  
 <cut />
 
@@ -121,7 +121,29 @@ for handlerName, handlerCfg := range s.cfg.Handlers {
 }
 ```
 
-## 2. Изменение подхода к логированию
+## 2 Добавление метрик [prometheus](https://prometheus.io/)
+
+В шаблон встроена сборка следующих метрик для [prometheus](https://prometheus.io/):
+- Метрики DB
+  - __db_total__ тип CounterVec - The total number of processed DB by sql statement
+  - __db_duration_ms__ тип HistogramVec - The duration histogram of DB operation in ms by sql statement
+- Метрики HTTP request
+  - __http_requests_total_by_resource__ тип CounterVec - How many HTTP requests processed, partitioned by resource
+  - __http_requests_error_total_by_resource__ тип CounterVec - How many HTTP requests was ERRORED, partitioned by resource
+  - __http_request_duration_ms_by_resource__ тип HistogramVec - The duration histogram of HTTP requests in ms by resource
+  - __http_active_requests_count__ тип Gauge - The total number of active HTTP requests
+  - __http_request_duration_ms__ тип Histogram - The duration histogram of HTTP requests in ms
+- Метрики HTTP client call
+  - __http_client_call_total_by_resource__ тип CounterVec - How many HTTP client call processed, partitioned by resource
+  - __http_client_call_duration_ms_by_resource__ тип HistogramVec - The duration histogram of HTTP client call in ms by resource
+- Метрики WorkerPoolVec
+  - __wp_task_queue_buffer_len_vec__ тип GaugeVec - The len of the worker pool buffer
+  - __wp_add_task_wait_count_vec__ тип GaugeVec - The number of the task waiting to add to worker pool queue
+  - __wp_worker_process_count_vec__ тип GaugeVec - The number of the working worker
+
+Доступ к метрикам настроен по стандартному пути HTTP GET [/metrics](http://127.0.0.1:3000/metrics).
+
+## 3. Изменение подхода к логированию
 Логирование приложения в Kubernetes можно реализовать несколькими способами:
 - вывод в stdout, stderr - этот способ является стандартным, но нужно учитывать, что в Kubernetes stdout, stderr Docker контейнеров перенаправляются в файлы, которые имеют ограниченный размер и могут перезаписываться. 
 - вывод в файл на примонтированный к Docker контейнеру внешний ресурс.
@@ -193,7 +215,7 @@ logger:
                 encoding: "console" # формат вывода 'console', 'json'
 ```
 
-## 3. Развертывание схемы БД
+## 4. Развертывание схемы БД
 Для первоначального развертывания схемы БД в контейнере и управления изменениями DDL скриптов через Git великолепно подходит [liquibase](https://www.liquibase.org/).
 
 [Liquibase](https://www.liquibase.org/) позволяет самостоятельно генерировать DDL скрипты БД. Для простых случаев - этого вполне хватает, но если требуется тонкая настройка БД (например,настройка партиций, Blob storage) то лучше формировать DDL скрипты в отдельном приложении. 
@@ -209,7 +231,7 @@ logger:
 
 В шаблоне предусмотрены оба эти варианта.
 
-## 4. Сборка Docker image
+## 5. Сборка Docker image
 Docker файлы для сборки выложены в каталоге [deploy/docker](https://github.com/romapres2010/goapp/tree/master/deploy/docker).
 
 Для тестирования сборки можно использовать Docker Desktop - в этом случае не нужно делать push Docker image - они все кешируются на локальной машине.
@@ -321,7 +343,7 @@ COPY ./db/sql /sql
 
 ```
 
-## 5. Сборка Docker Compose
+## 6. Сборка Docker Compose
 Для локальной сборки удобно использовать Docker Compose. Скрипт сборки [compose-app.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/compose/compose-app.yaml).
 
 В каталоге [/deploy/run/local.compose.global.config](https://github.com/romapres2010/goapp/tree/master/deploy/run/local.compose.global.config) выложены скрипты для локального тестирования с использованием Docker Compose.
@@ -437,7 +459,7 @@ COPY ./db/sql /sql
     restart: unless-stopped
 ```
 
-## 6. Схема развертывания в Kubernetes
+## 7. Схема развертывания в Kubernetes
 Схема развертывания в [Kubernetes](https://kubernetes.io/ru/docs/tutorials/kubernetes-basics/) приведена в сокращенном виде, исключены компоненты, связанные с UI (Jmix) и распределенным кэшем (hazelcast).
 
 ![Схема развертывания в Kubernetes](https://github.com/romapres2010/goapp/raw/master/doc/diagram/APP%20-%20Kebernates.jpg)
@@ -471,7 +493,7 @@ COPY ./db/sql /sql
   - желательно предусмотреть вариант постоянного (или лимитированного по количеству раз) перезапуска приложения в ожидании готовности внешних сервисов
   - желательно предусмотреть в связанных приложениях liveness/readiness probe, чтобы понять, когда связанное приложение готово к работе
 
-## 7. Подготовка YAML для Kubernetes
+## 8. Подготовка YAML для Kubernetes
 
 ### Конфигурирование
 В Kubernetes предусмотрено для основных способа конфигурирования [ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/) для основных настроек и [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) для настроек, чувствительных с точки зрения безопасности.
@@ -891,7 +913,7 @@ spec:
         tier: app-api
 ```
 
-## 8. Kustomization YAML для Kubernetes
+## 9. Kustomization YAML для Kubernetes
 
 Kubernetes не предоставляет стандартной возможности использовать внешние ENV переменные - каждый раз нужно менять YAML заново "накатывать конфигурацию".
 
@@ -1007,81 +1029,116 @@ spec:
             restartPolicy: Always
 ```
 
-## . Тестирование Kubernetes с kustomize
+## 10. Тестирование Kubernetes с kustomize
 Для тестирования подготовлено несколько скриптов в каталоге [/deploy/kubernates](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates).
+
+Для тестирования под Windows достаточно поставить Docker Desktop и включить в нем опцию Enable Kubernetes.
 
 _скрипты представлены только для ознакомительных целей_
 
-### Развертывание 
+### Сборка Docker образов
+
+В файле [/deploy/default_repository](https://github.com/romapres2010/goapp/blob/master/deploy/default_repository) нужно подменить константу на свой Docker репозиторий. Без этого тоже будет работать, но не получится сделать docker push.  
+
+Собрать Docker образы:
+- Go App [/deploy/docker/app-api-build.sh](https://github.com/romapres2010/goapp/blob/master/deploy/docker/app-api-build.sh)
+- Liquibase [/deploy/docker/app-liquibase-build.sh](https://github.com/romapres2010/goapp/blob/master/deploy/docker/app-liquibase-build.sh)
+
+Выполнять docker push не обязательно, так как после сборки Docker образы кешируются на локальной машине.   
+
+### Развертывание артефактов Kubernetes
+
 Запускаем скрипт [/deploy/kubernates/kube-build.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-build.sh) и передаем ему в качестве параметров среду dev, которую нужно развернуть.
 
 ``` shell
 ./kube-build.sh dev
 ```
 
-Все результаты логируются в каталог 
+Все результаты логируются в каталог [/deploy/kubernates/log](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates/log)
+- первым шагом выполняется kubectl kustomize и формируется итоговый YAML для среды DEV [/kubernates/log/build-dev-kustomize.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/log/build-dev-kustomize.yaml) - можно посмотреть как применилась dev конфигурация
+- вторым шагом выполняется kubectl apply - запускается одновременное создание всех ресурсов.
+- стартуют сразу все Pod, но dev-app-api и dev-app-liquibase уходит в ожидание через initContainers готовности порта 5432 postgres в Pod c БД
+- вставлена задержка 120 сек. и после этого собираются логи всех контейнеров
+
+### Краткий статус артефактов Kubernetes
+
+Если выполнить скрипт [/master/deploy/kubernates/kube-descibe.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-descibe.sh), то можно посмотреть краткий статус артефактов Kubernetes.
+- Pod Liquibase успешно отработал и термировался. Его создавали не через Deployment, поэтому у него "нормальное имя" _dev-app-liquibase_.  
+- Запущены и работают два Pod Go Api, они создавались через Deployment, поэтому имена имеют "нормальный" префикс и автоматически сгенерированную часть.
+- Запущен и работают два Pod БД.
+- Сервис dev-app-api имеет тип LoadBalancer
+  - он доступен вне кластера на 3000 порту - например, можно вызвать [/metrics](http://127.0.0.1:3000/metrics).
+  - стандартный LoadBalancer работает по алгоритму [round robin](https://ru.wikipedia.org/wiki/Round-robin_(%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC)), поэтому без сохранения сессии запросы будут направляться на разные Pod по очереди.
+  - если клиент запросит HTTP keep-alive, то запросы будут идти на тот же Pod (это имеет значение при использовании Horizontal Autoscaler) 
+- Сервис dev-app-db имеет тип NodePort и указан назначенный ему порт 30906
+  - что бы получить досут к БД вне кластера, нужно сначала определить на каком узле (Node) кластера поднят этот Pod и по IP адресу узла и порту 30906 можно получить доступ к БД
+- Между собой Pod могут коммуницировать через краткое DNS имя service.
+  - Liquibase и Go Api могут обратиться к БД через host name = service: dev-app-db
 
 ``` shell
-$ ./kube-build.sh dev
-Kube namespace: go-app
-Kube variant: dev
-YAML file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kustomize.yaml
-Kustomize Log file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kustomize.log
-Kube Log file: /g/Projects/go/goapp/deploy/kubernates/log/build-dev-kube.log
-APP describe file: /g/Projects/go/goapp/deploy/kubernates/log/describe-dev-kube.log
-kubectl kustomize ./overlays/dev
-kubectl apply
+$ ./kube-get.sh dev go-app
+
 Kube namespace: go-app
 Kube variant: dev
 
 kubectl get pods
-NAME                           READY   STATUS     RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
-dev-app-api-59b6ff97b4-2kmfm   0/1     Init:0/1   0          5s    10.1.1.182   docker-desktop   <none>           <none>
-dev-app-api-59b6ff97b4-plmz6   0/1     Init:0/1   0          5s    10.1.1.183   docker-desktop   <none>           <none>
-dev-app-db-58bbb867d8-c96bz    0/1     Running    0          5s    10.1.1.184   docker-desktop   <none>           <none>
-dev-app-liquibase              0/1     Init:0/1   0          5s    10.1.1.185   docker-desktop   <none>           <none>
+NAME                           READY   STATUS      RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
+dev-app-api-59b6ff97b4-2kmfm   1/1     Running     0          13m   10.1.1.182   docker-desktop   <none>           <none>
+dev-app-api-59b6ff97b4-plmz6   1/1     Running     0          13m   10.1.1.183   docker-desktop   <none>           <none>
+dev-app-db-58bbb867d8-c96bz    1/1     Running     0          13m   10.1.1.184   docker-desktop   <none>           <none>
+dev-app-liquibase              0/1     Completed   0          13m   10.1.1.185   docker-desktop   <none>           <none>
 
 kubectl get deployment
 NAME          READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                       SELECTOR
-dev-app-api   0/2     2            0           6s    app-api      romapres2010/app-api:2.0.0   app=app,tier=app-api,variant=dev
-dev-app-db    0/1     1            0           6s    app-db       postgres:14.5-alpine         app=app,tier=app-db,variant=dev
+dev-app-api   2/2     2            2           13m   app-api      romapres2010/app-api:2.0.0   app=app,tier=app-api,variant=dev
+dev-app-db    1/1     1            1           13m   app-db       postgres:14.5-alpine         app=app,tier=app-db,variant=dev
 
 kubectl get service
 NAME          TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE   SELECTOR
-dev-app-api   LoadBalancer   10.106.114.183   localhost     3000:30894/TCP   6s    app=app,tier=app-api,variant=dev
-dev-app-db    NodePort       10.111.201.17    <none>        5432:30906/TCP   6s    app=app,tier=app-db,variant=dev
+dev-app-api   LoadBalancer   10.106.114.183   localhost     3000:30894/TCP   13m   app=app,tier=app-api,variant=dev
+dev-app-db    NodePort       10.111.201.17    <none>        5432:30906/TCP   13m   app=app,tier=app-db,variant=dev
 
 kubectl get configmap
 NAME             DATA   AGE
-dev-app-config   9      6s
+dev-app-config   9      13m
 
 kubectl get secret
 NAME             TYPE     DATA   AGE
-dev-app-secret   Opaque   2      7s
+dev-app-secret   Opaque   2      13m
 
 kubectl get pvc
 NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE   VOLUMEMODE
-dev-app-db-claim   Bound    pvc-996244d5-c5fd-4496-abfd-b6d9301549af   100Mi      RWO            hostpath       7s    Filesystem
+dev-app-db-claim   Bound    pvc-996244d5-c5fd-4496-abfd-b6d9301549af   100Mi      RWO            hostpath       13m   Filesystem
 
 kubectl get hpa
 No resources found in go-app namespace.
-sleep: 120
-Kube namespace: go-app
-Kube variant: dev
-APP db Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-db.log
-APP api Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-api.log
-APP liquibase Log file: /g/Projects/go/goapp/deploy/kubernates/log/log-dev-app-liquibase.log
 ```
 
+### Развернутый статус артефактов Kubernetes
+
+Развернутый статус артефактов Kubernetes можно посмотреть, запустив скрипт [/master/deploy/kubernates/kube-descibe.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-descibe.sh).
+
+``` shell
+$ ./kube-descibe.sh dev go-app
+```
+
+Пример результатов в файле [/deploy/kubernates/log/describe-dev-kube.log](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/log/describe-dev-kube.log).
+
+### Проверка логов Docker контейнеров
+
+Логи контейнеров Kubernetes можно посмотреть, запустив скрипт [/deploy/kubernates/kube-log.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-log.sh).
+
+``` shell
+$ ./kube-log.sh dev go-app
+```
+
+У нас запущено 2 Pod Go Api - в этом скрипте они будут перемешаны и записаны в один файл.  
 
 
+### Удаление артефактов Kubernetes
 
-### Проверка логов
+Удалить все артефакты можно скриптом [/deploy/kubernates/kube-delete.sh](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/kube-delete.sh).
 
-### Удаление 
-
-## . Подготовка Helm chart
-
-## . Настройка Horizontal Autoscaler
-
-Так же нужно иметь в виду, что в Kubernetes может быть запущено более одного экземпляра Docker контейнера и так же возможна ситуация, когда Docker контейнер будет удален и пересоздано на другом узле кластера.
+``` shell
+$ ./kube-deelte.sh dev go-app
+```
