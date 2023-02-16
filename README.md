@@ -18,7 +18,9 @@
 
 Ссылка на новый [репозиторий](https://github.com/romapres2010/goapp).
 
-Шаблон в репозитории представлен в виде полностью готового к развертыванию кода в Docker, Docker Compose, Kubernetes (kustomize), Kubernetes (helm).
+Шаблон goapp в репозитории полностью готов к развертыванию в Docker, Docker Compose, Kubernetes (kustomize), Kubernetes (helm).
+
+_Настоящая статья не содержит детального описание используемых технологий_ 
 
 ## Содержание
 1. Изменение подхода к конфигурированию
@@ -780,7 +782,7 @@ spec:
 
 Особенности развертывания [/deploy/kubernates/base/app-api-deployment.yaml](https://github.com/romapres2010/goapp/blob/master/deploy/kubernates/base/app-api-deployment.yaml):
 - начальное количество replicas: 1, остальные будет автоматически создаваться Horizontal Autoscaler
-- template.metadata.labels задана дополнительная метка tier: app-api, чтобы можно было легко найти Pod БД
+- template.metadata.labels задана дополнительная метка tier: app-api, чтобы можно было легко найти Pod Go App
 - ENV переменные заполняются из ранее созданных ConfigMap и Secret
 - по аналогии с Liquibase задан отдельный initContainers для ожидания готовности порта 5432 postgres в Pod c БД
   - так как все Pod (БД, Liquibase, Go Api) будут запущены одновременно, то возникнет ситуация, когда БД уже стартовала, но Liquibase еще не применил DDL и DML скрипты. Или применил их только частично. 
@@ -794,7 +796,7 @@ spec:
   - если превышен limits.memory, то Pod будет удален и пересоздан
   - limits.cpu контролируется собственно кластером - больше процессорного времени не будет выделено. 
 - tag для Docker образа будет определен в kustomize через подстановку image: app-api
-- 
+
 ``` yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -935,7 +937,7 @@ spec:
 
 ## 9. Kustomization YAML для Kubernetes
 
-Kubernetes не предоставляет стандартной возможности использовать внешние ENV переменные - каждый раз нужно менять YAML заново "накатывать конфигурацию".
+Kubernetes не предоставляет стандартной возможности использовать внешние ENV переменные - каждый раз нужно менять YAML и заново "накатывать конфигурацию".
 
 Самый простой автоматически вносить изменения в YAML файлы в зависимости от сред развертывания DEV-TEST-PROD - это [Kustomize](https://kustomize.io/).
 - создается "базовая версия" (не содержит специфику сред) YAML для Kubernetes - она выложена в каталоге [/deploy/kubernates/base](https://github.com/romapres2010/goapp/tree/master/deploy/kubernates/base)
