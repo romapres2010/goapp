@@ -59,6 +59,7 @@ type Pool struct {
 
     taskQueueCh   chan *Task // канал очереди задач, ожидающих выполнения
     taskQueueSize int        // размер очереди задач - если 0, то количество ядер х 200
+    //taskPool *TaskPool  // кэширование структур для задач - снижает нагрузку на GC
 
     mx sync.RWMutex
 }
@@ -105,6 +106,7 @@ func NewPool(parentCtx context.Context, externalId uint64, name string, cfg *Con
         workerConcurrency: cfg.WorkerConcurrency,
         taskQueueSize:     cfg.TaskQueueSize,
         workerTimeout:     cfg.WorkerTimeout,
+        //taskPool:          newTaskPool(),
     }
 
     pool.setState(POOL_STATE_NEW)

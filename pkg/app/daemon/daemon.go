@@ -37,8 +37,8 @@ type Daemon struct {
     httpHandler      *httphandler.Service // сервис обработки HTTP запросов
     httpHandlerErrCh chan error           // канал ошибок для HTTP
 
-    wpService      *_wpservice.Service // сервис обработчиков причалов
-    wpServiceErrCh chan error          // канал ошибок для сервиса обработчиков причалов
+    wpService      *_wpservice.Service // сервис worker pool
+    wpServiceErrCh chan error          // канал ошибок для сервиса worker pool
 }
 
 // New create Daemon
@@ -85,7 +85,7 @@ func New(ctx context.Context, cfg *_cfg.Config) (*Daemon, error) {
     }
 
     // создаем обработчиков HTTP
-    if daemon.httpHandler, err = httphandler.New(daemon.ctx, &daemon.cfg.HttpHandlerCfg, daemon.httpService); err != nil {
+    if daemon.httpHandler, err = httphandler.New(daemon.ctx, &daemon.cfg.HttpHandlerCfg, daemon.wpService, daemon.httpService); err != nil {
         return nil, err
     }
 

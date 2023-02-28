@@ -59,24 +59,51 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
         return nil
     }
 
-    task := Task{
-        f:          f,
-        requests:   requests,
-        parentCtx:  parentCtx,
-        id:         id,
-        name:       name,
-        externalId: externalId,
-        timeout:    timeout,
-        doneCh:     doneCh,
+    // получаем task из глобального кэш
+    task := gTaskPool.getTask()
+
+    task.mx.Lock()
+    defer task.mx.Unlock()
+
+    { // установим все значения в начальные значения, после получения из кэша
+        task.parentCtx = parentCtx
+        task.ctx = nil
+        task.cancel = nil
+
+        task.externalId = externalId
+        task.doneCh = doneCh
+        task.stopCh = nil
+
+        task.id = id
+        task.setStateUnsafe(TASK_STATE_NEW)
+        task.name = name
+        task.timeout = timeout
+
+        task.requests = requests
+        task.responses = nil
+        task.err = nil
+
+        task.duration = 0
+
+        task.f = f
+
+        if timeout == 0 {
+            task.timeout = POOL_DEF_MAX_TIMEOUT
+        }
+    } // установим все значения в начальные значения, после получения из кэша
+
+    return task
+}
+
+// Delete - отправить в кэш
+func (ts *Task) Delete() {
+    if ts != nil {
+        gTaskPool.putTask(ts)
     }
+}
 
-    if timeout == 0 {
-        task.timeout = POOL_DEF_MAX_TIMEOUT
-    }
-
-    task.setState(TASK_STATE_NEW)
-
-    return &task
+// clearUnsafe - очистка task для повторного использования
+func (ts *Task) clearUnsafe() {
 }
 
 // setState - установка состояния жизненного цикла task

@@ -101,6 +101,28 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
     var startTime = time.Now()                      // отсчет времени от начала обработки
     defer close(doneCh)
 
+    // добавляем задачи в определенную группу, группа задач определяется каналом завершения
+    for _, task := range tasks {
+        if task != nil { // пустые task игнорируем
+
+            // Превышено максимальное время выполнения
+            if time.Now().After(startTime.Add(s.cfg.TotalTimeout)) {
+                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, s.cfg.TotalTimeout).PrintfError()
+                return err
+            }
+
+            task.SetDoneCh(doneCh) // установим общий канал окончания
+
+            // Отправляем в канал очереди задач, если канал заполнен - то ожидание
+            if err = s.AddTask(task); err != nil {
+                // Возможна ситуация, когда pool уже остановлен и закрыт канал очереди задач
+                return err
+            }
+            wgCnt++
+            wg.Add(1)
+        }
+    }
+
     // Управление wg.Done() не переносится в задачу - выполняется в отдельной горутине
     go func() {
         var doneCnt int // количество завершенных задач
@@ -130,28 +152,6 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
             }
         }
     }()
-
-    // добавляем задачи в определенную группу, группа задач определяется каналом завершения
-    for _, task := range tasks {
-        if task != nil { // пустые task игнорируем
-
-            // Превышено максимальное время выполнения
-            if time.Now().After(startTime.Add(s.cfg.TotalTimeout)) {
-                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, s.cfg.TotalTimeout).PrintfError()
-                return err
-            }
-
-            task.SetDoneCh(doneCh) // установим общий канал окончания
-
-            // Отправляем в канал очереди задач, если канал заполнен - то ожидание
-            if err = s.AddTask(task); err != nil {
-                // Возможна ситуация, когда pool уже остановлен и закрыт канал очереди задач
-                return err
-            }
-            wgCnt++
-            wg.Add(1)
-        }
-    }
 
     // Ожидать выполнения всех задач task в группе
     wg.Wait()

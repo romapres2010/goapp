@@ -120,6 +120,17 @@ http_service:
             params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
             method: "GET"                               # HTTP метод: GET, POST, ...
             handler_name: "ReadyHandler"               # Имя функции обработчика
+        WpHandlerFactorial:               # Сервис wptest - handle worker pool testing
+            enabled: true                               # Признак включен ли сервис
+            application: "app"                         # Приложение к которому относится сервис
+            module: "system"                            # Модуль к которому относится сервис
+            service: "ready"                            # Имя сервиса
+            version: "v1.0.0"                           # Версия сервиса
+            full_path: "/app/system/wp_factorial"       # URI сервиса /Application.Module.Service.APIVersion или /Application/APIVersion/Module/Service
+            params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
+            method: "POST"                               # HTTP метод: GET, POST, ...
+            handler_name: "WpHandlerFactorial"               # Имя функции обработчика
+
 
 # конфигурация сервиса логирования HTTP трафика (опциональный сервис)
 http_logger:
