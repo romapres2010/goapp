@@ -51,7 +51,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
                 tasks = append(tasks, task)
             }
 
-            // в конце обработки отпарить task в кэш для повторного использования
+            // в конце обработки отправить task в кэш для повторного использования
             defer func() {
                 for _, task := range tasks {
                     task.Delete()
@@ -117,7 +117,6 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
 func calculateFactorialFn(ctx context.Context, data ...interface{}) (error, []interface{}) {
     var factVal uint64 = 1
-    var out = make([]interface{}, 1, 1) // ответ содержит только один объект
 
     if len(data) == 1 {
 
@@ -133,8 +132,7 @@ func calculateFactorialFn(ctx context.Context, data ...interface{}) (error, []in
             }
         }
 
-        out[0] = factVal // ответ содержит только один объект
-        return nil, out  // ошибки расчета транслируем на уровень выше
+        return nil, []interface{}{factVal} // ошибки расчета транслируем на уровень выше
     }
     return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
 }

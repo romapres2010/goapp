@@ -13,34 +13,34 @@ Document Path:          /app/system/wp_factorial?wp_tipe=bg
 Document Length:        Variable
 
 Concurrency Level:      8
-Time taken for tests:   8.851 seconds
-Complete requests:      100000
+Time taken for tests:   204.887 seconds
+Complete requests:      1000000
 Failed requests:        0
-Keep-Alive requests:    100000
-Total transferred:      27587484 bytes
-Total body sent:        39300000
-HTML transferred:       10787484 bytes
-Requests per second:    11298.27 [#/sec] (mean)
-Time per request:       0.708 [ms] (mean)
-Time per request:       0.089 [ms] (mean, across all concurrent requests)
-Transfer rate:          3043.86 [Kbytes/sec] received
-                        4336.15 kb/s sent
-                        7380.01 kb/s total
+Keep-Alive requests:    1000000
+Total transferred:      277591843 bytes
+Total body sent:        393000000
+HTML transferred:       109591843 bytes
+Requests per second:    4880.75 [#/sec] (mean)
+Time per request:       1.639 [ms] (mean)
+Time per request:       0.205 [ms] (mean, across all concurrent requests)
+Transfer rate:          1323.10 [Kbytes/sec] received
+                        1873.18 kb/s sent
+                        3196.28 kb/s total
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
 Connect:        0    0   0.0      0      10
-Processing:     0    1   2.3      0      80
-Waiting:        0    1   2.2      0      80
-Total:          0    1   2.3      0      80
+Processing:     0    2   4.9      0     292
+Waiting:        0    2   4.8      0     292
+Total:          0    2   4.9      0     292
 
 Percentage of the requests served within a certain time (ms)
   50%      0
-  66%      0
-  75%      0
-  80%      1
-  90%      1
-  95%      7
+  66%      1
+  75%      2
+  80%      2
+  90%      4
+  95%     10
   98%     10
   99%     10
- 100%     80 (longest request)
+ 100%    292 (longest request)
