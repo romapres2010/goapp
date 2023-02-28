@@ -16,7 +16,7 @@ import (
 
 const (
     DEF_METRICS_NAMESPACE = "com"
-    DEF_METRICS_SUBSYSTEM = "app"
+    DEF_METRICS_SUBSYSTEM = "api"
 )
 
 // Config конфигурационные настройки
@@ -39,15 +39,24 @@ type Config struct {
     CollectHTTPClientCallCountVec    bool `yaml:"collect_http_client_call_count_vec"`
     CollectHTTPClientCallDurationVec bool `yaml:"collect_http_client_call_duration_vec"`
 
+    // Метрики вычислений
+    CollectCalcCountVec    bool `yaml:"collect_calc_count_vec"`
+    CollectCalcDurationVec bool `yaml:"collect_calc_duration_vec"`
+
+    // Метрики JSON
+    CollectMarshalingDurationVec   bool `yaml:"collect_marshaling_duration_vec"`
+    CollectUnMarshalingDurationVec bool `yaml:"collect_un_marshaling_duration_vec"`
+
     // Метрики WorkerPool
     CollectWPTaskQueueBufferLen bool `yaml:"collect_wp_task_queue_buffer_len"`
     CollectWPAddTaskWaitCount   bool `yaml:"collect_wp_add_task_wait_count"`
     CollectWPWorkerProcessCount bool `yaml:"collect_wp_worker_process_count"`
 
-    // Метрики WorkerPoolVec
-    CollectWPTaskQueueBufferLenVec bool `yaml:"collect_wp_task_queue_buffer_len_vec"`
-    CollectWPAddTaskWaitCountVec   bool `yaml:"collect_wp_add_task_wait_count_vec"`
-    CollectWPWorkerProcessCountVec bool `yaml:"collect_wp_worker_process_count_vec"`
+    // Метрики WorkerPool
+    CollectWPTaskQueueBufferLenVec  bool `yaml:"collect_wp_task_queue_buffer_len_vec"`
+    CollectWPAddTaskWaitCountVec    bool `yaml:"collect_wp_add_task_wait_count_vec"`
+    CollectWPWorkerProcessCountVec  bool `yaml:"collect_wp_worker_process_count_vec"`
+    CollectWPTaskProcessDurationVec bool `yaml:"collect_wp_task_process_duration_ms_by_name"`
 }
 
 type Metrics struct {
@@ -69,10 +78,19 @@ type Metrics struct {
     HTTPClientCallCountVec    *prometheus.CounterVec
     HTTPClientCallDurationVec *prometheus.HistogramVec
 
+    // Метрики вычислений
+    CalcCountVec    *prometheus.CounterVec
+    CalcDurationVec *prometheus.HistogramVec
+
+    // Метрики JSON
+    MarshalingDurationVec   *prometheus.HistogramVec
+    UnMarshalingDurationVec *prometheus.HistogramVec
+
     // Метрики WorkerPoolVec
-    WPTaskQueueBufferLenVec *prometheus.GaugeVec
-    WPAddTaskWaitCountVec   *prometheus.GaugeVec
-    WPWorkerProcessCountVec *prometheus.GaugeVec
+    WPTaskQueueBufferLenVec  *prometheus.GaugeVec
+    WPAddTaskWaitCountVec    *prometheus.GaugeVec
+    WPWorkerProcessCountVec  *prometheus.GaugeVec
+    WPTaskProcessDurationVec *prometheus.HistogramVec
 }
 
 func New(cfg *Config) (*Metrics, error) {
@@ -99,6 +117,9 @@ func New(cfg *Config) (*Metrics, error) {
 
     // Add Go module build info.
     metrics.Registry.MustRegister(collectors.NewBuildInfoCollector())
+    //metrics.Registry.MustRegister(collectors.NewGoCollector(
+    //    collectors.WithGoCollections(collectors.GoRuntimeMemStatsCollection | collectors.GoRuntimeMetricsCollection),
+    //))
     metrics.Registry.MustRegister(collectors.NewGoCollector(
         collectors.WithGoCollectorRuntimeMetrics(),
     ))
@@ -217,7 +238,60 @@ func New(cfg *Config) (*Metrics, error) {
         metrics.Registry.MustRegister(metrics.HTTPClientCallDurationVec)
     } // Метрики HTTP client call
 
-    { // Метрики WorkerPoolVec
+    { // Метрики вычислений
+        metrics.CalcCountVec = prometheus.NewCounterVec(
+            prometheus.CounterOpts{
+                Namespace: cfg.MetricsNamespace,
+                Subsystem: cfg.MetricsSubsystem,
+                Name:      "calc_total_by_type",
+                Help:      "How many calculation processed, partitioned by type",
+            },
+            []string{"type"},
+        )
+
+        metrics.CalcDurationVec = prometheus.NewHistogramVec(
+            prometheus.HistogramOpts{
+                Namespace: cfg.MetricsNamespace,
+                Subsystem: cfg.MetricsSubsystem,
+                Name:      "calc_duration_by_type",
+                Help:      "The duration histogram of calculation in ms by type",
+                Buckets:   []float64{0.1, 5, 10, 50, 100, 500, 1000},
+            },
+            []string{"type"},
+        )
+
+        metrics.Registry.MustRegister(metrics.CalcCountVec)
+        metrics.Registry.MustRegister(metrics.CalcDurationVec)
+    } // Метрики вычислений
+
+    { // Метрики JSON
+        metrics.MarshalingDurationVec = prometheus.NewHistogramVec(
+            prometheus.HistogramOpts{
+                Namespace: cfg.MetricsNamespace,
+                Subsystem: cfg.MetricsSubsystem,
+                Name:      "json_marshaling_duration_by_type",
+                Help:      "The duration histogram of JSON marshaling in ms by type",
+                Buckets:   []float64{0.01, 0.05, 0.10, 0.50, 1.00, 5.00, 10.00},
+            },
+            []string{"type"},
+        )
+
+        metrics.UnMarshalingDurationVec = prometheus.NewHistogramVec(
+            prometheus.HistogramOpts{
+                Namespace: cfg.MetricsNamespace,
+                Subsystem: cfg.MetricsSubsystem,
+                Name:      "json_unmarshaling_duration_by_type",
+                Help:      "The duration histogram of JSON unmarshaling in ms by type",
+                Buckets:   []float64{0.01, 0.05, 0.10, 0.50, 1.00, 5.00, 10.00},
+            },
+            []string{"type"},
+        )
+
+        metrics.Registry.MustRegister(metrics.MarshalingDurationVec)
+        metrics.Registry.MustRegister(metrics.UnMarshalingDurationVec)
+    } // Метрики JSON
+
+    { // Метрики WorkerPool
         metrics.WPTaskQueueBufferLenVec = promauto.NewGaugeVec(
             prometheus.GaugeOpts{
                 Namespace: cfg.MetricsNamespace,
@@ -248,10 +322,22 @@ func New(cfg *Config) (*Metrics, error) {
             []string{"type"},
         )
 
+        metrics.WPTaskProcessDurationVec = prometheus.NewHistogramVec(
+            prometheus.HistogramOpts{
+                Namespace: cfg.MetricsNamespace,
+                Subsystem: cfg.MetricsSubsystem,
+                Name:      "wp_task_process_duration_ms_by_name",
+                Help:      "The duration histogram of worker pool task process in ms by name",
+                Buckets:   []float64{0.1, 5, 10, 50, 100, 500, 1000},
+            },
+            []string{"type", "name"},
+        )
+
         metrics.Registry.MustRegister(metrics.WPTaskQueueBufferLenVec)
         metrics.Registry.MustRegister(metrics.WPAddTaskWaitCountVec)
         metrics.Registry.MustRegister(metrics.WPWorkerProcessCountVec)
-    } // Метрики WorkerPoolVec
+        metrics.Registry.MustRegister(metrics.WPTaskProcessDurationVec)
+    } // Метрики WorkerPool
 
     return &metrics, nil
 }
@@ -325,6 +411,30 @@ func IncHTTPClientCallDurationVec(resource string, method string, duration time.
     }
 }
 
+// Метрики вычислений
+func IncCalcCountVec(label string) {
+    if GlobalMetrics.Cfg.CollectCalcCountVec {
+        GlobalMetrics.CalcCountVec.WithLabelValues(label).Inc()
+    }
+}
+func IncCalcDurationVec(label string, duration time.Duration) {
+    if GlobalMetrics.Cfg.CollectCalcDurationVec {
+        GlobalMetrics.CalcDurationVec.WithLabelValues(label).Observe(float64(duration.Milliseconds()))
+    }
+}
+
+// Метрики JSON
+func IncMarshalingDurationVec(label string, duration time.Duration) {
+    if GlobalMetrics.Cfg.CollectMarshalingDurationVec {
+        GlobalMetrics.MarshalingDurationVec.WithLabelValues(label).Observe(float64(duration.Milliseconds()))
+    }
+}
+func IncUnMarshalingDurationVec(label string, duration time.Duration) {
+    if GlobalMetrics.Cfg.CollectUnMarshalingDurationVec {
+        GlobalMetrics.UnMarshalingDurationVec.WithLabelValues(label).Observe(float64(duration.Milliseconds()))
+    }
+}
+
 // Метрики WorkerPoolVec
 func IncWPTaskQueueBufferLenVec(wpType string) {
     if GlobalMetrics.Cfg.CollectWPTaskQueueBufferLenVec {
@@ -360,6 +470,15 @@ func DecWPWorkerProcessCountVec(wpType string) {
     if GlobalMetrics.Cfg.CollectWPWorkerProcessCountVec {
         GlobalMetrics.WPWorkerProcessCountVec.WithLabelValues(wpType).Dec()
     }
+}
+func IncWPTaskProcessDurationVec(wpType string, name string, duration time.Duration) {
+    if GlobalMetrics.Cfg.CollectWPTaskProcessDurationVec {
+        GlobalMetrics.WPTaskProcessDurationVec.WithLabelValues(wpType, name).Observe(float64(duration.Milliseconds()))
+    }
+}
+
+func PrintGlobalMetricsToLog() {
+    GlobalMetrics.PrintMetricsToLog()
 }
 
 func InitGlobalMetrics(cfg *Config) {

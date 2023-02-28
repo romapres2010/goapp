@@ -5,14 +5,16 @@ import (
     "os"
     "os/signal"
     "syscall"
+    "time"
 
+    _cfg "github.com/romapres2010/goapp/pkg/app/config"
     _err "github.com/romapres2010/goapp/pkg/common/error"
     _httplog "github.com/romapres2010/goapp/pkg/common/httplog"
     _httpserver "github.com/romapres2010/goapp/pkg/common/httpserver"
     _http "github.com/romapres2010/goapp/pkg/common/httpservice"
     _log "github.com/romapres2010/goapp/pkg/common/logger"
+    _wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
 
-    _cfg "github.com/romapres2010/goapp/pkg/app/config"
     httphandler "github.com/romapres2010/goapp/pkg/app/httphandler"
 )
 
@@ -34,6 +36,9 @@ type Daemon struct {
 
     httpHandler      *httphandler.Service // сервис обработки HTTP запросов
     httpHandlerErrCh chan error           // канал ошибок для HTTP
+
+    wpService      *_wpservice.Service // сервис обработчиков причалов
+    wpServiceErrCh chan error          // канал ошибок для сервиса обработчиков причалов
 }
 
 // New create Daemon
@@ -62,6 +67,11 @@ func New(ctx context.Context, cfg *_cfg.Config) (*Daemon, error) {
         daemon.ctx, daemon.cancel = context.WithCancel(context.Background())
     } else {
         daemon.ctx, daemon.cancel = context.WithCancel(ctx)
+    }
+
+    // создаем сервис обработчиков
+    if daemon.wpService, err = _wpservice.New(daemon.ctx, "WorkerPool - background", daemon.wpServiceErrCh, &daemon.cfg.WorkerPoolServiceCfg); err != nil {
+        return nil, err
     }
 
     // создаем обработчик для логирования HTTP
@@ -98,6 +108,9 @@ func New(ctx context.Context, cfg *_cfg.Config) (*Daemon, error) {
 func (d *Daemon) Run() error {
     _log.Info("Starting daemon")
 
+    // запускаем сервис обработчиков - паники должны быть обработаны внутри
+    go func() { d.wpServiceErrCh <- d.wpService.Run() }()
+
     // запускаем в фоне HTTP сервер, возврат в канал ошибок - паники должны быть обработаны внутри
     go func() { d.httpServerErrCh <- d.httpServer.Run() }()
 
@@ -113,16 +126,18 @@ func (d *Daemon) Run() error {
         select {
         case s := <-signalCh: //  ожидаем системное призывание
             _log.Info("Exiting, got signal", s)
-            d.Shutdown() // останавливаем daemon
+            d.Shutdown(true, d.cfg.ShutdownTimeout) // останавливаем daemon
             return nil
         case err = <-d.httpServerErrCh: // возврат от HTTP сервера в канал ошибок
             _log.Info("Got error from HTTP")
+        case err = <-d.wpServiceErrCh: // возврат от обработчиков в канал ошибок
+            _log.Info("Got error from worker pool")
         }
 
         // от сервиса пришла пустая ошибка - игнорируем
         if err != nil {
-            _log.Error(err.Error()) // логируем ошибку
-            d.Shutdown()            // останавливаем daemon
+            _log.Error(err.Error())                  // логируем ошибку
+            d.Shutdown(false, d.cfg.ShutdownTimeout) // останавливаем daemon
             return err
         } else {
             _log.Info("Got empty error - ignore it")
@@ -131,26 +146,31 @@ func (d *Daemon) Run() error {
 }
 
 // Shutdown daemon
-func (d *Daemon) Shutdown() {
+func (d *Daemon) Shutdown(hardShutdown bool, shutdownTimeout time.Duration) {
     _log.Info("Shutting down daemon")
 
     // Закрываем корневой контекст
     defer d.cancel()
 
+    //Останавливаем обработчик worker pool - прерываем обработку текущего задания
+    if err := d.wpService.Shutdown(hardShutdown, shutdownTimeout); err != nil {
+        _log.ErrorAsInfo(err) // дополнительно логируем результат остановки
+    }
+
     // Останавливаем служебные сервисы
-    if myerr := d.httpService.Shutdown(); myerr != nil {
-        _log.ErrorAsInfo(myerr) // дополнительно логируем результат остановки
+    if err := d.httpService.Shutdown(); err != nil {
+        _log.ErrorAsInfo(err) // дополнительно логируем результат остановки
     }
 
     // Останавливаем HTTP сервер, ожидаем завершения активных подключений
-    if myerr := d.httpServer.Shutdown(); myerr != nil {
-        _log.ErrorAsInfo(myerr) // дополнительно логируем результат остановки
+    if err := d.httpServer.Shutdown(); err != nil {
+        _log.ErrorAsInfo(err) // дополнительно логируем результат остановки
     }
 
     _log.Info("Daemon was shutdown")
 
     // Закрываем logger для корректного закрытия лог файла
-    if myerr := d.httpLogger.Shutdown(); myerr != nil {
-        _log.ErrorAsInfo(myerr) // дополнительно логируем результат остановки
+    if err := d.httpLogger.Shutdown(); err != nil {
+        _log.ErrorAsInfo(err) // дополнительно логируем результат остановки
     }
 }

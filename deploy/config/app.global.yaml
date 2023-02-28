@@ -1,4 +1,5 @@
 memory_limit: 2000000000         # рекомендуемый предел памяти в байтах - использовать для запуска в контейнере
+shutdown_timeout: 30s            # максимальное время остановки daemon
 
 # конфигурация сервиса логирования
 logger:
@@ -136,6 +137,16 @@ http_logger:
         local_time: true                    # использовать локальное время в имени архивных лог файлов
         compress: false                     # сжимать архивные лог файлы в zip архив
 
+# конфигурация сервиса обработчиков
+worker_pool_service:
+    total_timeout: 600s                     # максимальное время обработки всех task в одном запросе
+    shutdown_timeout: 30s                   # максимальное время остановки pool
+    worker_pool:			                # конфигурация пула обработчиков
+        task_queue_size: 0			        # размер очереди - если 0, то количество ядер х 200
+        task_timeout: 600s                  # максимальное время обработки одного task
+        worker_concurrency: 8               # уровень параллелизма для запускай нескольких расчетов - если 0, то количество ядер х2
+        worker_timeout: 600s                # максимальное время обработки для одного обработчика
+
 # конфигурация сбора метрик
 metrics:
     metrics_namespace: com
@@ -152,3 +163,4 @@ metrics:
     collect_wp_task_queue_buffer_len_vec: true
     collect_wp_add_task_wait_count_vec: true
     collect_wp_worker_process_count_vec: true
+    collect_wp_task_process_duration_ms_by_name: true

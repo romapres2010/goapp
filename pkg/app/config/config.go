@@ -3,6 +3,7 @@ package config
 import (
     "gopkg.in/yaml.v3"
     "os"
+    "time"
 
     _err "github.com/romapres2010/goapp/pkg/common/error"
     _httplog "github.com/romapres2010/goapp/pkg/common/httplog"
@@ -10,6 +11,7 @@ import (
     _http "github.com/romapres2010/goapp/pkg/common/httpservice"
     _log "github.com/romapres2010/goapp/pkg/common/logger"
     _metrics "github.com/romapres2010/goapp/pkg/common/metrics"
+    _wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
 
     httphandler "github.com/romapres2010/goapp/pkg/app/httphandler"
 )
@@ -31,8 +33,9 @@ const (
 
 // Config represent daemon options
 type Config struct {
-    MemoryLimit int64  `yaml:"memory_limit" json:"memory_limit"` // рекомендуемый предел памяти в байтах - использовать для запуска в контейнере
-    ConfigFile  string `yaml:"config_file" json:"config_file"`   // основной файл конфигурации
+    MemoryLimit     int64         `yaml:"memory_limit" json:"memory_limit"`         // рекомендуемый предел памяти в байтах - использовать для запуска в контейнере
+    ConfigFile      string        `yaml:"config_file" json:"config_file"`           // основной файл конфигурации
+    ShutdownTimeout time.Duration `yaml:"shutdown_timeout" json:"shutdown_timeout"` // максимальное время жестокой остановки daemon
 
     ArgsConfigFile     string `yaml:"args_config_file" json:"args_config_file"`           // основной файл конфигурации
     ArgsHTTPListenSpec string `yaml:"args_http_listen_spec" json:"args_http_listen_spec"` // строка HTTP листенера из командной строки
@@ -61,12 +64,13 @@ type Config struct {
     EnvPgPass         string `yaml:"env_pg_pass" json:"env_pg_pass"`                   // пароль пользователя БД
 
     // Конфигурация вложенных сервисов
-    LoggerCfg      _log.Config        `yaml:"logger" json:"logger"`             // конфигурация сервиса логирования
-    HttpServerCfg  _httpserver.Config `yaml:"http_server" json:"http_server"`   // конфигурация HTTP сервера
-    HttpServiceCfg _http.Config       `yaml:"http_service" json:"http_service"` // конфигурация обработчиков HTTP запросов
-    HttpHandlerCfg httphandler.Config `yaml:"http_handler" json:"http_handler"` // конфигурация обработчиков HTTP запросов
-    HttpLoggerCfg  _httplog.Config    `yaml:"http_logger" json:"http_logger"`   // конфигурация сервиса логирования HTTP трафика
-    MetricsCfg     _metrics.Config    `yaml:"metrics" json:"metrics"`           // конфигурация сбора метрик
+    LoggerCfg            _log.Config        `yaml:"logger" json:"logger"`                           // конфигурация сервиса логирования
+    HttpServerCfg        _httpserver.Config `yaml:"http_server" json:"http_server"`                 // конфигурация HTTP сервера
+    HttpServiceCfg       _http.Config       `yaml:"http_service" json:"http_service"`               // конфигурация обработчиков HTTP запросов
+    HttpHandlerCfg       httphandler.Config `yaml:"http_handler" json:"http_handler"`               // конфигурация обработчиков HTTP запросов
+    HttpLoggerCfg        _httplog.Config    `yaml:"http_logger" json:"http_logger"`                 // конфигурация сервиса логирования HTTP трафика
+    WorkerPoolServiceCfg _wpservice.Config  `yaml:"worker_pool_service" json:"worker_pool_service"` // конфигурация сервиса обработчиков
+    MetricsCfg           _metrics.Config    `yaml:"metrics" json:"metrics"`                         // конфигурация сбора метрик
 }
 
 // ValidateConfig validate config
