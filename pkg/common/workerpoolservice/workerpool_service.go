@@ -198,5 +198,8 @@ func (s *Service) Shutdown(hardShutdown bool, shutdownTimeout time.Duration) (er
     } else {
         _log.Info("WorkerPool service shutdown successfully: WorkerPoolName", s.name)
     }
+
+    s.pool.PrintTaskPoolStats()
+
     return err
 }
