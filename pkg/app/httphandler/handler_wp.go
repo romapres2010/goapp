@@ -2,8 +2,10 @@ package httphandler
 
 import (
     "context"
+    "fmt"
     "reflect"
-    
+    "time"
+
     "encoding/json"
     "net/http"
 
@@ -30,7 +32,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
         var err error
         var responseBuf []byte
         var wpFactorialReqResp WpFactorialReqResp
-        //var tic = time.Now()
+        var tic = time.Now()
         var tasks []*_wp.Task
 
         // Считаем параметры из URL query
@@ -87,7 +89,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
                     }
                 }
 
-                // wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
+                wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
             } else {
                 return nil, nil, http.StatusBadRequest, err
             }
