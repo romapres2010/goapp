@@ -98,16 +98,17 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
     var wgCnt int                                   // сколько task было отправлено = wg.Add
     var wg sync.WaitGroup                           // все task выполняются в одной WaitGroup
     var doneCh = make(chan interface{}, len(tasks)) // канал ответов об окончании задач
-    var startTime = time.Now()                      // отсчет времени от начала обработки
     defer close(doneCh)
+
+    var startTime = time.Now() // отсчет времени от начала обработки
 
     // добавляем задачи в определенную группу, группа задач определяется каналом завершения
     for _, task := range tasks {
         if task != nil { // пустые task игнорируем
 
             // Превышено максимальное время выполнения
-            if time.Now().After(startTime.Add(s.cfg.TotalTimeout)) {
-                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, s.cfg.TotalTimeout).PrintfError()
+            if s.cfg.TotalTimeout > 0 && time.Now().After(startTime.Add(s.cfg.TotalTimeout)) {
+                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, task.GetExternalId(), s.cfg.TotalTimeout).PrintfError()
                 return err
             }
 
@@ -125,9 +126,18 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 
     // Управление wg.Done() не переносится в задачу - выполняется в отдельной горутине
     go func() {
-        var doneCnt int // количество завершенных задач
+        // количество завершенных задач
+        var doneCnt int
+        var timer *time.Timer
+        if s.cfg.TotalTimeout > 0 {
+            timer = time.NewTimer(s.cfg.TotalTimeout)
+        } else {
+            timer = time.NewTimer(_wp.POOL_MAX_TIMEOUT) // максимальное время ожидания
+        }
+        defer timer.Stop()
+
         for {
-            // Ожидаем завершения обработки всех задач в WaitGroup
+            // Ожидаем завершения обработки всех задач в WaitGroup или TotalTimeout
             select {
             case _, ok := <-doneCh:
                 if ok { // канал открыт
@@ -142,13 +152,22 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
                 } else {
                     return // канал закрыт
                 }
-            case <-time.After(s.cfg.TotalTimeout):
-                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, s.cfg.TotalTimeout).PrintfError()
+            case <-timer.C:
+                err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, externalId, s.cfg.TotalTimeout).PrintfError()
                 // Уменьшить счетчик, чтобы разблокировать родительскую горутину
                 for doneCnt < wgCnt {
                     wg.Done()
                     doneCnt++
                 }
+                // !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
+                //case <-time.After(s.cfg.TotalTimeout):
+                //    err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, externalId, s.cfg.TotalTimeout).PrintfError()
+                //    // Уменьшить счетчик, чтобы разблокировать родительскую горутину
+                //    for doneCnt < wgCnt {
+                //        wg.Done()
+                //        doneCnt++
+                //    }
+                // !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
             }
         }
     }()
@@ -184,7 +203,6 @@ func (s *Service) Shutdown(hardShutdown bool, shutdownTimeout time.Duration) (er
     _log.Info("Shutdown WorkerPool service: WorkerPoolName", s.name)
 
     defer s.cancel()
-    //s.cancel()
 
     { // закрываем вложенные сервисы
         if shutdownTimeout > s.cfg.ShutdownTimeout {

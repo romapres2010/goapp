@@ -66,6 +66,8 @@ const ERR_WORKER_POOL_RUN_INCORRECT_STATE = "WORKER_POOL_RUN_INCORRECT_STATE"
 const ERR_WORKER_POOL_INCOMPLETE_DONE = "WORKER_POOL_INCOMPLETE_DONE"
 const ERR_WORKER_POOL_CONTEXT_CLOSED = "WORKER_POOL_CONTEXT_CLOSED"
 const ERR_WORKER_POOL_STOP_SIGNAL = "WORKER_POOL_STOP_SIGNAL"
+const ERR_WORKER_POOL_TASK_ALREADY_LOCKED = "WORKER_POOL_TASK_ALREADY_LOCKED"
+const ERR_WORKER_POOL_ALREADY_LOCKED = "WORKER_POOL_ALREADY_LOCKED"
 
 const ERR_TIMEOUT_ERROR = "TIMEOUT_ERROR"
 
@@ -134,6 +136,8 @@ var globalTypedErrorMessages = map[string]ErrorMessage{
     ERR_WORKER_POOL_INCOMPLETE_DONE:          {ERR_WORKER_POOL_INCOMPLETE_DONE, "Worker pool incomplete done of task queue: ['pool_name=[%s]']"},
     ERR_WORKER_POOL_CONTEXT_CLOSED:           {ERR_WORKER_POOL_CONTEXT_CLOSED, "Worker pool - context was closed: ['message=[%s]']"},
     ERR_WORKER_POOL_STOP_SIGNAL:              {ERR_WORKER_POOL_STOP_SIGNAL, "Worker pool - got stop signal: ['message=[%s]']"},
+    ERR_WORKER_POOL_TASK_ALREADY_LOCKED:      {ERR_WORKER_POOL_TASK_ALREADY_LOCKED, "Worker pool - task already locked for process: ['name=[%s]', 'current_state=[%s]']"},
+    ERR_WORKER_POOL_ALREADY_LOCKED:           {ERR_WORKER_POOL_ALREADY_LOCKED, "Worker pool - already locked for process: ['name=[%s]', 'current_state=[%s]']"},
     ERR_TIMEOUT_ERROR:                        {ERR_TIMEOUT_ERROR, "Time for process exceeded: ['timeout=[%s]', 'mes=[%s]']"},
     ERR_INCORRECT_ARG_NUM_ERROR:              {ERR_INCORRECT_ARG_NUM_ERROR, "Incorrect number of arguments: ['expectedArgsNum=[%v]', 'args=[%s]']"},
     ERR_HTTP_SERVER_SHUTDOWN_ERROR:           {ERR_HTTP_SERVER_SHUTDOWN_ERROR, "Failed to shutdown HTTP server: ['errors=[%s]']"},

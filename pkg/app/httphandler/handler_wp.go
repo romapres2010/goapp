@@ -2,12 +2,10 @@ package httphandler
 
 import (
     "context"
-    "encoding/json"
-    "fmt"
-
-    "net/http"
     "reflect"
-    "time"
+    
+    "encoding/json"
+    "net/http"
 
     _ctx "github.com/romapres2010/goapp/pkg/common/ctx"
     _err "github.com/romapres2010/goapp/pkg/common/error"
@@ -32,7 +30,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
         var err error
         var responseBuf []byte
         var wpFactorialReqResp WpFactorialReqResp
-        var tic = time.Now()
+        //var tic = time.Now()
         var tasks []*_wp.Task
 
         // Считаем параметры из URL query
@@ -47,7 +45,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 
         { // Подготовим список задач для запуска
             for i, value := range wpFactorialReqResp.NumArray {
-                task := _wp.NewTask(ctx, "CalculateRoute", nil, uint64(i), requestID, s.wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+                task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, s.wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
                 tasks = append(tasks, task)
             }
 
@@ -57,7 +55,6 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
                     task.Delete()
                 }
             }()
-
         } // Подготовим список задач для запуска
 
         { // Запускаем обработку
@@ -90,7 +87,7 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
                     }
                 }
 
-                wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
+                // wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
             } else {
                 return nil, nil, http.StatusBadRequest, err
             }
@@ -128,7 +125,7 @@ func calculateFactorialFn(ctx context.Context, data ...interface{}) (error, []in
             // Запускаем расчет
             for i := 1; i <= value; i++ {
                 factVal *= uint64(i)
-                //time.Sleep(time.Millisecond + 10)
+                //time.Sleep(time.Millisecond + 20)
             }
         }
 

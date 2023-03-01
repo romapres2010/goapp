@@ -12,7 +12,7 @@ import (
     _recover "github.com/romapres2010/goapp/pkg/common/recover"
 )
 
-const POOL_DEF_MAX_TIMEOUT = time.Hour * 24
+const POOL_MAX_TIMEOUT = time.Hour * 24 * 365
 
 // PoolState - статусы жизненного цикла pool
 type PoolState int
@@ -59,7 +59,6 @@ type Pool struct {
 
     taskQueueCh   chan *Task // канал очереди задач, ожидающих выполнения
     taskQueueSize int        // размер очереди задач - если 0, то количество ядер х 200
-    //taskPool *TaskPool  // кэширование структур для задач - снижает нагрузку на GC
 
     mx sync.RWMutex
 }
@@ -106,7 +105,6 @@ func NewPool(parentCtx context.Context, externalId uint64, name string, cfg *Con
         workerConcurrency: cfg.WorkerConcurrency,
         taskQueueSize:     cfg.TaskQueueSize,
         workerTimeout:     cfg.WorkerTimeout,
-        //taskPool:          newTaskPool(),
     }
 
     pool.setState(POOL_STATE_NEW)
@@ -117,13 +115,8 @@ func NewPool(parentCtx context.Context, externalId uint64, name string, cfg *Con
     }
 
     if pool.taskQueueSize == 0 {
-        pool.taskQueueSize = pool.workerConcurrency * 100
+        pool.taskQueueSize = pool.workerConcurrency * 10000
         _log.Debug("Set default: ExternalId, PoolName, TaskQueueSize", externalId, pool.name, pool.taskQueueSize)
-    }
-
-    if pool.workerTimeout == 0 {
-        pool.workerTimeout = POOL_DEF_MAX_TIMEOUT
-        _log.Debug("Set default: ExternalId, PoolName, WorkerTimeout", externalId, pool.name, pool.workerTimeout)
     }
 
     return &pool
@@ -145,7 +138,7 @@ func (p *Pool) AddTask(task *Task) (err error) {
     { // Блокируем для проверки статусов
         p.mx.RLock()
 
-        // Добавление зада разрешено только в определенных статусах
+        // Добавление task разрешено только в определенных статусах
         if !(p.state == POOL_STATE_BG_RUNNING || p.state == POOL_STATE_NEW || p.state == POOL_STATE_BG_PAUSED) {
             _log.Info("Pool - has incorrect state to add new task: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
             err = _err.NewTyped(_err.ERR_WORKER_POOL_ADD_TASK_INCORRECT_STATE, p.externalId, p.state, "NEW, RUNNING_BG, PAUSED_BG").PrintfError()

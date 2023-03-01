@@ -18,7 +18,6 @@ const (
     WORKER_STATE_NEW                           WorkerState = iota // worker создан
     WORKER_STATE_WORKING                                          // worker обрабатывает задачу
     WORKER_STATE_IDLE                                             // worker простаивает
-    WORKER_STATE_SHUTTING_DOWN                                    // worker находится в режиме остановки, новые задачи не будут выпоняться
     WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED                    // worker останавливается по причине закрытия родительского контекста
     WORKER_STATE_TERMINATING_STOP_SIGNAL                          // worker останавливается по причине получения сигнала об остановке
     WORKER_STATE_TERMINATING_TASK_CH_CLOSED                       // worker останавливается по причине закрытия канала задач
@@ -91,28 +90,40 @@ func newWorker(parentCtx context.Context, pool *Pool, taskQueueCh <-chan *Task, 
 
 // run - запускает worker
 func (wr *Worker) run(wg *sync.WaitGroup) {
+    if wr == nil {
+        return
+    }
 
-    { // блокируем для проверки и установки статусов
-        wr.mx.Lock()
+    // Worker можно запустить только один раз
+    if wr.mx.TryLock() {
+        defer wr.mx.Unlock()
+    } else {
+        _log.Info("Worker - already locked for run: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
+        err := _err.NewTyped(_err.ERR_WORKER_POOL_ALREADY_LOCKED, wr.externalId, wr.id, wr.state).PrintfError()
 
-        // запускать можно только новый worker или после паники
-        if wr.state == WORKER_STATE_NEW || wr.state == WORKER_STATE_RECOVER_ERR {
-            // worker запущен
-            wr.setStateUnsafe(WORKER_STATE_IDLE)
-            wr.mx.Unlock()
-        } else {
-            _log.Info("Worker - has incorrect state to run: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
-            err := _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, wr.externalId, wr.id, wr.state, "NEW', 'RECOVER_ERR").PrintfError()
-
-            // ошибки отправляем в канал
-            wr.errCh <- &WorkerError{
-                err:    err,
-                worker: wr,
-            }
-            wr.mx.Unlock()
-            return
+        // ошибки отправляем в канал
+        wr.errCh <- &WorkerError{
+            err:    err,
+            worker: wr,
         }
-    } // блокируем для проверки и установки статусов
+        return
+    }
+
+    // запускать можно только новый worker или после паники
+    if wr.state == WORKER_STATE_NEW || wr.state == WORKER_STATE_RECOVER_ERR {
+        // worker запущен
+        wr.setStateUnsafe(WORKER_STATE_IDLE)
+    } else {
+        _log.Info("Worker - has incorrect state to run: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
+        err := _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, wr.externalId, wr.id, wr.state, "NEW', 'RECOVER_ERR").PrintfError()
+
+        // ошибки отправляем в канал
+        wr.errCh <- &WorkerError{
+            err:    err,
+            worker: wr,
+        }
+        return
+    }
 
     _log.Debug("Worker - START: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
 
@@ -129,7 +140,7 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
             _log.Info("Worker - RECOVER FROM PANIC: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
             err := _recover.GetRecoverError(r, wr.externalId)
             if err != nil {
-                wr.setState(WORKER_STATE_RECOVER_ERR)
+                wr.setStateUnsafe(WORKER_STATE_RECOVER_ERR)
                 wr.errCh <- &WorkerError{
                     err:    err,
                     worker: wr,
@@ -148,7 +159,7 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
             wr.cancel()
         }
 
-        wr.setState(WORKER_STATE_TERMINATED)
+        wr.setStateUnsafe(WORKER_STATE_TERMINATED)
     }()
 
     // Ждем задачи из очереди, согнала об остановки или закрытия родительского контекста
@@ -161,19 +172,15 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
                     _metrics.IncWPWorkerProcessCountVec(wr.pool.name)                               // Метрика - количество worker в работе
                     _metrics.SetWPTaskQueueBufferLenVec(wr.pool.name, float64(len(wr.taskQueueCh))) // Метрика - длина необработанной очереди задач
 
-                    wr.mx.Lock()
                     wr.setStateUnsafe(WORKER_STATE_WORKING)
                     wr.taskInProcess = task
-                    wr.mx.Unlock()
 
                     _log.Debug("Worker - start to process task: PoolName, WorkerId, WorkerExternalId, TaskName", wr.pool.name, wr.id, wr.externalId, task.name)
                     // при запуске task передается контекст pool и worker - task отслеживает закрытие обеих контекстов
                     task.process(wr.parentCtx, wr.ctx, wr.id, wr.timeout)
 
-                    wr.mx.Lock()
                     wr.setStateUnsafe(WORKER_STATE_IDLE)
                     wr.taskInProcess = nil
-                    wr.mx.Unlock()
 
                     _metrics.DecWPWorkerProcessCountVec(wr.pool.name)                            // Метрика - количество worker в работе
                     _metrics.IncWPTaskProcessDurationVec(wr.pool.name, task.name, task.duration) // Метрика - время выполнения задачи по имени
@@ -181,22 +188,22 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
                 }
             } else { // канал очереди задач закрыт
                 _log.Debug("Worker - task channel was closed: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
-                wr.setState(WORKER_STATE_TERMINATING_TASK_CH_CLOSED)
+                wr.setStateUnsafe(WORKER_STATE_TERMINATING_TASK_CH_CLOSED)
                 return
             }
         case _, ok := <-wr.stopCh:
             if ok { // канал был открыт и получили команду на остановку
                 _log.Info("Worker - STOP - got quit signal: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
-                wr.setState(WORKER_STATE_TERMINATING_STOP_SIGNAL)
+                wr.setStateUnsafe(WORKER_STATE_TERMINATING_STOP_SIGNAL)
             } else {
                 // Не корректная ситуация с внутренней логикой - логируем для анализа
                 _log.Error("Worker - STOP - stop chanel closed: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
             }
             return
         case <-wr.parentCtx.Done():
-            // закрыт родительский контест
+            // закрыт родительский контекст
             _log.Info("Worker - STOP - got parent context close: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
-            wr.setState(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
+            wr.setStateUnsafe(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
             return
         }
     }
@@ -207,13 +214,9 @@ func (wr *Worker) stop(hardShutdown bool) {
 
     _log.Debug("Worker - STOP: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
 
-    wr.mx.Lock()
-    defer wr.mx.Unlock()
-
     // Останавливать можно только в определенных статусах
     if wr.state == WORKER_STATE_NEW || wr.state == WORKER_STATE_WORKING || wr.state == WORKER_STATE_IDLE {
         _log.Debug("Worker  - send STOP signal: PoolName, WorkerId", wr.pool.name, wr.id)
-        wr.setStateUnsafe(WORKER_STATE_SHUTTING_DOWN)
 
         // Отправляем сигнал и закрываем канал - если worker ни разу не запускался, то wr.stopCh будет nil
         if wr.stopCh != nil {

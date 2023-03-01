@@ -16,15 +16,14 @@ type TaskState int
 
 const (
     TASK_STATE_NEW                          TaskState = iota // task создан
-    TASK_STATE_PROCESS                                       // task выполняется
-    TASK_STATE_DONE                                          // task завершился
+    TASK_STATE_IN_PROCESS                                    // task выполняется
+    TASK_STATE_DONE_SUCCESS                                  // task завершился
     TASK_STATE_RECOVER_ERR                                   // task остановился из-за паники
     TASK_STATE_TERMINATED_STOP_SIGNAL                        // task остановлен по причине получения сигнала об остановке
     TASK_STATE_TERMINATED_PARENT_CTX_CLOSED                  // task остановлен по причине закрытия родительского контекста
     TASK_STATE_TERMINATED_WORKER_CTX_CLOSED                  // task остановлен по причине закрытия worker контекста
     TASK_STATE_TERMINATED_POOL_CTX_CLOSED                    // task остановлен по причине закрытия контекста pool
-    TASK_STATE_TERMINATED_TASK_TIMEOUT                       // task остановлен по причине превышения task timeout
-    TASK_STATE_TERMINATED_WORKER_TIMEOUT                     // task остановлен по причине превышения worker timeout
+    TASK_STATE_TERMINATED_TIMEOUT                            // task остановлен по причине превышения timeout
 )
 
 // Task - содержимое задачи и результаты выполнения
@@ -36,11 +35,14 @@ type Task struct {
     externalId uint64             // внешний идентификатор, в рамках которого работает task
     doneCh     chan<- interface{} // канал сигнала о завершении выполнения задачи
     stopCh     chan interface{}   // канал остановки task, запущенного в фоне
+    //timeoutCh   chan interface{}   // канал остановки task по timeout
+    localDoneCh chan interface{} // локальный канал task о завершении задачи
 
     id      uint64        // номер task
     state   TaskState     // состояние жизненного цикла task
     name    string        // наименование task для логирования
     timeout time.Duration // максимальное время выполнения task
+    timer   *time.Timer   // таймер остановки по timeout
 
     requests  []interface{} // входные данные task
     responses []interface{} // результаты task
@@ -72,7 +74,6 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 
         task.externalId = externalId
         task.doneCh = doneCh
-        task.stopCh = nil
 
         task.id = id
         task.setStateUnsafe(TASK_STATE_NEW)
@@ -86,10 +87,6 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
         task.duration = 0
 
         task.f = f
-
-        if timeout == 0 {
-            task.timeout = POOL_DEF_MAX_TIMEOUT
-        }
     } // установим все значения в начальные значения, после получения из кэша
 
     return task
@@ -166,46 +163,41 @@ func (ts *Task) process(poolCtx context.Context, workerCtx context.Context, work
         return
     }
 
-    { // блокируем для проверки и установки статусов
-        ts.mx.Lock()
+    // Task можно запустить только один раз
+    if ts.mx.TryLock() {
+        defer ts.mx.Unlock()
+    } else {
+        _log.Info("TASK - already locked for process: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+        ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_ALREADY_LOCKED, ts.externalId, ts.name, ts.state).PrintfError()
+        return
+    }
 
-        // запускать можно только новый task, не всегда правильно - создает доп нагрузку на GC
-        if ts.state == TASK_STATE_NEW {
-            ts.setStateUnsafe(TASK_STATE_PROCESS)
-            _log.Debug("START task: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-        } else {
-            _log.Info("TASK - has incorrect state to run: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-            ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
-        }
-
-        ts.mx.Unlock()
-
-        if ts.err != nil {
-            return
-        }
-    } // блокируем для проверки и установки статусов
+    // запускать можно только новый task
+    if ts.state == TASK_STATE_NEW {
+        ts.setStateUnsafe(TASK_STATE_IN_PROCESS)
+        _log.Debug("START task: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+    } else {
+        _log.Info("TASK - has incorrect state to run: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+        ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
+        return
+    }
 
     // Работаем в изолированном от родительского контексте
     ts.ctx, ts.cancel = context.WithCancel(context.Background())
 
-    var tic = time.Now()                        // временная метка начала обработки task
-    var localDoneCh = make(chan interface{}, 1) // Локальный внутренний канал для информирования о завершении task
-    //defer close(localDoneCh) закрывать канал нужно в том месте, где отправляется сигнал
-
-    // канал для информирования task о необходимости срочной остановки
-    ts.stopCh = make(chan interface{}, 1)
-    //defer close(ts.stopCh) закрывать канал нужно в том месте, где отправляется сигнал
+    var tic = time.Now()      // временная метка начала обработки task
+    var timeout time.Duration // предельное время работы task
 
     // информируем о завершении работы и закрываем локальный контекст
     defer func() {
         if r := recover(); r != nil {
             ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
-            ts.setState(TASK_STATE_RECOVER_ERR)
+            ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
         }
 
         // Закрываем локальный контекст task - функция обработчика должна корректно отработать это состояние и выполнить компенсационные воздействия
         if ts.cancel != nil {
-            _log.Debug("Task - DONE - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+            _log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
             ts.cancel()
         }
 
@@ -223,9 +215,8 @@ func (ts *Task) process(poolCtx context.Context, workerCtx context.Context, work
             }
 
             // Отправляем сигнал и закрываем канал, task не контролирует, успешно или нет завершился обработчик
-            if localDoneCh != nil {
-                localDoneCh <- struct{}{}
-                close(localDoneCh)
+            if ts.localDoneCh != nil {
+                ts.localDoneCh <- struct{}{}
             }
         }()
 
@@ -235,30 +226,44 @@ func (ts *Task) process(poolCtx context.Context, workerCtx context.Context, work
         }
     }()
 
-    // максимальное время ожидания, задается на уровне worker
-    if workerTimeout == 0 {
-        workerTimeout = POOL_DEF_MAX_TIMEOUT
+    { // определим, нужно ли контролировать timeout
+        // наименьший из workerTimeout и ts.timeout
+        if workerTimeout < ts.timeout {
+            timeout = workerTimeout
+        } else {
+            timeout = ts.timeout
+        }
+
+        if timeout > 0 {
+            // Переставим таймер на новое значение, сбрасывать канал не требуется, так как он не сработал
+            ts.timer.Stop()
+            ts.timer.Reset(timeout)
+        }
     }
 
     // Ожидаем завершения обработки, либо таймаутов задачи, worker или закрытия контекста
     select {
-    case <-localDoneCh:
+    case <-ts.localDoneCh:
         ts.duration = time.Now().Sub(tic)
-        ts.setState(TASK_STATE_DONE)
-    case <-time.After(ts.timeout):
-        _log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
-        ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
-        ts.setState(TASK_STATE_TERMINATED_TASK_TIMEOUT)
-    case <-time.After(workerTimeout):
-        _log.Info("Task - INTERRUPT - exceeded WorkerTimeout: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
-        ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, workerTimeout).PrintfError()
-        ts.setState(TASK_STATE_TERMINATED_WORKER_TIMEOUT)
+        ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
+        ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
+        _log.Debug("Task - DONE: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+    case <-ts.timer.C:
+        _log.Info("Task - INTERRUPT - exceeded Timeout: WorkerId, TaskExternalId, TaskName, Timeout", workerID, ts.externalId, ts.name, timeout)
+        ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.id, timeout).PrintfError()
+        ts.setStateUnsafe(TASK_STATE_TERMINATED_TIMEOUT)
+    // !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
+    //case <-time.After(ts.timeout):
+    //    _log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
+    //    ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
+    //    ts.setState(TASK_STATE_TERMINATED_TIMEOUT)
+    // !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
     case _, ok := <-ts.stopCh:
         if ok {
             // канал был открыт и получили команду на остановку
             _log.Debug("Task - INTERRUPT - got stop signal: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
             ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_STOP_SIGNAL, ts.externalId, fmt.Sprintf("[WorkerId='%v', TaskExternalId='%v', TaskName='%v', WorkerTimeout='%v']", workerID, ts.externalId, ts.name, workerTimeout))
-            ts.setState(TASK_STATE_TERMINATED_STOP_SIGNAL)
+            ts.setStateUnsafe(TASK_STATE_TERMINATED_STOP_SIGNAL)
         } else {
             // Не корректная ситуация с внутренней логикой - логируем для анализа
             _log.Error("Task - INTERRUPT - stop chanel closed: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
@@ -266,26 +271,23 @@ func (ts *Task) process(poolCtx context.Context, workerCtx context.Context, work
     case <-ts.parentCtx.Done():
         _log.Info("Task - STOP - got Parent context close: WorkerId, TaskExternalId", workerID, ts.externalId)
         ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got Parent context close")
-        ts.setState(TASK_STATE_TERMINATED_PARENT_CTX_CLOSED)
+        ts.setStateUnsafe(TASK_STATE_TERMINATED_PARENT_CTX_CLOSED)
     case <-workerCtx.Done():
         _log.Info("Task - STOP - got WORKER context close: WorkerId, TaskExternalId", workerID, ts.externalId)
         ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got WORKER context close")
-        ts.setState(TASK_STATE_TERMINATED_WORKER_CTX_CLOSED)
+        ts.setStateUnsafe(TASK_STATE_TERMINATED_WORKER_CTX_CLOSED)
     case <-poolCtx.Done():
         _log.Info("Task - STOP - got POOL context close: WorkerId, TaskExternalId", workerID, ts.externalId)
         ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got POOL context close")
-        ts.setState(TASK_STATE_TERMINATED_POOL_CTX_CLOSED)
+        ts.setStateUnsafe(TASK_STATE_TERMINATED_POOL_CTX_CLOSED)
     }
 }
 
 // Stop - принудительная остановка task
 func (ts *Task) Stop() {
 
-    ts.mx.Lock()
-    defer ts.mx.Unlock()
-
     // Останавливать можно только в определенных статусах
-    if ts.state == TASK_STATE_NEW || ts.state == TASK_STATE_PROCESS || ts.state == TASK_STATE_DONE {
+    if ts.state == TASK_STATE_NEW || ts.state == TASK_STATE_IN_PROCESS || ts.state == TASK_STATE_DONE_SUCCESS {
         _log.Debug("TASK  - send STOP signal: TaskExternalId, TaskName", ts.externalId, ts.name)
         // Отправляем сигнал и закрываем канал - если task ни разу не запускался, то ts.stopCh будет nil
         if ts.stopCh != nil {
