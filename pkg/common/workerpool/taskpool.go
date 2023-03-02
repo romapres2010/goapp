@@ -1,6 +1,7 @@
 package workerpool
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -30,8 +31,9 @@ func newTaskPool() *TaskPool {
 				task := new(Task)
 				task.stopCh = make(chan interface{}, 1)
 				task.localDoneCh = make(chan interface{}, 1)
-				task.timer = time.NewTimer(POOL_MAX_TIMEOUT) // новый таймер - начально максимальное время ожидания
-				task.timer.Stop()                            // остановим таймер, сбрасывать канал не требуется, так как он не сработал
+				task.timer = time.NewTimer(POOL_MAX_TIMEOUT)                     // новый таймер - начально максимальное время ожидания
+				task.timer.Stop()                                                // остановим таймер, сбрасывать канал не требуется, так как он не сработал
+				task.ctx, task.cancel = context.WithCancel(context.Background()) // создаем локальный контекст с отменой
 				return task
 			},
 		},

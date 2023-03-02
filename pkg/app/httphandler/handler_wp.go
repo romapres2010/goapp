@@ -125,7 +125,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 }
 
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
-func calculateFactorialFn(ctx context.Context, data ...interface{}) (error, []interface{}) {
+func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
 	var factVal uint64 = 1
 	var cnt uint64 = 1
 	var value uint64

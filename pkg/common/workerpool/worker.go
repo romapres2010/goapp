@@ -175,8 +175,7 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 					wr.taskInProcess = task
 
 					//_log.Debug("Worker - start to process task: PoolName, WorkerId, WorkerExternalId, TaskName", wr.pool.name, wr.id, wr.externalId, task.name)
-					// при запуске task передается контекст pool и worker - task отслеживает закрытие обеих контекстов
-					task.process(wr.parentCtx, wr.ctx, wr.id, wr.timeout)
+					task.process(wr.id, wr.timeout)
 
 					wr.setStateUnsafe(WORKER_STATE_IDLE)
 					wr.taskInProcess = nil
@@ -199,11 +198,11 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 				//_log.Error("Worker - STOP - stop chanel closed: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
 			}
 			return
-			//case <-wr.parentCtx.Done():
-			//	// закрыт родительский контекст
-			//	//_log.Info("Worker - STOP - got parent context close: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
-			//	wr.setStateUnsafe(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
-			//	return
+		case <-wr.parentCtx.Done():
+			// закрыт родительский контекст
+			//_log.Info("Worker - STOP - got parent context close: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
+			wr.setStateUnsafe(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
+			return
 		}
 	}
 }
