@@ -1,0 +1,47 @@
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+
+
+Server Software:        
+Server Hostname:        127.0.0.1
+Server Port:            3001
+
+Document Path:          /app/system/wp_factorial?wp_tipe=bg
+Document Length:        Variable
+
+Concurrency Level:      32
+Time taken for tests:   64.742 seconds
+Complete requests:      1000000
+Failed requests:        0
+Non-2xx responses:      17
+Keep-Alive requests:    1000000
+Total transferred:      258017205 bytes
+Total body sent:        393000000
+HTML transferred:       91003206 bytes
+Requests per second:    15445.90 [#/sec] (mean)
+Time per request:       2.072 [ms] (mean)
+Time per request:       0.065 [ms] (mean, across all concurrent requests)
+Transfer rate:          3891.90 [Kbytes/sec] received
+                        5927.97 kb/s sent
+                        9819.87 kb/s total
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.0      0       4
+Processing:     0    2   2.0      2     286
+Waiting:        0    2   2.0      2     285
+Total:          0    2   2.0      2     286
+
+Percentage of the requests served within a certain time (ms)
+  50%      2
+  66%      2
+  75%      3
+  80%      3
+  90%      4
+  95%      5
+  98%      8
+  99%      9
+ 100%    286 (longest request)
