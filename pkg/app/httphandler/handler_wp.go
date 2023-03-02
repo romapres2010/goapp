@@ -1,137 +1,151 @@
 package httphandler
 
 import (
-    "context"
-    "fmt"
-    "reflect"
-    "time"
+	"context"
+	"encoding/json"
+	_wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
+	"net/http"
+	"reflect"
 
-    "encoding/json"
-    "net/http"
-
-    _ctx "github.com/romapres2010/goapp/pkg/common/ctx"
-    _err "github.com/romapres2010/goapp/pkg/common/error"
-    _http "github.com/romapres2010/goapp/pkg/common/httpservice"
-    _log "github.com/romapres2010/goapp/pkg/common/logger"
-    _wp "github.com/romapres2010/goapp/pkg/common/workerpool"
+	_ctx "github.com/romapres2010/goapp/pkg/common/ctx"
+	_err "github.com/romapres2010/goapp/pkg/common/error"
+	_http "github.com/romapres2010/goapp/pkg/common/httpservice"
+	_wp "github.com/romapres2010/goapp/pkg/common/workerpool"
 )
 
 type WpFactorialReqResp struct {
-    NumArray     []int  `json:"num_array,omitempty"`
-    SumFactorial uint64 `json:"sum_factorial,omitempty"`
-    Duration     string `json:"duration,omitempty"`
+	NumArray     []uint64 `json:"num_array,omitempty"`
+	SumFactorial uint64   `json:"sum_factorial,omitempty"`
+	Duration     string   `json:"duration,omitempty"`
 }
 
 // WpHandlerFactorial handle worker pool
 func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
-    _log.Debug("START   ==================================================================================")
+	//_log.Debug("START   ==================================================================================")
 
-    // Запускаем обработчик, возврат ошибки игнорируем
-    _ = s.httpService.Process(true, "POST", w, r, func(ctx context.Context, requestBuf []byte, buf []byte) ([]byte, _http.Header, int, error) {
-        var requestID = _ctx.FromContextHTTPRequestID(ctx) // RequestID передается через context
-        var err error
-        var responseBuf []byte
-        var wpFactorialReqResp WpFactorialReqResp
-        var tic = time.Now()
-        var tasks []*_wp.Task
+	// Запускаем обработчик, возврат ошибки игнорируем
+	_ = s.httpService.Process(true, "POST", w, r, func(ctx context.Context, requestBuf []byte, buf []byte) ([]byte, _http.Header, int, error) {
+		var requestID = _ctx.FromContextHTTPRequestID(ctx) // RequestID передается через context
+		var err error
+		var responseBuf []byte
+		var wpFactorialReqResp WpFactorialReqResp
 
-        // Считаем параметры из URL query
-        wpTipe := r.URL.Query().Get("wp_tipe")
+		// Считаем параметры из URL query
+		wpTipe := r.URL.Query().Get("wp_tipe")
 
-        _log.Debug("START: requestID", requestID)
+		//_log.Debug("START: requestID", requestID)
 
-        if err = json.Unmarshal(requestBuf, &wpFactorialReqResp); err != nil {
-            err = _err.WithCauseTyped(_err.ERR_JSON_UNMARSHAL_ERROR, requestID, err).PrintfError()
-            return nil, nil, http.StatusBadRequest, err
-        }
+		if err = json.Unmarshal(requestBuf, &wpFactorialReqResp); err != nil {
+			err = _err.WithCauseTyped(_err.ERR_JSON_UNMARSHAL_ERROR, requestID, err).PrintfError()
+			return nil, nil, http.StatusBadRequest, err
+		}
 
-        { // Подготовим список задач для запуска
-            for i, value := range wpFactorialReqResp.NumArray {
-                task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, s.wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
-                tasks = append(tasks, task)
-            }
+		// Запускаем обработку
+		err = calculateFactorial(ctx, s.wpService, requestID, &wpFactorialReqResp, wpTipe)
+		if err != nil {
+			return nil, nil, http.StatusBadRequest, err
+		}
 
-            // в конце обработки отправить task в кэш для повторного использования
-            defer func() {
-                for _, task := range tasks {
-                    task.Delete()
-                }
-            }()
-        } // Подготовим список задач для запуска
+		if responseBuf, err = json.Marshal(wpFactorialReqResp); err != nil {
+			err = _err.WithCauseTyped(_err.ERR_JSON_MARSHAL_ERROR, requestID, err).PrintfError()
+			return nil, nil, http.StatusBadRequest, err
+		}
 
-        { // Запускаем обработку
-            if wpTipe == "bg" {
-                // Запускаем обработку в общий background pool
-                _log.Debug("Start with global worker pool: requestID", requestID)
-                err = s.wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
-            } else {
-                // Запускаем обработку в локальный пул обработчиков
-                _log.Debug("Start with local worker pool: calcId", requestID)
-                pool := _wp.NewPool(ctx, requestID, "Calculate - online", s.wpService.GetWPConfig())
-                err = pool.RunOnline(requestID, tasks, s.wpService.GetWPConfig().TaskTimeout)
-            }
+		// формируем ответ
+		header := _http.Header{}
+		header[_http.HEADER_CONTENT_TYPE] = _http.HEADER_CONTENT_TYPE_JSON_UTF8
+		header[_http.HEADER_CUSTOM_ERR_CODE] = _http.HEADER_CUSTOM_ERR_CODE_SUCCESS
 
-            if err == nil {
-                // Суммируем все результаты
-                for _, task := range tasks {
-                    if task.GetError() == nil {
-                        result := task.GetResponses()[0] // ожидаем только один ответ
+		//_log.Debug("SUCCESS", requestID)
 
-                        // Приведем к нужному типу
-                        if factorial, ok := result.(uint64); ok {
-                            wpFactorialReqResp.SumFactorial += factorial
-                        } else {
-                            err = _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "WpHandlerFactorial", "0 - uint", reflect.ValueOf(factorial).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError()
-                            return nil, nil, http.StatusBadRequest, err
-                        }
-                    } else {
-                        return nil, nil, http.StatusBadRequest, task.GetError()
-                    }
-                }
+		return responseBuf, header, http.StatusOK, nil
+	})
 
-                wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
-            } else {
-                return nil, nil, http.StatusBadRequest, err
-            }
-        } // Запускаем обработку
+	//_log.Debug("SUCCESS ==================================================================================")
+}
 
-        if responseBuf, err = json.Marshal(wpFactorialReqResp); err != nil {
-            err = _err.WithCauseTyped(_err.ERR_JSON_MARSHAL_ERROR, requestID, err).PrintfError()
-            return nil, nil, http.StatusBadRequest, err
-        }
+// calculateFactorial функция запуска расчета Factorial
+func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string) (err error) {
 
-        // формируем ответ
-        header := _http.Header{}
-        header[_http.HEADER_CONTENT_TYPE] = _http.HEADER_CONTENT_TYPE_JSON_UTF8
-        header[_http.HEADER_CUSTOM_ERR_CODE] = _http.HEADER_CUSTOM_ERR_CODE_SUCCESS
+	//var tic = time.Now()
+	var tasks = make([]*_wp.Task, 0, len(wpFactorialReqResp.NumArray))
 
-        _log.Debug("SUCCESS", requestID)
+	// Подготовим список задач для запуска
+	for i, value := range wpFactorialReqResp.NumArray {
+		task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+		tasks = append(tasks, task)
+	}
 
-        return responseBuf, header, http.StatusOK, nil
-    })
+	// в конце обработки отправить task в кэш для повторного использования
+	defer func() {
+		for _, task := range tasks {
+			task.Delete()
+		}
+	}()
 
-    _log.Debug("SUCCESS ==================================================================================")
+	{ // Запускаем обработку
+		if wpTipe == "bg" {
+			// Запускаем обработку в общий background pool
+			//_log.Debug("Start with global worker pool: requestID", requestID)
+			err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
+		} else {
+			// Запускаем обработку в локальный пул обработчиков
+			var pool *_wp.Pool
+			//_log.Debug("Start with local worker pool: calcId", requestID)
+			pool, err = _wp.NewPool(ctx, requestID, "Calculate - online", wpService.GetWPConfig())
+			if err == nil {
+				err = pool.RunOnline(requestID, tasks, wpService.GetWPConfig().TaskTimeout)
+			}
+		}
+
+		if err == nil {
+			// Суммируем все результаты
+			for _, task := range tasks {
+				if task.GetError() == nil {
+					result := task.GetResponses()[0] // ожидаем только один ответ
+
+					// Приведем к нужному типу
+					if factorial, ok := result.(uint64); ok {
+						wpFactorialReqResp.SumFactorial += factorial
+					} else {
+						return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "WpHandlerFactorial", "0 - uint", reflect.ValueOf(factorial).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError()
+					}
+				} else {
+					return task.GetError()
+				}
+			}
+
+			//wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
+		} else {
+			return err
+		}
+	} // Запускаем обработку
+
+	return err
 }
 
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
 func calculateFactorialFn(ctx context.Context, data ...interface{}) (error, []interface{}) {
-    var factVal uint64 = 1
+	var factVal uint64 = 1
+	var cnt uint64 = 1
+	var value uint64
+	var ok bool
 
-    if len(data) == 1 {
+	if len(data) == 1 {
 
-        // проверяем тип входных параметров
-        if value, ok := data[0].(int); !ok {
-            return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "CalculateFactorialFn", "0 - int", reflect.ValueOf(data[0]).Type().String(), reflect.ValueOf(1).Type().String()).PrintfError(), nil
-        } else {
+		// проверяем тип входных параметров
+		if value, ok = data[0].(uint64); !ok {
+			return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "CalculateFactorialFn", "0 - uint64", reflect.ValueOf(data[0]).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError(), nil
+		} else {
 
-            // Запускаем расчет
-            for i := 1; i <= value; i++ {
-                factVal *= uint64(i)
-                //time.Sleep(time.Millisecond + 20)
-            }
-        }
+			// Запускаем расчет
+			for cnt = 1; cnt <= value; cnt++ {
+				factVal *= cnt
+				//time.Sleep(time.Millisecond * 20)
+			}
+		}
 
-        return nil, []interface{}{factVal} // ошибки расчета транслируем на уровень выше
-    }
-    return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
+		return nil, []interface{}{factVal} // ошибки расчета транслируем на уровень выше
+	}
+	return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
 }

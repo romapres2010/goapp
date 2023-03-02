@@ -154,9 +154,9 @@ worker_pool_service:
     shutdown_timeout: 30s                   # максимальное время остановки pool
     worker_pool:			                # конфигурация пула обработчиков
         task_queue_size: 0			        # размер очереди - если 0, то количество ядер х 10000
-        task_timeout: 10ms                  # максимальное время обработки одного task
+        task_timeout: 20ms                  # максимальное время обработки одного task
         worker_concurrency: 8               # уровень параллелизма для запускай нескольких расчетов - если 0, то количество ядер х2
-        worker_timeout: 20ms                # максимальное время обработки для одного обработчика
+        worker_timeout: 30ms                # максимальное время обработки для одного обработчика
 
 # конфигурация сбора метрик
 metrics:
@@ -171,7 +171,7 @@ metrics:
     collect_http_requests_duration: true
     collect_http_client_call_count_vec: true
     collect_http_client_call_duration_vec: true
-    collect_wp_task_queue_buffer_len_vec: true
-    collect_wp_add_task_wait_count_vec: true
-    collect_wp_worker_process_count_vec: true
-    collect_wp_task_process_duration_ms_by_name: true
+    collect_wp_task_queue_buffer_len_vec: false
+    collect_wp_add_task_wait_count_vec: false
+    collect_wp_worker_process_count_vec: false
+    collect_wp_task_process_duration_ms_by_name: false

@@ -13,11 +13,11 @@ import (
 
 	//"crypto/go.cypherpunks.ru/gogost/v5/gost3410"
 
-    _err "github.com/romapres2010/goapp/pkg/common/error"
-    _http "github.com/romapres2010/goapp/pkg/common/httpservice"
-    _log "github.com/romapres2010/goapp/pkg/common/logger"
-    _metrics "github.com/romapres2010/goapp/pkg/common/metrics"
-    _recover "github.com/romapres2010/goapp/pkg/common/recover"
+	_err "github.com/romapres2010/goapp/pkg/common/error"
+	_http "github.com/romapres2010/goapp/pkg/common/httpservice"
+	_log "github.com/romapres2010/goapp/pkg/common/logger"
+	_metrics "github.com/romapres2010/goapp/pkg/common/metrics"
+	_recover "github.com/romapres2010/goapp/pkg/common/recover"
 )
 
 // Server represent HTTP server
@@ -174,7 +174,7 @@ func New(ctx context.Context, errCh chan<- error, cfg *Config, httpService *_htt
 
 		// Expose the registered _metrics via HTTP.
 		server.router.Handle("/metrics", promhttp.HandlerFor(
-			_metrics.GlobalMetrics.Registry,
+			_metrics.GlobalMetrics().Registry,
 			promhttp.HandlerOpts{
 				// Opt into OpenMetrics to support exemplars.
 				EnableOpenMetrics: true,
