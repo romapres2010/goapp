@@ -9,38 +9,38 @@ Server Software:
 Server Hostname:        127.0.0.1
 Server Port:            3001
 
-Document Path:          /app/system/wp_factorial?wp_tipe=bg
+Document Path:          /app/system/wp_factorial?wp_tipe=online
 Document Length:        Variable
 
 Concurrency Level:      1
-Time taken for tests:   13.865 seconds
+Time taken for tests:   11.322 seconds
 Complete requests:      100000
 Failed requests:        0
 Keep-Alive requests:    100000
 Total transferred:      25800000 bytes
-Total body sent:        39300000
+Total body sent:        39700000
 HTML transferred:       9100000 bytes
-Requests per second:    7212.56 [#/sec] (mean)
-Time per request:       0.139 [ms] (mean)
-Time per request:       0.139 [ms] (mean, across all concurrent requests)
-Transfer rate:          1817.23 [Kbytes/sec] received
-                        2768.10 kb/s sent
-                        4585.33 kb/s total
+Requests per second:    8832.48 [#/sec] (mean)
+Time per request:       0.113 [ms] (mean)
+Time per request:       0.113 [ms] (mean, across all concurrent requests)
+Transfer rate:          2225.37 [Kbytes/sec] received
+                        3424.31 kb/s sent
+                        5649.68 kb/s total
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.0      0       1
-Processing:     0    0   1.0      0      10
-Waiting:        0    0   0.9      0      10
-Total:          0    0   1.0      0      10
+Connect:        0    0   0.0      0      10
+Processing:     0    0   0.5      0      11
+Waiting:        0    0   0.4      0      11
+Total:          0    0   0.5      0      11
 
 Percentage of the requests served within a certain time (ms)
   50%      0
   66%      0
   75%      0
   80%      0
-  90%      0
+  90%      1
   95%      1
   98%      1
-  99%      3
- 100%     10 (longest request)
+  99%      1
+ 100%     11 (longest request)

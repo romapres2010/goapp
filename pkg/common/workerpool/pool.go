@@ -480,7 +480,7 @@ func (p *Pool) stopWorkersUnsafe(hardShutdown bool, shutdownTimeout time.Duratio
 
 		// Проверим все worker, кто еще не остановился
 		for _, worker := range p.workers {
-			if worker.GetState() != WORKER_STATE_TERMINATED {
+			if worker.state != WORKER_STATE_TERMINATED {
 				//_log.Debug("Pool - WORKER STILL WORKING: ExternalId, PoolName, WorkerId, ActiveTaskCount, State", p.externalId, p.name, worker.id, len(p.taskQueueCh), p.state)
 				anyNonStoppedWorker = true // Есть хоть один не остановленный
 				break

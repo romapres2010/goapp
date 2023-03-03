@@ -14,9 +14,9 @@ import (
 )
 
 type WpFactorialReqResp struct {
-	NumArray     []uint64 `json:"num_array,omitempty"`
-	SumFactorial uint64   `json:"sum_factorial,omitempty"`
-	Duration     string   `json:"duration,omitempty"`
+	NumArray     *[]uint64 `json:"num_array,omitempty"`
+	SumFactorial uint64    `json:"sum_factorial,omitempty"`
+	Duration     string    `json:"duration,omitempty"`
 }
 
 // WpHandlerFactorial handle worker pool
@@ -66,38 +66,30 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 
 // calculateFactorial функция запуска расчета Factorial
 func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string) (err error) {
+	if wpTipe == "bg" {
 
-	//var tic = time.Now()
-	var tasks = make([]*_wp.Task, 0, len(wpFactorialReqResp.NumArray))
+		//var tic = time.Now()
+		var tasks = make([]*_wp.Task, 0, len(*wpFactorialReqResp.NumArray))
 
-	// Подготовим список задач для запуска
-	for i, value := range wpFactorialReqResp.NumArray {
-		task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
-		tasks = append(tasks, task)
-	}
-
-	// в конце обработки отправить task в кэш для повторного использования
-	defer func() {
-		for _, task := range tasks {
-			task.Delete()
+		// Подготовим список задач для запуска
+		for i, value := range *wpFactorialReqResp.NumArray {
+			task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+			tasks = append(tasks, task)
 		}
-	}()
 
-	{ // Запускаем обработку
-		if wpTipe == "bg" {
-			// Запускаем обработку в общий background pool
-			//_log.Debug("Start with global worker pool: requestID", requestID)
-			err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
-		} else {
-			// Запускаем обработку в локальный пул обработчиков
-			var pool *_wp.Pool
-			//_log.Debug("Start with local worker pool: calcId", requestID)
-			pool, err = _wp.NewPool(ctx, requestID, "Calculate - online", wpService.GetWPConfig())
-			if err == nil {
-				err = pool.RunOnline(requestID, tasks, wpService.GetWPConfig().TaskTimeout)
+		// в конце обработки отправить task в кэш для повторного использования
+		defer func() {
+			for _, task := range tasks {
+				task.Delete()
 			}
-		}
+		}()
 
+		// Запускаем обработку в общий background pool
+		//_log.Debug("Start with global worker pool: requestID", requestID)
+		err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
+
+		//return nil
+		// Анализ результатов
 		if err == nil {
 			// Суммируем все результаты
 			for _, task := range tasks {
@@ -119,13 +111,17 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		} else {
 			return err
 		}
-	} // Запускаем обработку
+	} else {
+		calculateFactorialOnline(wpFactorialReqResp)
+		return nil
+	}
 
 	return err
 }
 
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
 func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
+	//return nil, nil
 	var factVal uint64 = 1
 	var cnt uint64 = 1
 	var value uint64
@@ -148,4 +144,19 @@ func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data .
 		return nil, []interface{}{factVal} // ошибки расчета транслируем на уровень выше
 	}
 	return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
+}
+
+// calculateFactorialOnline функция запуска расчета Factorial в цикле
+func calculateFactorialOnline(wpFactorialReqResp *WpFactorialReqResp) {
+	var factValSum uint64
+	var factVal uint64 = 1
+	var cnt uint64 = 1
+
+	for _, value := range *wpFactorialReqResp.NumArray {
+		for cnt = 1; cnt <= value; cnt++ {
+			factVal *= cnt
+		}
+		factValSum += factVal
+	}
+	wpFactorialReqResp.SumFactorial = factValSum
 }
