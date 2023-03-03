@@ -30,7 +30,7 @@ type Config struct {
 }
 
 // New - create WorkerPool service
-func New(ctx context.Context, name string, errCh chan<- error, cfg *Config) (*Service, error) {
+func New(parentCtx context.Context, name string, errCh chan<- error, cfg *Config) (*Service, error) {
 	var externalId = _err.ERR_UNDEFINED_ID
 	var err error
 
@@ -51,15 +51,15 @@ func New(ctx context.Context, name string, errCh chan<- error, cfg *Config) (*Se
 	}
 
 	// создаем контекст с отменой
-	if ctx == nil {
+	if parentCtx == nil {
 		service.ctx, service.cancel = context.WithCancel(context.Background())
 	} else {
-		service.ctx, service.cancel = context.WithCancel(ctx)
+		service.ctx, service.cancel = context.WithCancel(parentCtx)
 	}
 
 	//_log.Info("Create worker pool: WorkerPoolName, WorkerConcurrency", service.name, service.cfg.WPCfg.WorkerConcurrency)
 
-	service.pool, err = _wp.NewPool(ctx, externalId, service.name, &service.cfg.WPCfg)
+	service.pool, err = _wp.NewPool(parentCtx, externalId, service.name, &service.cfg.WPCfg)
 	if err != nil {
 		return nil, err
 	}

@@ -85,6 +85,14 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 		task.f = f
 	} // установим все значения в начальные значения, после получения из кэша
 
+	// !!! Не желательно создавать контест от родительского - это приводит к созданию нового канала для контроля отмены родительского контекста
+	//if parentCtx == nil {
+	//    task.ctx, task.cancel = context.WithCancel(context.Background())
+	//} else {
+	//    task.ctx, task.cancel = context.WithCancel(parentCtx)
+	//}
+	// !!! Не желательно создавать контест от родительского - это приводит к созданию нового канала для контроля отмены родительского контекста
+
 	return task
 }
 
@@ -266,14 +274,22 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 
 		// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
 		//case <-time.After(ts.timeout):
-		//    //_log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
-		//    ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
-		//    ts.setState(TASK_STATE_TERMINATED_TIMEOUT)
-		//    return
+		//	//_log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
+		//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
+		//	ts.setState(TASK_STATE_TERMINATED_TIMEOUT)
+		//	return
 		// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
 
 		// !!! Контроль за контекстом приводит к необходимости блокировки родительского канала контекста - дорогая операция
 		//case <-ts.parentCtx.Done():
+		//	//_log.Info("Task - STOP - got context close: WorkerId, TaskExternalId", workerID, ts.externalId)
+		//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got context close")
+		//	ts.setStateUnsafe(TASK_STATE_TERMINATED_PARENT_CTX_CLOSED)
+		//	return
+		// !!! Контроль за контекстом приводит к необходимости блокировки родительского канала контекста - дорогая операция
+
+		// !!! Контроль за контекстом приводит к необходимости блокировки родительского канала контекста - дорогая операция
+		//case <-ts.ctx.Done():
 		//	//_log.Info("Task - STOP - got context close: WorkerId, TaskExternalId", workerID, ts.externalId)
 		//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got context close")
 		//	ts.setStateUnsafe(TASK_STATE_TERMINATED_PARENT_CTX_CLOSED)
