@@ -61,7 +61,6 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		//b.StopTimer()
 		wpFactorialReqResp := &WpFactorialReqResp{
 			//NumArray: NumArray1,
 			//NumArray: NumArray10,
@@ -70,7 +69,6 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 			//NumArray: NumArray2048,
 			NumArray: NumArray4096,
 		}
-		//b.StartTimer()
 		_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg")
 		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "online")
 	}

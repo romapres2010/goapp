@@ -24,7 +24,7 @@
 
 Правильный вариант решения такой проблемы - это разнесение разных типов задач на разные микросервисы. Но вместе с этим, пришлось серьезно перепроектировать Worker pool.
 
-Представленный в шаблоне Worker pool реализует следующую функциональность:
+Представленный в шаблоне Worker pool дополнительно реализует следующую функциональность:
 - Возможность экстренной остановки Worker pool в целом 
   - явно по команде остановки
   - автоматически по закрытию корневого контекста
@@ -38,7 +38,7 @@
 - Автоматический перезапуск сбойного worker
 - Сбор метрик [prometheus](https://prometheus.io/) по загрузке worker, очереди задач и производительности выполнения по типам task
 - Возможность управления группами task в рамках единого Worker pool
-- Накладные расходы Worker pool для одной task 500-900 ns/op 60 B/op 2 allocs/op
+- Накладные расходы Worker pool для одной task 500-900 ns/op, от60 B/op, от 2 allocs/op
 
 Ссылка на [репозиторий проекта](https://github.com/romapres2010/goapp).
 
@@ -46,12 +46,74 @@
 
 ## Содержание
 1. Архитектура Worker pool
-2. 
-3. Оптимизация накладных расходов Worker pool
-4. Нагрузочное тестирование
+2. Подходы к остановке приложения (микросервиса)
+3. Структура Task
+4. Настройка Worker pool через конфиг
+5. Оптимизация накладных расходов Worker pool
+6. Пример использования Worker pool
+7. Нагрузочное тестирование Worker pool
  
 <cut />
 
 ## . Архитектура Worker pool
 В основе лежит концепция из статьи [Ahad Hasan](https://hackernoon.com/concurrency-in-golang-and-workerpool-part-2-l3w31q7). 
 
+## . Подходы к остановке приложения (микросервиса) 
+
+## . Структура Task
+
+[Task](https://github.com/romapres2010/goapp/blob/master/pkg/common/workerpool/task.go) - содержит входные параметры задачи, функцию обработчик, результаты выполнения, каналы для управления и таймер для контроля timeout.
+
+Основные задачи Task:
+- Запустить функцию-обработчик и передать ей входные данные
+- Контролировать результат выполнения функции-обработчика
+- Информировать "внешний мир" о завершении выполнения функции-обработчика
+- Контролировать время выполнения функции-обработчика по timeout, при необходимости прервать выполнение
+- Перехватить panic от функции-обработчика и обработать ошибку
+- Контролировать команду на остановку со стороны Worker pool
+- Информировать функцию-обработчика о необходимости срочной остановки
+
+``` go
+type Task struct {
+	parentCtx context.Context    // родительский контекст, переданный при создании task
+	ctx       context.Context    // контекст, в рамках которого работает task
+	cancel    context.CancelFunc // функция закрытия контекста для task
+
+	externalId  uint64             // внешний идентификатор, в рамках которого работает task
+	doneCh      chan<- interface{} // канал сигнала о завершении выполнения задачи
+	stopCh      chan interface{}   // канал остановки task, запущенного в фоне
+	localDoneCh chan interface{}   // локальный канал task о завершении задачи
+
+	id      uint64        // номер task
+	state   TaskState     // состояние жизненного цикла task
+	name    string        // наименование task для логирования
+	timeout time.Duration // максимальное время выполнения task
+	timer   *time.Timer   // таймер остановки по timeout
+
+	requests  []interface{} // входные данные task
+	responses []interface{} // результаты task
+	err       error         // ошибки task
+
+	duration time.Duration // реальная длительность выполнения task
+
+	f func(context.Context, context.Context, ...interface{}) (error, []interface{}) // функция обработчик task
+
+	mx sync.RWMutex
+}
+}
+```
+
+Task управляется следующей статусной моделью.
+``` go
+type TaskState int
+
+const (
+	TASK_STATE_NEW                    TaskState = iota // task создан
+	TASK_STATE_IN_PROCESS                              // task выполняется
+	TASK_STATE_DONE_SUCCESS                            // task завершился
+	TASK_STATE_RECOVER_ERR                             // task остановился из-за паники
+	TASK_STATE_TERMINATED_STOP_SIGNAL                  // task остановлен по причине получения сигнала об остановке
+	TASK_STATE_TERMINATED_CTX_CLOSED                   // task остановлен по причине закрытия контекста
+	TASK_STATE_TERMINATED_TIMEOUT                      // task остановлен по причине превышения timeout
+)
+```

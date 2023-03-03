@@ -53,8 +53,10 @@ func (p *TaskPool) putTask(task *Task) {
 	// Если task не был успешно завершен, то в нем могли быть закрыты каналы или сработал таймер - такие не подходят для повторного использования
 	if task.state == TASK_STATE_NEW || task.state == TASK_STATE_DONE_SUCCESS {
 		atomic.AddUint64(&countPut, 1)
-		task.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как при TASK_STATE_DONE_SUCCESS он не сработал
-		p.pool.Put(task)
+		task.timer.Stop()    // остановим таймер, сбрасывать канал не требуется, так как при TASK_STATE_DONE_SUCCESS он не сработал
+		task.requests = nil  // обнулить указатель, чтобы освободить для GC
+		task.responses = nil // обнулить указатель, чтобы освободить для GC
+		p.pool.Put(task)     // отправить в pool
 	}
 }
 

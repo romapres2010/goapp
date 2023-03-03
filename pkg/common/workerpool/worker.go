@@ -29,8 +29,6 @@ type Worker struct {
 	pool *Pool // pool, в состав которого входит worker
 
 	parentCtx context.Context // родительский контекст, в котором работает pool
-	//ctx       context.Context    // контекст, в рамках которого работает worker
-	//cancel    context.CancelFunc // функция закрытия контекста для worker
 
 	externalId uint64           // внешний идентификатор для логирования
 	stopCh     chan interface{} // канал остановки worker, запущенного в фоне
@@ -126,9 +124,6 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 
 	//_log.Debug("Worker - START: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
 
-	//// Работаем в изолированном от родительского контексте
-	//wr.ctx, wr.cancel = context.WithCancel(context.Background())
-
 	// канал для информирования worker о необходимости срочной остановки
 	wr.stopCh = make(chan interface{}, 1)
 	//defer close(wr.stopCh) закрывать канал нужно в том месте, где отправляется сигнал
@@ -151,12 +146,6 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 		if wg != nil {
 			wg.Done()
 		}
-
-		//// закрываем контекст worker
-		//if wr.cancel != nil {
-		//	//_log.Debug("Worker - TERMINATED - close context: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
-		//	wr.cancel()
-		//}
 
 		wr.setStateUnsafe(WORKER_STATE_TERMINATED)
 	}()
