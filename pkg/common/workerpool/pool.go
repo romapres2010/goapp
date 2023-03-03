@@ -16,7 +16,6 @@ const POOL_MAX_TIMEOUT = time.Hour * 24 * 365
 // PoolState - статусы жизненного цикла pool
 type PoolState int
 
-// TODO - переделать
 const (
 	POOL_STATE_NEW               PoolState = iota // pool создан, еще ни разу не запускался
 	POOL_STATE_ONLINE_RUNNING                     // pool запущен в режиме online, добавление новых задач запрещено
@@ -28,6 +27,15 @@ const (
 	POOL_STATE_SHUTTING_DOWN                      // pool находится в режиме остановки, добавление новых задач запрещено
 	POOL_STATE_TERMINATE_TIMEOUT                  // pool превышено время ожидания остановки
 	POOL_STATE_SHUTDOWN                           // pool экстренно прерван
+)
+
+// PoolShutdownMode - режим остановки pool
+type PoolShutdownMode int
+
+const (
+	POOL_SHUTDOWN_LIGHT PoolShutdownMode = iota // все начатые к обработке и все взятые в очередь задачи должны быть завершены, новые задачи не принимаются
+	POOL_SHUTDOWN_SOFT                          // только начатые к обработке задачи должны быть завершены, новые задачи не принимаются, оставшиеся в очереди задачи останавливаются с ошибкой
+	POOL_SHUTDOWN_HARD                          // экстренно прерывается обработка всех задач, как начатых, так и находящихся в очереди
 )
 
 // Config - конфигурационные настройки pool
@@ -141,7 +149,7 @@ func (p *Pool) AddTask(task *Task) (err error) {
 
 	//_log.Debug("Pool - START - add new task: PoolName, TaskId, TaskExternalId, State", p.name, task.id, task.externalId, p.state)
 
-	{ // Блокируем для проверки статусов
+	{ // Блокируем для проверки статусов pool
 		p.mx.RLock()
 
 		// Добавление task разрешено только в определенных статусах
@@ -153,7 +161,7 @@ func (p *Pool) AddTask(task *Task) (err error) {
 		}
 
 		p.mx.RUnlock()
-	} // Блокируем для проверки статусов
+	} // Блокируем для проверки статусов pool
 
 	// Функция восстановления после паники
 	defer func() {
@@ -371,7 +379,7 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 				return nil
 			}
 		case <-p.stopCh:
-			// Нормальный вариант остановки - worker в этот момент уже остановлены
+			// Нормальный вариант остановки
 			//_log.Info("Pool background - STOP - got quit signal: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			return nil
 		case <-p.parentCtx.Done():
@@ -418,10 +426,6 @@ func (p *Pool) shutdownUnsafe(hardShutdown bool, shutdownTimeout time.Duration) 
 	if p.state != POOL_STATE_SHUTDOWN {
 		//_log.Debug("Pool - SHUTTING DOWN : ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 
-		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN)
-		// временная метка начала остановки
-		//tic := time.Now()
-
 		// Функция восстановления после паники
 		defer func() {
 			if r := recover(); r != nil {
@@ -430,6 +434,11 @@ func (p *Pool) shutdownUnsafe(hardShutdown bool, shutdownTimeout time.Duration) 
 
 			p.setStateUnsafe(POOL_STATE_SHUTDOWN)
 		}()
+
+		// Начало остановки - в этом статусе запрещено принимать новые task
+		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN)
+
+		//tic := time.Now() // временная метка начала остановки
 
 		// Запускаем остановку worker и ожидаем shutdownTimeout
 		p.stopWorkersUnsafe(hardShutdown, shutdownTimeout)

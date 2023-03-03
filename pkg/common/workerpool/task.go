@@ -15,6 +15,7 @@ type TaskState int
 
 const (
 	TASK_STATE_NEW                    TaskState = iota // task создан
+	TASK_STATE_IN_QUEUE                                // task помещен в очередь
 	TASK_STATE_IN_PROCESS                              // task выполняется
 	TASK_STATE_DONE_SUCCESS                            // task завершился
 	TASK_STATE_RECOVER_ERR                             // task остановился из-за паники
