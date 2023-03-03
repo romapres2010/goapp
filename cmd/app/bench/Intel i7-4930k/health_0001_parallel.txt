@@ -13,23 +13,23 @@ Document Path:          /app/system/health
 Document Length:        Variable
 
 Concurrency Level:      1
-Time taken for tests:   11.101 seconds
+Time taken for tests:   11.390 seconds
 Complete requests:      100000
 Failed requests:        0
 Keep-Alive requests:    100000
 Total transferred:      18688895 bytes
 HTML transferred:       0 bytes
-Requests per second:    9008.42 [#/sec] (mean)
-Time per request:       0.111 [ms] (mean)
-Time per request:       0.111 [ms] (mean, across all concurrent requests)
-Transfer rate:          1644.12 [Kbytes/sec] received
+Requests per second:    8779.78 [#/sec] (mean)
+Time per request:       0.114 [ms] (mean)
+Time per request:       0.114 [ms] (mean, across all concurrent requests)
+Transfer rate:          1602.39 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
 Connect:        0    0   0.0      0       1
-Processing:     0    0   0.7      0      10
-Waiting:        0    0   0.6      0      10
-Total:          0    0   0.7      0      10
+Processing:     0    0   0.5      0      10
+Waiting:        0    0   0.4      0      10
+Total:          0    0   0.5      0      10
 
 Percentage of the requests served within a certain time (ms)
   50%      0
@@ -39,5 +39,5 @@ Percentage of the requests served within a certain time (ms)
   90%      1
   95%      1
   98%      1
-  99%      1
+  99%      2
  100%     10 (longest request)

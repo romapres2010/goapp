@@ -1,4 +1,5 @@
 memory_limit: 2000000000         # рекомендуемый предел памяти в байтах - использовать для запуска в контейнере
+shutdown_timeout: 30s            # максимальное время остановки daemon
 
 # конфигурация сервиса логирования
 logger:
@@ -119,6 +120,17 @@ http_service:
             params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
             method: "GET"                               # HTTP метод: GET, POST, ...
             handler_name: "ReadyHandler"               # Имя функции обработчика
+        WpHandlerFactorial:               # Сервис wptest - handle worker pool testing
+            enabled: true                               # Признак включен ли сервис
+            application: "app"                         # Приложение к которому относится сервис
+            module: "system"                            # Модуль к которому относится сервис
+            service: "ready"                            # Имя сервиса
+            version: "v1.0.0"                           # Версия сервиса
+            full_path: "/app/system/wp_factorial"       # URI сервиса /Application.Module.Service.APIVersion или /Application/APIVersion/Module/Service
+            params: ""                                  # Параметры сервиса с виде {id:[0-9]+}
+            method: "POST"                               # HTTP метод: GET, POST, ...
+            handler_name: "WpHandlerFactorial"               # Имя функции обработчика
+
 
 # конфигурация сервиса логирования HTTP трафика (опциональный сервис)
 http_logger:
@@ -136,6 +148,16 @@ http_logger:
         local_time: true                    # использовать локальное время в имени архивных лог файлов
         compress: false                     # сжимать архивные лог файлы в zip архив
 
+# конфигурация сервиса обработчиков
+worker_pool_service:
+    total_timeout: 100ms                    # максимальное время обработки всех task в одной группе
+    shutdown_timeout: 30s                   # максимальное время остановки pool
+    worker_pool:			                # конфигурация пула обработчиков
+        task_queue_size: 0			        # размер очереди - если 0, то количество ядер х 10000
+        task_timeout: 20ms                  # максимальное время обработки одного task
+        worker_concurrency: 8               # уровень параллелизма для запускай нескольких расчетов - если 0, то количество ядер х2
+        worker_timeout: 30ms                # максимальное время обработки для одного обработчика
+
 # конфигурация сбора метрик
 metrics:
     metrics_namespace: com
@@ -149,6 +171,7 @@ metrics:
     collect_http_requests_duration: true
     collect_http_client_call_count_vec: true
     collect_http_client_call_duration_vec: true
-    collect_wp_task_queue_buffer_len_vec: true
-    collect_wp_add_task_wait_count_vec: true
-    collect_wp_worker_process_count_vec: true
+    collect_wp_task_queue_buffer_len_vec: false
+    collect_wp_add_task_wait_count_vec: false
+    collect_wp_worker_process_count_vec: false
+    collect_wp_task_process_duration_ms_by_name: false

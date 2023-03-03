@@ -2,6 +2,7 @@ package httphandler
 
 import (
     "context"
+    _wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
 
     _ctx "github.com/romapres2010/goapp/pkg/common/ctx"
     _err "github.com/romapres2010/goapp/pkg/common/error"
@@ -16,7 +17,8 @@ type Service struct {
     cfg    *Config            // конфигурационные параметры
 
     // вложенные сервисы
-    httpService *_http.Service // сервис HTTP
+    httpService *_http.Service      // сервис HTTP
+    wpService   *_wpservice.Service // сервис worker pool
 }
 
 // Config represent HTTP Service configurations
@@ -25,6 +27,7 @@ type Config struct {
 
 // New create new HTTP service
 func New(ctx context.Context, cfg *Config,
+    wpService *_wpservice.Service,
     httpService *_http.Service) (*Service, error) {
 
     requestID := _ctx.FromContextHTTPRequestID(ctx) // RequestID передается через context
@@ -38,10 +41,14 @@ func New(ctx context.Context, cfg *Config,
         if httpService == nil {
             return nil, _err.NewTyped(_err.ERR_INCORRECT_CALL_ERROR, requestID, "if httpService == nil {}").PrintfError()
         }
+        if wpService == nil {
+            return nil, _err.NewTyped(_err.ERR_INCORRECT_CALL_ERROR, requestID, "if wpService == nil {}").PrintfError()
+        }
     } // входные проверки
 
     service := &Service{
         cfg:         cfg,
+        wpService:   wpService,
         httpService: httpService,
     }
 
