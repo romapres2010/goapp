@@ -32,7 +32,7 @@ const (
 
 // Config - конфигурационные настройки pool
 type Config struct {
-	TaskQueueSize     int           `yaml:"task_queue_size" json:"task_queue_size"`       // размер очереди задач - если 0, то количество ядер х 200
+	TaskQueueSize     int           `yaml:"task_queue_size" json:"task_queue_size"`       // размер очереди задач - если 0, то количество ядер х 1000
 	TaskTimeout       time.Duration `yaml:"task_timeout" json:"task_timeout"`             // максимальное время обработки одного расчета
 	WorkerConcurrency int           `yaml:"worker_concurrency" json:"worker_concurrency"` // уровень параллелизма - если 0, то количество ядер х 2
 	WorkerTimeout     time.Duration `yaml:"worker_timeout" json:"worker_timeout"`         // максимальное время обработки задачи worker
@@ -57,7 +57,7 @@ type Pool struct {
 	workerErrCh       chan *WorkerError // канал ошибок workers, размер определяется количеством worker
 
 	taskQueueCh   chan *Task // канал очереди задач, ожидающих выполнения
-	taskQueueSize int        // размер очереди задач - если 0, то количество ядер х 200
+	taskQueueSize int        // размер очереди задач - если 0, то количество ядер х 1000
 
 	mx sync.RWMutex
 }
@@ -121,7 +121,7 @@ func NewPool(parentCtx context.Context, externalId uint64, name string, cfg *Con
 	}
 
 	if pool.taskQueueSize == 0 {
-		pool.taskQueueSize = pool.workerConcurrency * 10000
+		pool.taskQueueSize = pool.workerConcurrency * 1000
 		//_log.Debug("Set default: ExternalId, PoolName, TaskQueueSize", externalId, pool.name, pool.taskQueueSize)
 	}
 
@@ -258,6 +258,7 @@ func (p *Pool) RunOnline(externalId uint64, tasks []*Task, shutdownTimeout time.
 		go func() {
 			select {
 			case <-p.stopCh:
+				// Нормальный вариант остановки - worker в этот момент уже остановлены
 				//_log.Info("Pool online - STOP - got quit signal: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			case <-p.parentCtx.Done():
 				// Закрылся родительский контекст - останавливаем все worker, должна разблокироваться wg
@@ -370,10 +371,11 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 				return nil
 			}
 		case <-p.stopCh:
+			// Нормальный вариант остановки - worker в этот момент уже остановлены
 			//_log.Info("Pool background - STOP - got quit signal: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			return nil
 		case <-p.parentCtx.Done():
-			// Закрылся родительский контекст - останавливаем все worker, должна разблокироваться wg
+			// Закрылся родительский контекст - останавливаем все worker
 			//_log.Info("Pool background - STOP - got parent context close: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			p.mx.Lock()
 			// ошибки будут переданы через именованную переменную возврата
@@ -469,7 +471,7 @@ func (p *Pool) stopWorkersUnsafe(hardShutdown bool, shutdownTimeout time.Duratio
 	// ждем остановки всех workers или предельного shutdownTimeout
 	for {
 
-		// Превышено предельное время "жесткой" остановки, в противном случае ждем отработки всех worker
+		// Превышено предельное время "жесткой" остановки, в противном случае ждем отработки всех текущих задач worker
 		if shutdownTimeout != 0 && time.Now().After(stopStartTime.Add(shutdownTimeout)) {
 			//_log.Info("Pool - STOP WORKER INTERRUPT - exceeded StopTimeout: ExternalId, PoolName, ActiveTaskCount, StopTimeout, State", p.externalId, p.name, len(p.taskQueueCh), shutdownTimeout, p.state)
 			p.setStateUnsafe(POOL_STATE_TERMINATE_TIMEOUT)

@@ -65,6 +65,7 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 		wpFactorialReqResp := &WpFactorialReqResp{
 			//NumArray: NumArray1,
 			//NumArray: NumArray10,
+			//NumArray: NumArray100,
 			//NumArray: NumArray1024,
 			//NumArray: NumArray2048,
 			NumArray: NumArray4096,

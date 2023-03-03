@@ -170,7 +170,7 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 					wg.Done()
 					doneCnt++
 				}
-				// !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
+				// !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
 				//case <-time.After(s.cfg.TotalTimeout):
 				//    err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, externalId, s.cfg.TotalTimeout).PrintfError()
 				//    // Уменьшить счетчик, чтобы разблокировать родительскую горутину
@@ -178,7 +178,7 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 				//        wg.Done()
 				//        doneCnt++
 				//    }
-				// !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры, пока они не сработают
+				// !!! вариант с time.After(s.cfg.TotalTimeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
 			}
 		}
 	}()

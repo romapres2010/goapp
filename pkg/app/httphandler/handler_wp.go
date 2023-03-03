@@ -3,7 +3,6 @@ package httphandler
 import (
 	"context"
 	"encoding/json"
-	_wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
 	"net/http"
 	"reflect"
 
@@ -11,6 +10,7 @@ import (
 	_err "github.com/romapres2010/goapp/pkg/common/error"
 	_http "github.com/romapres2010/goapp/pkg/common/httpservice"
 	_wp "github.com/romapres2010/goapp/pkg/common/workerpool"
+	_wpservice "github.com/romapres2010/goapp/pkg/common/workerpoolservice"
 )
 
 type WpFactorialReqResp struct {
@@ -88,7 +88,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		//_log.Debug("Start with global worker pool: requestID", requestID)
 		err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
 
-		//return nil
+		//return nil  // для оценки накладных расходов на Worker pool
 		// Анализ результатов
 		if err == nil {
 			// Суммируем все результаты
@@ -121,7 +121,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
 func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
-	//return nil, nil
+	//return nil, nil // для оценки накладных расходов на Worker pool
 	var factVal uint64 = 1
 	var cnt uint64 = 1
 	var value uint64
