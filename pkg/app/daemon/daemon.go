@@ -127,7 +127,7 @@ func (d *Daemon) Run() error {
 		select {
 		case s := <-signalCh: //  ожидаем системное призывание
 			_log.Info("Exiting, got signal", s)
-			d.Shutdown(true, d.cfg.ShutdownTimeout) // останавливаем daemon
+			d.Shutdown(false, d.cfg.ShutdownTimeout) // останавливаем daemon
 			return nil
 		case err = <-d.httpServerErrCh: // возврат от HTTP сервера в канал ошибок
 			_log.Info("Got error from HTTP")
@@ -137,8 +137,8 @@ func (d *Daemon) Run() error {
 
 		// от сервиса пришла пустая ошибка - игнорируем
 		if err != nil {
-			_log.Error(err.Error())                  // логируем ошибку
-			d.Shutdown(false, d.cfg.ShutdownTimeout) // останавливаем daemon
+			_log.Error(err.Error())                 // логируем ошибку
+			d.Shutdown(true, d.cfg.ShutdownTimeout) // останавливаем daemon
 			return err
 		} else {
 			_log.Info("Got empty error - ignore it")

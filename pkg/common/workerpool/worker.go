@@ -166,8 +166,8 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 					//_log.Debug("Worker - start to process task: PoolName, WorkerId, WorkerExternalId, TaskName", wr.pool.name, wr.id, wr.externalId, task.name)
 					task.process(wr.id, wr.timeout)
 
-					wr.setStateUnsafe(WORKER_STATE_IDLE)
 					wr.taskInProcess = nil
+					wr.setStateUnsafe(WORKER_STATE_IDLE)
 
 					_metrics.DecWPWorkerProcessCountVec(wr.pool.name)                            // Метрика - количество worker в работе
 					_metrics.IncWPTaskProcessDurationVec(wr.pool.name, task.name, task.duration) // Метрика - время выполнения задачи по имени
@@ -197,7 +197,7 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 }
 
 // stop - принудительная остановка worker, не дожидаясь отработки всей очереди
-func (wr *Worker) stop(hardShutdown bool) {
+func (wr *Worker) stop(shutdownMode PoolShutdownMode) {
 
 	//_log.Debug("Worker - STOP: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
 
@@ -212,7 +212,7 @@ func (wr *Worker) stop(hardShutdown bool) {
 		}
 
 		// В режиме срочной остановки запускаем прерывание текущей task
-		if hardShutdown {
+		if shutdownMode == POOL_SHUTDOWN_HARD {
 			if wr.taskInProcess != nil {
 				wr.taskInProcess.Stop()
 			}

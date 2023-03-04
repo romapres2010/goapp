@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"time"
 
 	_ctx "github.com/romapres2010/goapp/pkg/common/ctx"
 	_err "github.com/romapres2010/goapp/pkg/common/error"
@@ -73,7 +74,8 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 
 		// Подготовим список задач для запуска
 		for i, value := range *wpFactorialReqResp.NumArray {
-			task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+			task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, -1*time.Second, calculateFactorialFn, value)
 			tasks = append(tasks, task)
 		}
 
@@ -88,7 +90,6 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		//_log.Debug("Start with global worker pool: requestID", requestID)
 		err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
 
-		//return nil  // для оценки накладных расходов на Worker pool
 		// Анализ результатов
 		if err == nil {
 			// Суммируем все результаты
@@ -121,7 +122,6 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 
 // calculateFactorialFn функция запуска расчета Factorial через worker pool
 func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
-	//return nil, nil // для оценки накладных расходов на Worker pool
 	var factVal uint64 = 1
 	var cnt uint64 = 1
 	var value uint64
@@ -159,4 +159,31 @@ func calculateFactorialOnline(wpFactorialReqResp *WpFactorialReqResp) {
 		factValSum += factVal
 	}
 	wpFactorialReqResp.SumFactorial = factValSum
+}
+
+// calculateEmpty функция оценки накладных расходов worker pool
+func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string, tasks []*_wp.Task) (err error) {
+
+	// Подготовим список задач для запуска
+	for i, value := range *wpFactorialReqResp.NumArray {
+		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
+		tasks = append(tasks, task)
+	}
+
+	// в конце обработки отправить task в кэш для повторного использования
+	defer func() {
+		for _, task := range tasks {
+			task.Delete()
+		}
+	}()
+
+	// Запускаем обработку в общий background pool
+	err = wpService.RunTasksGroupWG(requestID, tasks, "")
+
+	return err
+}
+
+// calculateEmpty функция запуска оценки накладных расходов worker pool
+func calculateEmptyFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
+	return nil, nil // для оценки накладных расходов на Worker pool
 }

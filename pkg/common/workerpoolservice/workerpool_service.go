@@ -219,7 +219,13 @@ func (s *Service) Shutdown(hardShutdown bool, shutdownTimeout time.Duration) (er
 		if shutdownTimeout > s.cfg.ShutdownTimeout {
 			shutdownTimeout = s.cfg.ShutdownTimeout
 		}
-		err = s.pool.Stop(hardShutdown, shutdownTimeout) // ожидание остановки worker
+		var poolShutdownMode _wp.PoolShutdownMode
+		if hardShutdown {
+			poolShutdownMode = _wp.POOL_SHUTDOWN_HARD
+		} else {
+			poolShutdownMode = _wp.POOL_SHUTDOWN_SOFT
+		}
+		err = s.pool.Stop(poolShutdownMode, shutdownTimeout) // ожидание остановки worker
 	} // закрываем вложенные сервисы
 
 	if err != nil {

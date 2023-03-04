@@ -15,7 +15,6 @@ type TaskState int
 
 const (
 	TASK_STATE_NEW                    TaskState = iota // task создан
-	TASK_STATE_IN_QUEUE                                // task помещен в очередь
 	TASK_STATE_IN_PROCESS                              // task выполняется
 	TASK_STATE_DONE_SUCCESS                            // task завершился
 	TASK_STATE_RECOVER_ERR                             // task остановился из-за паники
@@ -137,12 +136,12 @@ func (ts *Task) GetRequests() []interface{} {
 
 // process - запускает task из worker
 func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
-	if ts == nil {
+	if ts == nil || ts.f == nil {
 		return
 	}
 
-	// Task можно запустить только один раз
-	if ts.mx.TryLock() {
+	// Заблокируем task на время запуска, чтобы исключить одновременное использование одного указателя
+	if ts.mx.TryLock() { // Использование TryLock не рекомендуется, но в данном случае это очень удобно
 		defer ts.mx.Unlock()
 	} else {
 		//_log.Info("TASK - already locked for process: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
@@ -150,116 +149,121 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		return
 	}
 
-	// запускать можно только новый task
+	// Проверим, что запускать можно только новый task
 	if ts.state == TASK_STATE_NEW {
 		ts.setStateUnsafe(TASK_STATE_IN_PROCESS)
 		//_log.Debug("START task: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 	} else {
 		//_log.Info("TASK - has incorrect state to run: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
+		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
 		return
 	}
 
-	var tic = time.Now()      // временная метка начала обработки task
-	var timeout time.Duration // предельное время работы task
+	var tic = time.Now() // временная метка начала обработки task
 
-	// Обрабатываем панику и информируем "внешний мир" о завершении работы
+	// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
 	defer func() {
 		if r := recover(); r != nil {
 			ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
 			ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
 		}
 
-		// информируем внешний мир о завершении task - общий канал для группировки связанных task
 		if ts.doneCh != nil {
 			ts.doneCh <- struct{}{}
 		}
 	}()
 
-	// Запускаем task в фоне и ожидаем завершения в локальный канал или timeout
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
-			}
-
-			// Отправляем сигнал и закрываем канал, task не контролирует, успешно или нет завершился обработчик
-			if ts.localDoneCh != nil {
-				ts.localDoneCh <- struct{}{}
-			}
-		}()
-
-		// запускаем обработчик task в локальном контексте task
-		if ts.f != nil {
-			ts.err, ts.responses = ts.f(ts.parentCtx, ts.ctx, ts.requests...)
-		}
-	}()
-
-	{ // определим, нужно ли контролировать timeout
-		// наименьший из workerTimeout и ts.timeout
-		if workerTimeout < ts.timeout {
-			timeout = workerTimeout
-		} else {
-			timeout = ts.timeout
-		}
-
-		if timeout > 0 {
-			// Task получает таймер всегда остановленным, сбрасывать канал таймера не требуется, так как он не сработал
-			//ts.timer.Stop()
-			ts.timer.Reset(timeout) // Переставим таймер на новое значение
-		}
-	} // определим, нужно ли контролировать timeout
-
-	// Ожидаем завершения обработки, либо таймаутов задачи, worker или закрытия контекста
-	select {
-	case <-ts.localDoneCh:
+	if ts.timeout < 0 {
+		// "Короткие" task (timeout < 0) не контролируем по timeout. Их нельзя прервать. Функция-обработчик запускается в goroutine worker
+		ts.err, ts.responses = ts.f(ts.parentCtx, nil, ts.requests...)
 		ts.duration = time.Now().Sub(tic)
 		ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
-		ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
-		//_log.Debug("Task - DONE: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 		return
-	case _, ok := <-ts.stopCh:
-		if ok {
-			// канал был открыт и получили команду на остановку
-			//_log.Debug("Task - INTERRUPT - got stop signal: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
-			ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_STOP_SIGNAL, ts.externalId, fmt.Sprintf("[WorkerId='%v', TaskExternalId='%v', TaskName='%v', WorkerTimeout='%v']", workerID, ts.externalId, ts.name, workerTimeout))
-			ts.setStateUnsafe(TASK_STATE_TERMINATED_STOP_SIGNAL)
-		} else {
-			// Не корректная ситуация с внутренней логикой - логируем для анализа
-			//_log.Error("Task - INTERRUPT - stop chanel closed: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
-		}
-		// Закрываем локальный контекст task - функция обработчика должна корректно отработать это состояние и выполнить компенсационные воздействия
-		if ts.cancel != nil {
-			//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-			ts.cancel()
-		}
-		return
-	case <-ts.timer.C:
-		//_log.Info("Task - INTERRUPT - exceeded Timeout: WorkerId, TaskExternalId, TaskName, Timeout", workerID, ts.externalId, ts.name, timeout)
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.id, timeout).PrintfError()
-		ts.setStateUnsafe(TASK_STATE_TERMINATED_TIMEOUT)
-		// Закрываем локальный контекст task - функция обработчика должна корректно отработать это состояние и выполнить компенсационные воздействия
-		if ts.cancel != nil {
-			//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-			ts.cancel()
-		}
-		return
+	} else {
+		// "Длинные" task запускаем в фоне и ожидаем завершения в отдельный локальный канал. Контролируем timeout
 
-		// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
-		//case <-time.After(ts.timeout):
-		//	//_log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
-		//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
-		//	ts.setState(TASK_STATE_TERMINATED_TIMEOUT)
-		//	return
-		// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
+				}
 
-		// !!! Контроль за контекстом - дорогая операция
-		//case <-ts.ctx.Done():
-		//	//_log.Info("Task - STOP - got context close: WorkerId, TaskExternalId", workerID, ts.externalId)
-		//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got context close")
-		//	ts.setStateUnsafe(TASK_STATE_TERMINATED_CTX_CLOSED)
-		//	return
-		// !!! Контроль за контекстом - дорогая операция
+				// Отправляем сигнал и закрываем канал, task не контролирует, успешно или нет завершился обработчик
+				if ts.localDoneCh != nil {
+					ts.localDoneCh <- struct{}{}
+				}
+			}()
+
+			// Обработчик получает родительский контекст и локальный контекст task.
+			// Локальный контекст task нужно контролировать в обработчике для определения необходимости остановки
+			ts.err, ts.responses = ts.f(ts.parentCtx, ts.ctx, ts.requests...)
+		}()
+
+		// Определим, нужно ли контролировать timeout, ts.timeout имеет приоритет над workerTimeout
+		var timeout time.Duration // предельное время работы task
+		if ts.timeout > 0 {
+			timeout = ts.timeout
+		} else if workerTimeout > 0 {
+			timeout = workerTimeout
+		}
+
+		// Если timeout == 0, то не контролировать timeout
+		if timeout > 0 {
+			// Task получает таймер всегда остановленным, сбрасывать канал таймера не требуется, так как он не сработал
+			ts.timer.Reset(timeout) // Переставим таймер на новое значение
+		}
+
+		// Ожидаем завершения функции обработчика, наступления timeout или команды на закрытие task
+		select {
+		case <-ts.localDoneCh:
+			ts.duration = time.Now().Sub(tic)
+			ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
+			ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
+			//_log.Debug("Task - DONE: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+			return
+		case _, ok := <-ts.stopCh:
+			if ok {
+				// канал был открыт и получили команду на остановку
+				//_log.Debug("Task - INTERRUPT - got stop signal: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
+				ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_STOP_SIGNAL, ts.externalId, fmt.Sprintf("[WorkerId='%v', TaskExternalId='%v', TaskName='%v', WorkerTimeout='%v']", workerID, ts.externalId, ts.name, workerTimeout))
+				ts.setStateUnsafe(TASK_STATE_TERMINATED_STOP_SIGNAL)
+			} else {
+				// Не корректная ситуация с внутренней логикой - логируем для анализа
+				//_log.Error("Task - INTERRUPT - stop chanel closed: WorkerId, TaskExternalId, TaskName, WorkerTimeout", workerID, ts.externalId, ts.name, workerTimeout)
+			}
+			// Закрываем локальный контекст task - функция обработчика должна корректно отработать это состояние и выполнить компенсационные воздействия
+			if ts.cancel != nil {
+				//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+				ts.cancel()
+			}
+			return
+		case <-ts.timer.C:
+			//_log.Info("Task - INTERRUPT - exceeded Timeout: WorkerId, TaskExternalId, TaskName, Timeout", workerID, ts.externalId, ts.name, timeout)
+			ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.id, timeout).PrintfError()
+			ts.setStateUnsafe(TASK_STATE_TERMINATED_TIMEOUT)
+			// Закрываем локальный контекст task - функция обработчика должна корректно отработать это состояние и выполнить компенсационные воздействия
+			if ts.cancel != nil {
+				//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
+				ts.cancel()
+			}
+			return
+
+			// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
+			//case <-time.After(ts.timeout):
+			//	//_log.Info("Task - INTERRUPT - exceeded TaskTimeout: WorkerId, TaskExternalId, TaskName, TaskTimeout", workerID, ts.externalId, ts.name, ts.timeout)
+			//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, ts.externalId, ts.timeout).PrintfError()
+			//	ts.setState(TASK_STATE_TERMINATED_TIMEOUT)
+			//	return
+			// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
+
+			// !!! Контроль за контекстом - дорогая операция
+			//case <-ts.ctx.Done():
+			//	//_log.Info("Task - STOP - got context close: WorkerId, TaskExternalId", workerID, ts.externalId)
+			//	ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_CONTEXT_CLOSED, ts.externalId, "Worker pool - Task - got context close")
+			//	ts.setStateUnsafe(TASK_STATE_TERMINATED_CTX_CLOSED)
+			//	return
+			// !!! Контроль за контекстом - дорогая операция
+		}
 	}
 }
 

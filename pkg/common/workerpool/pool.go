@@ -54,10 +54,11 @@ type Pool struct {
 	ctx       context.Context    // контекст, в котором работает pool
 	cancel    context.CancelFunc // функция закрытия контекста для pool
 
-	externalId uint64           // внешний идентификатор для логирования
-	name       string           // имя pool для сбора метрик и логирования
-	state      PoolState        // состояние жизненного цикла pool
-	stopCh     chan interface{} // канал остановки pool, запущенного в фоне
+	externalId   uint64           // внешний идентификатор для логирования
+	name         string           // имя pool для сбора метрик и логирования
+	state        PoolState        // состояние жизненного цикла pool
+	stopCh       chan interface{} // канал остановки pool, запущенного в фоне
+	isBackground bool             // pool запущен в background режиме
 
 	workers           map[int]*Worker   // набор worker
 	workerConcurrency int               // уровень параллелизма - если 0, то количество ядер х 2
@@ -200,6 +201,7 @@ func (p *Pool) RunOnline(externalId uint64, tasks []*Task, shutdownTimeout time.
 		if p.state == POOL_STATE_NEW {
 			p.setStateUnsafe(POOL_STATE_ONLINE_RUNNING)
 			p.externalId = externalId
+			p.isBackground = false
 			p.mx.Unlock()
 		} else {
 			//_log.Info("Pool online - has incorrect state to run: ExternalId, PoolName, ActiveTaskCount, State", externalId, p.name, len(p.taskQueueCh), p.state)
@@ -222,7 +224,7 @@ func (p *Pool) RunOnline(externalId uint64, tasks []*Task, shutdownTimeout time.
 			p.mx.Lock()
 			defer p.mx.Unlock()
 			p.setStateUnsafe(POOL_STATE_RECOVER_ERR)
-			_ = p.shutdownUnsafe(true, shutdownTimeout) // экстренная остановка, ошибку игнорируем
+			_ = p.shutdownUnsafe(POOL_SHUTDOWN_HARD, shutdownTimeout) // экстренная остановка, ошибку игнорируем
 		}
 
 		if p.cancel != nil {
@@ -273,7 +275,7 @@ func (p *Pool) RunOnline(externalId uint64, tasks []*Task, shutdownTimeout time.
 				//_log.Info("Pool online - STOP - got parent context close: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 				p.mx.Lock()
 				// ошибки будут переданы через именованную переменную возврата
-				err = p.shutdownUnsafe(true, shutdownTimeout)
+				err = p.shutdownUnsafe(POOL_SHUTDOWN_HARD, shutdownTimeout)
 				p.mx.Unlock()
 			case <-p.ctx.Done():
 				// Закрытие контекста pool - нормальная ситуация, если pool отработал штатно, нужно выйти, чтобы не оставляют за собой "подвисших" горутин
@@ -316,6 +318,7 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 		// уже запущенный pool запустить повторно нельзя
 		if p.state == POOL_STATE_NEW {
 			p.setStateUnsafe(POOL_STATE_BG_RUNNING)
+			p.isBackground = true
 			p.externalId = externalId
 			p.mx.Unlock()
 		} else {
@@ -342,11 +345,8 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 			p.mx.Lock()
 			defer p.mx.Unlock()
 			p.setStateUnsafe(POOL_STATE_RECOVER_ERR)
-			_ = p.shutdownUnsafe(true, shutdownTimeout) // экстренная остановка, ошибку игнорируем
+			_ = p.shutdownUnsafe(POOL_SHUTDOWN_HARD, shutdownTimeout) // экстренная остановка, ошибку игнорируем
 		}
-
-		// Дополнительных задач не ожидаем - закрытие канала
-		close(p.taskQueueCh)
 
 		if p.cancel != nil {
 			//_log.Debug("Pool background - STOPPED - close context: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
@@ -387,7 +387,7 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 			//_log.Info("Pool background - STOP - got parent context close: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			p.mx.Lock()
 			// ошибки будут переданы через именованную переменную возврата
-			err = p.shutdownUnsafe(true, shutdownTimeout)
+			err = p.shutdownUnsafe(POOL_SHUTDOWN_HARD, shutdownTimeout)
 			p.mx.Unlock()
 			return err
 		}
@@ -395,7 +395,7 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 }
 
 // Stop закрывает контекст и останавливает workers
-func (p *Pool) Stop(hardShutdown bool, shutdownTimeout time.Duration) (err error) {
+func (p *Pool) Stop(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration) (err error) {
 	if p == nil {
 		return _err.NewTyped(_err.ERR_INCORRECT_CALL_ERROR, _err.ERR_UNDEFINED_ID, "Nil Pool pointer").PrintfError()
 	}
@@ -406,7 +406,7 @@ func (p *Pool) Stop(hardShutdown bool, shutdownTimeout time.Duration) (err error
 	// Останавливать можно только в определенных статусах
 	if p.state != POOL_STATE_SHUTDOWN {
 		//_log.Info("Pool online - STOP - got quit signal: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
-		err = p.shutdownUnsafe(hardShutdown, shutdownTimeout)
+		err = p.shutdownUnsafe(shutdownMode, shutdownTimeout)
 
 		// Отправляем сигнал и закрываем канал - если pool ни разу не запускался, то p.stopCh будет nil
 		if p.stopCh != nil {
@@ -420,7 +420,7 @@ func (p *Pool) Stop(hardShutdown bool, shutdownTimeout time.Duration) (err error
 }
 
 // shutdownUnsafe закрывает контекст и останавливает workers
-func (p *Pool) shutdownUnsafe(hardShutdown bool, shutdownTimeout time.Duration) (err error) {
+func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration) (err error) {
 
 	// исключить повторную остановку
 	if p.state != POOL_STATE_SHUTDOWN {
@@ -438,10 +438,25 @@ func (p *Pool) shutdownUnsafe(hardShutdown bool, shutdownTimeout time.Duration) 
 		// Начало остановки - в этом статусе запрещено принимать новые task
 		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN)
 
+		// Канал задач для Online закрывается сразу
+		if p.isBackground {
+			// Дополнительных задач не ожидаем - закрытие канала
+			close(p.taskQueueCh)
+		}
+
+		// Вычитываем task из очереди и останавливаем их
+		if shutdownMode == POOL_SHUTDOWN_HARD || shutdownMode == POOL_SHUTDOWN_SOFT {
+			for task := range p.taskQueueCh {
+				if task != nil {
+					task.Stop()
+				}
+			}
+		}
+
 		//tic := time.Now() // временная метка начала остановки
 
 		// Запускаем остановку worker и ожидаем shutdownTimeout
-		p.stopWorkersUnsafe(hardShutdown, shutdownTimeout)
+		p.stopWorkersUnsafe(shutdownMode, shutdownTimeout)
 
 		{ // Проверим ошибки от worker, которые накопились в канале
 			close(p.workerErrCh) // Закрываем канал ошибок worker
@@ -465,14 +480,13 @@ func (p *Pool) shutdownUnsafe(hardShutdown bool, shutdownTimeout time.Duration) 
 }
 
 // stopWorkersUnsafe останавливает запущенных в фоне worker
-func (p *Pool) stopWorkersUnsafe(hardShutdown bool, shutdownTimeout time.Duration) {
+func (p *Pool) stopWorkersUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration) {
 
 	//_log.Debug("Pool - STOP workers: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 
-	// Команда на остановку worker без ожидания завершения очереди, дорабатывает только текущая задача
-	// Время выполнения текущей задачи, может превышать отведенный для остановки лимит
+	// Команда на остановку worker
 	for _, worker := range p.workers {
-		worker.stop(hardShutdown)
+		worker.stop(shutdownMode)
 	}
 
 	stopStartTime := time.Now() // отсчет времени от начала остановки
