@@ -58,7 +58,7 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 
 	// запускаем сервис обработчиков - паники должны быть обработаны внутри
 	go func() { wpServiceErrCh <- wpService.Run() }()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1 * time.Microsecond) // минимальная задержка для инициации pool
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -70,9 +70,9 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 			//NumArray: NumArray2048,
 			//NumArray: NumArray4096,
 		}
-		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg")
+		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
 		_ = calculateEmpty(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
-		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "online")
+		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "online", tasks)
 	}
 
 	//Останавливаем обработчик worker pool

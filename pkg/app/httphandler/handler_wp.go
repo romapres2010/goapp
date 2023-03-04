@@ -41,8 +41,10 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 			return nil, nil, http.StatusBadRequest, err
 		}
 
+		var tasks = make([]*_wp.Task, 0, len(*wpFactorialReqResp.NumArray))
+
 		// Запускаем обработку
-		err = calculateFactorial(ctx, s.wpService, requestID, &wpFactorialReqResp, wpTipe)
+		err = calculateFactorial(ctx, s.wpService, requestID, &wpFactorialReqResp, wpTipe, tasks)
 		if err != nil {
 			return nil, nil, http.StatusBadRequest, err
 		}
@@ -66,11 +68,11 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 }
 
 // calculateFactorial функция запуска расчета Factorial
-func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string) (err error) {
+func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string, tasks []*_wp.Task) (err error) {
 	if wpTipe == "bg" {
 
 		//var tic = time.Now()
-		var tasks = make([]*_wp.Task, 0, len(*wpFactorialReqResp.NumArray))
+		//var tasks = make([]*_wp.Task, 0, len(*wpFactorialReqResp.NumArray))
 
 		// Подготовим список задач для запуска
 		for i, value := range *wpFactorialReqResp.NumArray {
@@ -124,24 +126,18 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
 	var factVal uint64 = 1
 	var cnt uint64 = 1
-	var value uint64
-	var ok bool
 
+	// Проверяем количество входных параметров
 	if len(data) == 1 {
-
-		// проверяем тип входных параметров
-		if value, ok = data[0].(uint64); !ok {
-			return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "CalculateFactorialFn", "0 - uint64", reflect.ValueOf(data[0]).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError(), nil
-		} else {
-
-			// Запускаем расчет
+		// Проверяем тип входных параметров
+		if value, ok := data[0].(uint64); ok {
 			for cnt = 1; cnt <= value; cnt++ {
 				factVal *= cnt
-				//time.Sleep(time.Millisecond * 20)
 			}
+			return nil, []interface{}{factVal}
+		} else {
+			return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "calculateFactorialFn", "0 - uint64", reflect.ValueOf(data[0]).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError(), nil
 		}
-
-		return nil, []interface{}{factVal} // ошибки расчета транслируем на уровень выше
 	}
 	return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
 }

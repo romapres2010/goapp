@@ -23,10 +23,9 @@ const (
 	POOL_STATE_INCOMPLETE_DONE                    // pool запущенный в режиме online, завершил обработку НЕ всех задач
 	POOL_STATE_RECOVER_ERR                        // pool остановлен по панике, дальнейшие действия не возможны
 	POOL_STATE_BG_RUNNING                         // pool запущен в режиме background, добавление новых задач разрешено
-	POOL_STATE_BG_PAUSED                          // обработка worker поставлена на паузу
 	POOL_STATE_SHUTTING_DOWN                      // pool находится в режиме остановки, добавление новых задач запрещено
 	POOL_STATE_TERMINATE_TIMEOUT                  // pool превышено время ожидания остановки
-	POOL_STATE_SHUTDOWN                           // pool экстренно прерван
+	POOL_STATE_SHUTDOWN                           // pool успешно остановлен
 )
 
 // PoolShutdownMode - режим остановки pool
@@ -54,10 +53,10 @@ type Pool struct {
 	ctx       context.Context    // контекст, в котором работает pool
 	cancel    context.CancelFunc // функция закрытия контекста для pool
 
-	externalId   uint64           // внешний идентификатор для логирования
+	externalId   uint64           // внешний идентификатор, в рамках которого работает pool - для целей логирования
 	name         string           // имя pool для сбора метрик и логирования
 	state        PoolState        // состояние жизненного цикла pool
-	stopCh       chan interface{} // канал остановки pool, запущенного в фоне
+	stopCh       chan interface{} // канал команды на остановку pool со стороны "внешнего мира"
 	isBackground bool             // pool запущен в background режиме
 
 	workers           map[int]*Worker   // набор worker
@@ -154,7 +153,7 @@ func (p *Pool) AddTask(task *Task) (err error) {
 		p.mx.RLock()
 
 		// Добавление task разрешено только в определенных статусах
-		if !(p.state == POOL_STATE_BG_RUNNING || p.state == POOL_STATE_BG_PAUSED) {
+		if p.state != POOL_STATE_BG_RUNNING {
 			//_log.Info("Pool - has incorrect state to add new task: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 			err = _err.NewTyped(_err.ERR_WORKER_POOL_ADD_TASK_INCORRECT_STATE, p.externalId, p.state, "NEW, RUNNING_BG, PAUSED_BG").PrintfError()
 			p.mx.RUnlock()
@@ -243,10 +242,10 @@ func (p *Pool) RunOnline(externalId uint64, tasks []*Task, shutdownTimeout time.
 	//_log.Debug("Pool online - START: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(tasks), p.state)
 
 	// Стартуем worker, передаем им канал ошибок
-	for workerCnt := 1; workerCnt <= p.workerConcurrency; workerCnt++ {
-		worker := newWorker(p.ctx, p, p.taskQueueCh, uint(workerCnt), externalId, p.workerErrCh, p.workerTimeout)
+	for workerId := 1; workerId <= p.workerConcurrency; workerId++ {
+		worker := newWorker(p.ctx, p, p.taskQueueCh, uint(workerId), externalId, p.workerErrCh, p.workerTimeout)
 
-		p.workers[workerCnt] = worker
+		p.workers[workerId] = worker
 
 		// Увеличиваем счетчик WaitGroup
 		wg.Add(1)
@@ -312,30 +311,28 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 		return _err.NewTyped(_err.ERR_INCORRECT_CALL_ERROR, externalId, "Nil Pool pointer").PrintfError()
 	}
 
-	{ // блокируем для проверки и установки статусов
-		p.mx.Lock()
+	// Блокируем pool на время инициализации, иначе task могут начать поступать раньше, чем он стартует
+	p.mx.Lock()
 
-		// уже запущенный pool запустить повторно нельзя
-		if p.state == POOL_STATE_NEW {
-			p.setStateUnsafe(POOL_STATE_BG_RUNNING)
-			p.isBackground = true
-			p.externalId = externalId
-			p.mx.Unlock()
-		} else {
-			//_log.Info("Pool background - has incorrect state to run: ExternalId, PoolName, ActiveTaskCount, State", externalId, p.name, len(p.taskQueueCh), p.state)
-			err = _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, p.externalId, p.name, p.state, "NEW").PrintfError()
-			p.mx.Unlock()
-			return err
-		}
-	} // блокируем для проверки и установки статусов
+	// Уже запущенный pool запустить повторно нельзя
+	if p.state == POOL_STATE_NEW {
+		p.setStateUnsafe(POOL_STATE_BG_RUNNING)
+		p.isBackground = true
+		p.externalId = externalId
+	} else {
+		//_log.Info("Pool background - has incorrect state to run: ExternalId, PoolName, ActiveTaskCount, State", externalId, p.name, len(p.taskQueueCh), p.state)
+		err = _err.NewTyped(_err.ERR_WORKER_POOL_RUN_INCORRECT_STATE, p.externalId, p.name, p.state, "NEW").PrintfError()
+		p.mx.Unlock()
+		return err
+	}
 
-	// Работаем в изолированном от родительского контексте
-	p.ctx, p.cancel = context.WithCancel(context.Background())
-	p.stopCh = make(chan interface{}, 1)
-	//defer close(p.stopCh) закрывать канал нужно в том месте, где отправляется сигнал
-	p.workers = make(map[int]*Worker, p.workerConcurrency)
+	// Инициализация всех внутренних структур
+	p.ctx, p.cancel = context.WithCancel(context.Background())   // Работаем в изолированном от родительского контексте
+	p.workers = make(map[int]*Worker, p.workerConcurrency)       // Набор worker
 	p.workerErrCh = make(chan *WorkerError, p.workerConcurrency) // достаточно по одной ошибке на worker
-	p.taskQueueCh = make(chan *Task, p.taskQueueSize)
+	p.taskQueueCh = make(chan *Task, p.taskQueueSize)            // Канал-очередь task
+	p.stopCh = make(chan interface{}, 1)                         // Внутренний канал для информирования pool о необходимости срочной остановки со стороны "внешнего мира"
+	//defer close(p.stopCh) закрывать канал будем в том месте, где отправляется сигнал
 
 	// Функция восстановления после глобальной паники и закрытия контекста
 	defer func() {
@@ -356,16 +353,19 @@ func (p *Pool) RunBG(externalId uint64, shutdownTimeout time.Duration) (err erro
 
 	//_log.Info("Pool background - START: ExternalId, PoolName, ActiveTaskCount", p.externalId, p.name, len(p.taskQueueCh))
 
-	// Стартуем worker, передаем им канал ошибок
-	for workerCount := 1; workerCount <= p.workerConcurrency; workerCount++ {
-		worker := newWorker(p.ctx, p, p.taskQueueCh, uint(workerCount), p.externalId, p.workerErrCh, p.workerTimeout)
+	// Стартуем в фоне workers, передаем им канал ошибок и канал-очередь task
+	for workerId := 1; workerId <= p.workerConcurrency; workerId++ {
+		worker := newWorker(p.ctx, p, p.taskQueueCh, uint(workerId), p.externalId, p.workerErrCh, p.workerTimeout)
 
-		p.workers[workerCount] = worker
+		p.workers[workerId] = worker
 
-		go worker.run(nil) // без WaitGroup
+		go worker.run(nil) // Запускаем в фоне без WaitGroup
 	}
 
-	// Ожидаем ошибки от worker, закрытия контекста или остановки pool
+	// Pool готов к работе - можно принимать новый task в канал-очередь task
+	p.mx.Unlock()
+
+	// Ожидаем ошибки от worker, закрытия родительского контекста или остановки pool
 	for {
 		select {
 		case workerErr, ok := <-p.workerErrCh:
@@ -404,7 +404,7 @@ func (p *Pool) Stop(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration
 	defer p.mx.Unlock()
 
 	// Останавливать можно только в определенных статусах
-	if p.state != POOL_STATE_SHUTDOWN {
+	if p.state != POOL_STATE_SHUTDOWN && p.state != POOL_STATE_SHUTTING_DOWN {
 		//_log.Info("Pool online - STOP - got quit signal: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 		err = p.shutdownUnsafe(shutdownMode, shutdownTimeout)
 
@@ -423,7 +423,7 @@ func (p *Pool) Stop(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration
 func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration) (err error) {
 
 	// исключить повторную остановку
-	if p.state != POOL_STATE_SHUTDOWN {
+	if p.state != POOL_STATE_SHUTDOWN && p.state != POOL_STATE_SHUTTING_DOWN {
 		//_log.Debug("Pool - SHUTTING DOWN : ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
 
 		// Функция восстановления после паники
@@ -432,13 +432,12 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 				err = _recover.GetRecoverError(r, p.externalId)
 			}
 
-			p.setStateUnsafe(POOL_STATE_SHUTDOWN)
+			p.setStateUnsafe(POOL_STATE_SHUTDOWN) // Остановка закончена
 		}()
 
-		// Начало остановки - в этом статусе запрещено принимать новые task
-		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN)
+		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN) // Начало остановки - в этом статусе запрещено принимать новые task
 
-		// Канал задач для Online закрывается сразу
+		// Закрываем канал задач для Background, для Online он уже закрыт
 		if p.isBackground {
 			// Дополнительных задач не ожидаем - закрытие канала
 			close(p.taskQueueCh)
@@ -486,7 +485,7 @@ func (p *Pool) stopWorkersUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout 
 
 	// Команда на остановку worker
 	for _, worker := range p.workers {
-		worker.stop(shutdownMode)
+		worker.Stop(shutdownMode)
 	}
 
 	stopStartTime := time.Now() // отсчет времени от начала остановки

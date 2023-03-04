@@ -29,8 +29,8 @@ func newTaskPool() *TaskPool {
 			New: func() interface{} {
 				atomic.AddUint64(&countNew, 1)
 				task := new(Task)
-				task.stopCh = make(chan interface{}, 1)
-				task.localDoneCh = make(chan interface{}, 1)
+				task.stopCh = make(chan interface{}, 1)                          // канал закрывается только при получении команды на остановку task
+				task.localDoneCh = make(chan interface{}, 1)                     // канал никогда не закрывается
 				task.timer = time.NewTimer(POOL_MAX_TIMEOUT)                     // новый таймер - начально максимальное время ожидания
 				task.timer.Stop()                                                // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 				task.ctx, task.cancel = context.WithCancel(context.Background()) // создаем локальный контекст с отменой
@@ -54,8 +54,8 @@ func (p *TaskPool) putTask(task *Task) {
 	if task.state == TASK_STATE_NEW || task.state == TASK_STATE_DONE_SUCCESS {
 		atomic.AddUint64(&countPut, 1)
 		task.timer.Stop()    // остановим таймер, сбрасывать канал не требуется, так как при TASK_STATE_DONE_SUCCESS он не сработал
-		task.requests = nil  // обнулить указатель, чтобы освободить для GC
-		task.responses = nil // обнулить указатель, чтобы освободить для GC
+		task.requests = nil  // обнулить указатель, чтобы освободить для сбора мусора
+		task.responses = nil // обнулить указатель, чтобы освободить для сбора мусора
 		p.pool.Put(task)     // отправить в pool
 	}
 }

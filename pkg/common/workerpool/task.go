@@ -25,28 +25,28 @@ const (
 
 // Task - содержимое задачи и результаты выполнения
 type Task struct {
-	parentCtx context.Context    // родительский контекст, переданный при создании task
-	ctx       context.Context    // контекст, в рамках которого работает task
+	parentCtx context.Context    // родительский контекст, переданный при создании task - используется в функции-обработчике
+	ctx       context.Context    // контекст, в рамках которого работает собственно task - используется в функции-обработчике как сигнал для остановки
 	cancel    context.CancelFunc // функция закрытия контекста для task
 
-	externalId  uint64             // внешний идентификатор, в рамках которого работает task
-	doneCh      chan<- interface{} // канал сигнала о завершении выполнения задачи
-	stopCh      chan interface{}   // канал остановки task, запущенного в фоне
-	localDoneCh chan interface{}   // локальный канал task о завершении задачи
+	externalId  uint64             // внешний идентификатор запроса, в рамках которого работает task - для целей логирования
+	doneCh      chan<- interface{} // внешний канал сигнала во "внешний мир" о завершении выполнения функции-обработчике
+	stopCh      chan interface{}   // канал команды на остановку task со стороны "внешнего мира"
+	localDoneCh chan interface{}   // локальный канал task - сигнал о завершении выполнения функции-обработчике для "длинных" task
 
-	id      uint64        // номер task
+	id      uint64        // номер task - для целей логирования
 	state   TaskState     // состояние жизненного цикла task
-	name    string        // наименование task для логирования
-	timeout time.Duration // максимальное время выполнения task
-	timer   *time.Timer   // таймер остановки по timeout
+	name    string        // наименование task для логирования и мониторинга
+	timeout time.Duration // максимальное время выполнения для "длинных" task
+	timer   *time.Timer   // таймер остановки по timeout для "длинных" task
 
-	requests  []interface{} // входные данные task
-	responses []interface{} // результаты task
-	err       error         // ошибки task
+	requests  []interface{} // входные данные запроса - передаются в функцию-обработчик
+	responses []interface{} // результаты обработки запроса в функции-обработчике
+	err       error         // ошибки обработки запроса в функции-обработчике
 
 	duration time.Duration // реальная длительность выполнения task
 
-	f func(context.Context, context.Context, ...interface{}) (error, []interface{}) // функция обработчик task
+	f func(context.Context, context.Context, ...interface{}) (error, []interface{}) // функция-обработчик
 
 	mx sync.RWMutex
 }
@@ -273,7 +273,7 @@ func (ts *Task) Stop() {
 	// Останавливать можно только в определенных статусах
 	if ts.state == TASK_STATE_NEW || ts.state == TASK_STATE_IN_PROCESS || ts.state == TASK_STATE_DONE_SUCCESS {
 		//_log.Debug("TASK  - send STOP signal: TaskExternalId, TaskName", ts.externalId, ts.name)
-		// Отправляем сигнал и закрываем канал - если task ни разу не запускался, то ts.stopCh будет nil
+		// Отправляем сигнал и закрываем канал
 		if ts.stopCh != nil {
 			ts.stopCh <- true
 			close(ts.stopCh)
