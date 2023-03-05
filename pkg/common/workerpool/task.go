@@ -216,7 +216,10 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		// Ожидаем завершения функции обработчика, наступления timeout или команды на закрытие task
 		select {
 		case <-ts.localDoneCh:
-			ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
+			if !ts.timer.Stop() { // остановим таймер
+				<-ts.timer.C // Вероятность, что он сработал в промежутке между select из localDoneCh и выполнением ts.timer.Stop() крайне мала
+			}
+
 			ts.duration = time.Now().Sub(tic)
 			ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
 			//_log.Debug("Task - DONE: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)

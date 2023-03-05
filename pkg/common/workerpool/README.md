@@ -7,9 +7,9 @@
 - "Короткие" - не контролируется предельный timeout выполнения и их нельзя прервать
 - "Длинные" - контролируется предельный timeout выполнения и их можно прервать
 
-Накладные расходы Worker pool на отдельную task:
-- Для "коротких" task - от 300 ns/op, 35 B/op, 0 allocs/op
-- Для "длинных" task - от 600 ns/op, 60 B/op, 1 allocs/op
+Накладные расходы Worker pool на добавление в очередь, запуск обработки task, контроль времени выполнения task:
+- Для "коротких" task - от 300 ns/op, 0 B/op, 0 allocs/op
+- Для "длинных" task - от 800 ns/op, 16 B/op, 1 allocs/op
 
 _Для task, которые должны выполняться быстрее 100 ns/op представленный Worker pool использовать не эффективно_
 
@@ -38,10 +38,10 @@ _Для task, которые должны выполняться быстрее 
 4. Структура Worker
 5. Структура Pool
 6. Оптимизация накладных расходов Worker pool
-7. Worker pool service
-8. Нагрузочное тестирование Worker pool
+7. Нагрузочное тестирование Worker pool
+8. Профилирование Worker pool
 
-## . Особенности работы worker pool в составе микросервиса в Kubernetes
+## 1. Особенности работы worker pool в составе микросервиса в Kubernetes
 
 При развертывании приложения в Kubernetes столкнулись с такими [особенностями](https://habr.com/ru/post/716634/).
 - при росте нагрузки Horizontal Autoscaler (HA) может создавать новые Pod c приложением и перенаправлять на него часть запросов.
@@ -70,7 +70,7 @@ _Для task, которые должны выполняться быстрее 
 
 Шаблон Worker pool в репозитории поддерживается варианты остановки "Light", "Soft", "Soft + timeout", "Hard". по умолчанию настроен режим "Soft + timeout".
 
-## . Архитектура Worker pool
+## 2. Архитектура Worker pool
 В основе Worker pool лежит концепция из статьи [Ahad Hasan](https://hackernoon.com/concurrency-in-golang-and-workerpool-part-2-l3w31q7). 
 - task - содержит входные параметры задачи, функцию обработчик, результаты выполнения, каналы для управления и таймер для контроля timeout.
 - worker - контролирует очередь задач выполняет task в своей goroutine  
@@ -103,7 +103,7 @@ _Для task, которые должны выполняться быстрее 
 - Отработать различные сценарии остановки "Light", "Soft", "Soft + timeout", "Hard"
 
 
-## . Структура Task
+## 3. Структура Task
 
 ``` go
 type Task struct {
@@ -233,9 +233,12 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		// Ожидаем завершения функции обработчика, наступления timeout или команды на закрытие task
 		select {
 		case <-ts.localDoneCh:
+            if !ts.timer.Stop() { // остановим таймер 
+				<-ts.timer.C // Вероятность, что он сработал в промежутке между select из localDoneCh и выполнением ts.timer.Stop() крайне мала
+			}
+
 			ts.duration = time.Now().Sub(tic)
 			ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
-			ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 			return
 		case _, ok := <-ts.stopCh:
 			if ok {
@@ -303,7 +306,7 @@ func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data .
 }
 ```
 
-## . Структура Worker
+## 4. Структура Worker
 
 ``` go
 type Worker struct {
@@ -501,7 +504,7 @@ func (wr *Worker) Stop(shutdownMode PoolShutdownMode) {
 }
 ```
 
-## . Структура Pool
+## 5. Структура Pool
 
 ``` go
 type Pool struct {
@@ -740,12 +743,18 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 }
 ```
 
-## . Оптимизация накладных расходов Worker pool
+## 6. Оптимизация накладных расходов Worker pool
+
+### Оптимизация расхода памяти на создание task
+
+Основные расходы памяти приходятся на создание новой структуры task, при добавлении задачи в очередь. После выполнения task структура будет собрана GC.
+
+Для решения этой проблемы отлично подходит sync.Pool. Вместо, того, чтобы "выбрасывать" task после отработки, будет складывать их в sync.Pool, а при добавлении новой задачи в очередь, брать их из sync.Pool.
 
 ### Оптимизация работы с time.Timer
 Для того чтобы контролировать время выполнения функции-обработчика task, используется time.Timer.
 
-В простейшем случаем можно использовать такую конструкцию с time.After(ts.timeout) в task.
+В простейшем случае, можно использовать такую конструкцию с time.After(ts.timeout) в task.
 
 ``` go
     select {
@@ -760,21 +769,22 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
     }
 ```
 
-Есть одно "но", time.After создает новый канал для контроля времени и этот канал не будет удален CG, пока он не сработает.
+Только есть одно "но", time.After создает новый канал для контроля времени и этот канал не будет удален CG, пока таймер не сработает.
 В результате получите огромный расход памяти и потери по времени в 2-3 раза на интенсивных операциях с task. Ниже в нагрузочном тесте будет пример, где легко можно получить расход памяти до 5-10 Гбайт
 
 Вместо time.After, в приведенном шаблоне используется явное управление созданием, остановкой и сбросом time.Timer.
-
 - time.Timer создается один раз при создании новой task и устанавливается в максимальное значение (константа workerpoolю.POOL_MAX_TIMEOUT) 
 - после создания time.Timer сразу останавливается timer.Stop(). При запуске task.process получает на вход всегда остановленный time.Timer
-- при выполнении task.process устанавливает правильный timeout, который нужно контролировать и запускает time.Timer. Если timeout == 0, то time.Timer на запускается
-- при успешном выполнении функции-обработчика, task сразу останавливает time.Timer
+- при выполнении task.process устанавливает правильный timeout, который нужно контролировать, и запускает time.Timer. Если timeout == 0, то time.Timer на запускается
+- при успешном выполнении функции-обработчика, task сразу останавливает time.Timer. Вероятность, что Timer сработал в промежутке между select из localDoneCh и выполнением ts.timer.Stop() крайне мала, но нужно подстраховаться и очистить канал.  
 
-### Оптимизация расхода памяти на создание task
+``` go
+    if !ts.timer.Stop() {
+        <-ts.timer.C // Вероятность, что он сработал в промежутке между select из localDoneCh и выполнением ts.timer.Stop() крайне мала
+    }
+```
 
-Основные расходы памяти приходятся на создание новой структуры task, при добавлении задачи в очередь. После выполнения task структура будет собрана GC.
-
-Для решения этой проблемы отлично подходит sync.Pool. Вместо, того, чтобы "выбрасывать" task после отработки, будет складывать их в sync.Pool, а при добавлении новой задачи в очередь, брать их из sync.Pool.
+Такой подход позволяет постоянно использовать один и тот же time.Timer.
 
 ### Реализация TaskPool 
 
@@ -829,7 +839,6 @@ func (p *TaskPool) putTask(task *Task) {
 	// Если task не был успешно завершен, то в нем могли быть закрыты каналы или сработал таймер - такие не подходят для повторного использования
 	if task.state == TASK_STATE_NEW || task.state == TASK_STATE_DONE_SUCCESS {
 		atomic.AddUint64(&countPut, 1)
-		task.timer.Stop()    // остановим таймер, сбрасывать канал не требуется, так как при TASK_STATE_DONE_SUCCESS он не сработал
 		task.requests = nil  // обнулить указатель, чтобы освободить для сбора мусора
 		task.responses = nil // обнулить указатель, чтобы освободить для сбора мусора
 		p.pool.Put(task)     // отправить в pool
@@ -846,3 +855,298 @@ func (p *Pool) PrintTaskPoolStats() {
 	}
 }
 ```
+
+## 7. Нагрузочное тестирование Worker pool
+
+### Сценарий тестирования 
+
+Для тестирования выбрал крайне нагруженный пример "коротких" task - будем считать сумму факториалов в группе task.
+
+Каждый task из группы выполняется в отдельно и по завершению всей группы результаты суммируются.
+
+[Фукнция-обработчик для расчета факториала n!](https://github.com/romapres2010/goapp/blob/master/pkg/app/httphandler/handler_wp.go).
+
+``` go
+func calculateFactorialFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
+	var factVal uint64 = 1
+	var cnt uint64 = 1
+
+	// Проверяем количество входных параметров
+	if len(data) == 1 {
+		// Проверяем тип входных параметров
+		if value, ok := data[0].(uint64); ok {
+			for cnt = 1; cnt <= value; cnt++ {
+				factVal *= cnt
+			}
+			return nil, []interface{}{factVal}
+		} else {
+			return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "calculateFactorialFn", "0 - uint64", reflect.ValueOf(data[0]).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError(), nil
+		}
+	}
+	return _err.NewTyped(_err.ERR_INCORRECT_ARG_NUM_ERROR, _err.ERR_UNDEFINED_ID, data).PrintfError(), nil
+}
+```
+
+[Фукнция-обработчик для формирования группы task и суммирования результатов](https://github.com/romapres2010/goapp/blob/master/pkg/app/httphandler/handler_wp.go).
+
+``` go
+// calculateFactorial функция запуска расчета Factorial
+func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string, tasks []*_wp.Task) (err error) {
+    // Подготовим список задач для запуска
+    for i, value := range *wpFactorialReqResp.NumArray {
+        task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, -1*time.Second, calculateFactorialFn, value)
+        tasks = append(tasks, task)
+    }
+
+    // в конце обработки отправить task в кэш для повторного использования
+    defer func() {
+        for _, task := range tasks {
+            task.Delete()
+        }
+    }()
+
+    // Запускаем обработку в общий background pool
+    err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
+
+    // Анализ результатов
+    if err == nil {
+        // Суммируем все результаты
+        for _, task := range tasks {
+            if task.GetError() == nil {
+                result := task.GetResponses()[0] // ожидаем только один ответ
+
+                // Приведем к нужному типу
+                if factorial, ok := result.(uint64); ok {
+                    wpFactorialReqResp.SumFactorial += factorial
+                } else {
+                    return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "WpHandlerFactorial", "0 - uint", reflect.ValueOf(factorial).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError()
+                }
+            } else {
+                _log.Error("Task error", requestID, task.GetError())
+                return task.GetError()
+            }
+        }
+    } else {
+        _log.Error("RunTasksGroupWG error", requestID, err)
+    }
+
+    return err
+}
+```
+
+### Benchmark для тестирования 
+Содержит наборы task в диапазоне от 1 до 4096. Запуск через командную строку. Чтобы получить репрезентативную выборку, запускаем 5 тестов 
+
+``` shell
+go.exe test -benchmem -run=^$ -bench ^BenchmarkCalculateFactorial$ github.com/romapres2010/goapp/pkg/app/httphandler -count 5 -v
+```
+
+[BenchmarkCalculateFactorial](https://github.com/romapres2010/goapp/blob/master/pkg/app/httphandler/handler_wp_test.go)
+- Создаем Worker pool service
+- Запускаем Worker pool service в фоне и делаем минимальную задержку для инициации pool
+- Далее в цикле запускаем нужный тестовый набор от 1 до 4096 task
+- Останавливаем обработчик Worker pool service
+
+``` go
+func BenchmarkCalculateFactorial(b *testing.B) {
+
+	// конфигурационные параметры для Worker pool service, все timeout выставлены в заведомо большие значения, чтобы не срабатывали.
+	var wpServiceCfg = &_wpservice.Config{
+		TotalTimeout:    100000 * time.Millisecond,
+		ShutdownTimeout: 30 * time.Second,
+		WPCfg: _wp.Config{
+			TaskQueueSize:     0,
+			TaskTimeout:       20000 * time.Millisecond,
+			WorkerConcurrency: 4,
+			WorkerTimeout:     30000 * time.Millisecond,
+		},
+	}
+
+	var wpService *_wpservice.Service                                           // сервис worker pool
+	var wpServiceErrCh = make(chan error, wpServiceCfg.WPCfg.WorkerConcurrency) // канал ошибок для сервиса worker pool
+	var err error
+	var parentCtx = context.Background()
+
+	// Создаем Worker pool service
+	if wpService, err = _wpservice.New(parentCtx, "WorkerPool - background", wpServiceErrCh, wpServiceCfg); err != nil {
+		return
+	}
+
+	// Запускаем Worker pool service в фоне и делаем минимальную задержку для инициации pool
+	go func() { wpServiceErrCh <- wpService.Run() }()
+	time.Sleep(1 * time.Microsecond)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		wpFactorialReqResp := &WpFactorialReqResp{
+			NumArray: NumArray1024,
+		}
+		_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
+	}
+
+	// Останавливаем обработчик Worker pool service
+	if err = wpService.Shutdown(false, wpServiceCfg.ShutdownTimeout); err != nil {
+		_log.ErrorAsInfo(err) // дополнительно логируем результат остановки
+	}
+}
+```
+
+### Результаты тестирования для 1 task
+
+1. Тестируем неоптимизированный вариант worker pool. Без использования sync.Pool и с time.After
+``` shell
+2023-03-05 20:51:23.730300    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['993524', '0', '993524']
+2023-03-05 20:51:23.746665    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['993624', '0', '993624']
+2023-03-05 20:51:23.881707    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1003624', '0', '1003624']
+2023-03-05 20:51:24.686886    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1095245', '0', '1095245']
+2023-03-05 20:51:25.880455    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1233606', '0', '1233606']
+BenchmarkCalculateFactorial-4             138361              8553 ns/op            1209 B/op         21 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       11.171s
+```
+
+2. Тестируем оптимизированный вариант worker pool. Включен sync.Pool и с time.timer
+``` shell
+2023-03-05 20:59:06.661061    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1026975', '1026975', '26']
+2023-03-05 20:59:06.678355    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1027075', '1027075', '27']
+2023-03-05 20:59:06.863869    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1036025', '1036025', '28']
+2023-03-05 20:59:07.613347    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1130840', '1130840', '30']
+2023-03-05 20:59:08.893377    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['1284189', '1284189', '32']
+BenchmarkCalculateFactorial-4             153349              8331 ns/op             464 B/op         11 allocs/op
+PASS
+```
+
+### Результаты тестирования для 100 task
+
+1. Тестируем неоптимизированный вариант worker pool. Без использования sync.Pool и с time.After
+``` shell
+2023-03-05 20:54:31.642079    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['3431200', '0', '3431200']
+2023-03-05 20:54:31.706946    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['3440400', '0', '3440400']
+2023-03-05 20:54:32.041946    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['3618100', '0', '3618100']
+2023-03-05 20:54:33.230567    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['4277500', '0', '4277500']
+BenchmarkCalculateFactorial-4               6594            179944 ns/op           80624 B/op       1308 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       8.237s
+```
+
+2. Тестируем оптимизированный вариант worker pool. Включен sync.Pool и с time.timer
+``` shell
+2023-03-05 20:58:13.493850    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['5921000', '5921000', '138']
+2023-03-05 20:58:13.513097    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['5931000', '5931000', '139']
+2023-03-05 20:58:14.268227    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['6591200', '6591200', '144']
+2023-03-05 20:58:15.388267    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['7658300', '7658300', '149']
+BenchmarkCalculateFactorial-4              10671            103819 ns/op            6246 B/op        308 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       8.513s
+```
+
+### Результаты тестирования для 1024 task
+
+1. Тестируем неоптимизированный вариант worker pool. Без использования sync.Pool и с time.After
+``` shell
+2023-03-05 20:55:16.861903    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['5306368', '0', '5306368']
+2023-03-05 20:55:17.041430    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['5374976', '0', '5374976']
+2023-03-05 20:55:17.884380    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['5868544', '0', '5868544']
+2023-03-05 20:55:19.021540    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['6581248', '0', '6581248']
+BenchmarkCalculateFactorial-4                696           1623650 ns/op          819853 B/op      13321 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       11.370s
+```
+
+2. Тестируем оптимизированный вариант worker pool. Включен sync.Pool и с time.timer
+``` shell
+2023-03-05 20:57:24.753063    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['10350592', '10350592', '2080']
+2023-03-05 20:57:24.863404    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['10422272', '10422272', '2082']
+2023-03-05 20:57:25.523164    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['11227136', '11227136', '2085']
+2023-03-05 20:57:26.738321    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['12699648', '12699648', '2089']
+BenchmarkCalculateFactorial-4               1438            837543 ns/op           61221 B/op       3082 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       10.800s
+```
+
+### Сравнение результатов
+
+Сравним результаты в пересчете на одну task
+1. 1 task
+   - неоптимизированный - 8553 ns/op 1209 B/op 21 allocs/op
+   - оптимизированный - 8331 ns/op 464 B/op 11 allocs/op
+2. 100 task
+   - неоптимизированный - 1799 ns/op 806 B/op 13 allocs/op
+   - оптимизированный - 1038 ns/op 62 B/op 3 allocs/op
+3. 1024 task
+    - неоптимизированный - 1620 ns/op 810 B/op 13 allocs/op
+    - оптимизированный - 830 ns/op 61 B/op 3 allocs/op
+
+При большом количестве task, минимум двухкратный выигрыш по cpu и более чем десятикратный по памяти.
+
+### Контрольный выстрел
+
+Сравним, сколько занимает расчет суммы факториалов 50! без использования worker pool в один поток для 1024 значений
+``` shell
+2023-03-05 21:05:40.898732    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['0', '0', '0']
+2023-03-05 21:05:40.914259    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['0', '0', '0']
+2023-03-05 21:05:41.298531    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['0', '0', '0']
+2023-03-05 21:05:42.498569    info    workerpool/taskpool.go:68    (*Pool).PrintTaskPoolStats() - Usage task pool: countGet, countPut, countNew['0', '0', '0']
+BenchmarkCalculateFactorial-4              26288             45514 ns/op               0 B/op          0 allocs/op
+PASS
+ok      github.com/romapres2010/goapp/pkg/app/httphandler       8.675s
+```
+
+Оптимизированный worker pool (на 2 физических ярах) отстает в 20 раз от прямого расчета суммы факториалов в один поток.
+На 6-8 ядрах можно сократить разрыв до 8-10 раз, дальше рост количества ядер не сильно поможет.
+
+**Используйте worker pool разумно - не везде он нужен**
+
+Для task, которые должны выполняться быстрее 100 ns/op представленный Worker pool использовать не эффективно. 
+
+## 8. Профилирование Worker pool
+
+### Обработчик для профилирования
+
+Для профилирования подготовим упрощенный обработчик, который ни чего не делает в task 
+
+``` go
+// calculateEmpty функция оценки накладных расходов worker pool
+func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string, tasks []*_wp.Task) (err error) {
+
+	// Подготовим список задач для запуска
+	for i, value := range *wpFactorialReqResp.NumArray {
+		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
+		tasks = append(tasks, task)
+	}
+
+	// в конце обработки отправить task в кэш для повторного использования
+	defer func() {
+		for _, task := range tasks {
+			task.Delete()
+		}
+	}()
+
+	// Запускаем обработку в общий background pool
+	err = wpService.RunTasksGroupWG(requestID, tasks, "")
+
+	return err
+}
+
+// calculateEmpty функция запуска оценки накладных расходов worker pool
+func calculateEmptyFn(parentCtx context.Context, ctx context.Context, data ...interface{}) (error, []interface{}) {
+	return nil, nil // для оценки накладных расходов на Worker pool
+}
+```
+
+### Результат профилирования
+
+Скрины с профилирования выложены в каталог [doc/image](https://github.com/romapres2010/goapp/tree/master/doc/image)
+
+1. Результат профилирования для "длинных" task
+    - workerpool.(*Task).process - выделено память для 2261026 объектов, всего 36176424 байт - 16 байт на один task
+    - workerpool.(*Task).process - 900 ns из которых, 
+      - 290 ns - ожидание информации в канал о завершении функции-обработчика и таймера, 
+      - 160 ns - запуск функции-обработчика в отдельной goroutine
+      - 120 ns - информирование "внешнего мира" о завершении task, 
+      - 140 ns - перезапуск и остановка таймера,  
+
+3. Результат профилирования для "коротких" task
+   - workerpool.(*Task).process - память не выделялась
+   - workerpool.(*Task).process - 270 ns из которых,
+       - 140 ns - информирование "внешнего мира" о завершении task,

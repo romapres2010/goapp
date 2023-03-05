@@ -3,6 +3,7 @@ package httphandler
 import (
 	"context"
 	"encoding/json"
+	_log "github.com/romapres2010/goapp/pkg/common/logger"
 	"net/http"
 	"reflect"
 	"time"
@@ -71,9 +72,6 @@ func (s *Service) WpHandlerFactorial(w http.ResponseWriter, r *http.Request) {
 func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requestID uint64, wpFactorialReqResp *WpFactorialReqResp, wpTipe string, tasks []*_wp.Task) (err error) {
 	if wpTipe == "bg" {
 
-		//var tic = time.Now()
-		//var tasks = make([]*_wp.Task, 0, len(*wpFactorialReqResp.NumArray))
-
 		// Подготовим список задач для запуска
 		for i, value := range *wpFactorialReqResp.NumArray {
 			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
@@ -106,12 +104,12 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 						return _err.NewTyped(_err.ERR_INCORRECT_TYPE_ERROR, _err.ERR_UNDEFINED_ID, "WpHandlerFactorial", "0 - uint", reflect.ValueOf(factorial).Type().String(), reflect.ValueOf(uint64(1)).Type().String()).PrintfError()
 					}
 				} else {
+					_log.Error("Task error", requestID, task.GetError())
 					return task.GetError()
 				}
 			}
-
-			//wpFactorialReqResp.Duration = fmt.Sprintf("%s", time.Now().Sub(tic))
 		} else {
+			_log.Error("RunTasksGroupWG error", requestID, err)
 			return err
 		}
 	} else {
@@ -162,7 +160,7 @@ func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestI
 
 	// Подготовим список задач для запуска
 	for i, value := range *wpFactorialReqResp.NumArray {
-		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
+		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, 1*time.Second, calculateEmptyFn, value)
 		tasks = append(tasks, task)
 	}
 
