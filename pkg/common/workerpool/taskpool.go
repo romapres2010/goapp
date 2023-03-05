@@ -30,7 +30,7 @@ func newTaskPool() *TaskPool {
 				atomic.AddUint64(&countNew, 1)
 				task := new(Task)
 				task.stopCh = make(chan interface{}, 1)                          // канал закрывается только при получении команды на остановку task
-				task.localDoneCh = make(chan interface{}, 1)                     // канал никогда не закрывается
+				task.localDoneCh = make(chan interface{}, 1)                     // канал закрывается при timeout и при получении команды на остановку task
 				task.timer = time.NewTimer(POOL_MAX_TIMEOUT)                     // новый таймер - начально максимальное время ожидания
 				task.timer.Stop()                                                // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 				task.ctx, task.cancel = context.WithCancel(context.Background()) // создаем локальный контекст с отменой

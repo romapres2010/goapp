@@ -149,35 +149,29 @@ func (p *Pool) AddTask(task *Task) (err error) {
 
 	//_log.Debug("Pool - START - add new task: PoolName, TaskId, TaskExternalId, State", p.name, task.id, task.externalId, p.state)
 
-	{ // Блокируем для проверки статусов pool
-		p.mx.RLock()
+	// Блокируем pool для проверки статуса и чтобы задержать отправку task до полной инициации pool
+	p.mx.RLock()
 
-		// Добавление task разрешено только в определенных статусах
-		if p.state != POOL_STATE_BG_RUNNING {
-			//_log.Info("Pool - has incorrect state to add new task: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
-			err = _err.NewTyped(_err.ERR_WORKER_POOL_ADD_TASK_INCORRECT_STATE, p.externalId, p.state, "NEW, RUNNING_BG, PAUSED_BG").PrintfError()
-			p.mx.RUnlock()
-			return err
-		}
-
+	// Добавление task запрещено
+	if p.state != POOL_STATE_BG_RUNNING {
+		//_log.Info("Pool - has incorrect state to add new task: ExternalId, PoolName, ActiveTaskCount, State", p.externalId, p.name, len(p.taskQueueCh), p.state)
+		err = _err.NewTyped(_err.ERR_WORKER_POOL_ADD_TASK_INCORRECT_STATE, p.externalId, p.state, "NEW, RUNNING_BG, PAUSED_BG").PrintfError()
 		p.mx.RUnlock()
-	} // Блокируем для проверки статусов pool
+		return err
+	}
 
-	// Функция восстановления после паники
+	p.mx.RUnlock()
+
+	// Обработать ошибки закрытия канала-очереди task
 	defer func() {
 		if r := recover(); r != nil {
 			err = _recover.GetRecoverError(r, p.externalId)
 		}
 	}()
 
-	// Счетчик ожиданий отправки в очередь - увеличить
-	_metrics.IncWPAddTaskWaitCountVec(p.name)
-
-	// Очередь имеет ограниченный размер - возможно ожидание, пока не появится свободное место
-	p.taskQueueCh <- task
-
-	// Счетчик ожиданий отправки в очередь - отправили - уменьшить
-	_metrics.DecWPAddTaskWaitCountVec(p.name)
+	_metrics.IncWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - увеличить
+	p.taskQueueCh <- task                     // Очередь имеет ограниченный размер - возможно ожидание, пока не появится свободное место
+	_metrics.DecWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - отправили - уменьшить
 
 	return nil
 }
@@ -419,7 +413,7 @@ func (p *Pool) Stop(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration
 	return nil
 }
 
-// shutdownUnsafe закрывает контекст и останавливает workers
+// shutdownUnsafe останавливает workers
 func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout time.Duration) (err error) {
 
 	// исключить повторную остановку
@@ -437,13 +431,12 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 
 		p.setStateUnsafe(POOL_STATE_SHUTTING_DOWN) // Начало остановки - в этом статусе запрещено принимать новые task
 
-		// Закрываем канал задач для Background, для Online он уже закрыт
+		// Закрываем канал задач для Background pool, для Online он уже закрыт
 		if p.isBackground {
-			// Дополнительных задач не ожидаем - закрытие канала
 			close(p.taskQueueCh)
 		}
 
-		// Вычитываем task из очереди и останавливаем их
+		// В режиме остановки "hard" и "soft", вычитываем task из очереди и останавливаем их
 		if shutdownMode == POOL_SHUTDOWN_HARD || shutdownMode == POOL_SHUTDOWN_SOFT {
 			for task := range p.taskQueueCh {
 				if task != nil {
@@ -454,28 +447,26 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 
 		//tic := time.Now() // временная метка начала остановки
 
-		// Запускаем остановку worker и ожидаем shutdownTimeout
+		// Запускаем остановку worker и ожидаем успешной остановки или shutdownTimeout, если shutdownTimeout == 0, то бесконечное ожидание
 		p.stopWorkersUnsafe(shutdownMode, shutdownTimeout)
 
-		{ // Проверим ошибки от worker, которые накопились в канале
-			close(p.workerErrCh) // Закрываем канал ошибок worker
+		close(p.workerErrCh) // Закрываем канал ошибок worker
 
-			if len(p.workerErrCh) != 0 {
-				//_log.Info("Pool - SHUTDOWN - ERROR: ExternalId, PoolName, ErrorCount, duration", p.externalId, p.name, len(p.workerErrCh), time.Now().Sub(tic))
+		// Проверим ошибки от worker, которые накопились в канале
+		if len(p.workerErrCh) != 0 {
+			//_log.Info("Pool - SHUTDOWN - ERROR: ExternalId, PoolName, ErrorCount, duration", p.externalId, p.name, len(p.workerErrCh), time.Now().Sub(tic))
 
-				// накопленные ошибки worker передадим на уровень вверх
-				for workerErr := range p.workerErrCh {
-					//_log.Debug("Pool online - DONE - Worker error: error", workerErr.err.Error())
-					err = _err.WithCauseTyped(_err.ERR_WORKER_POOL_WORKER_ERROR, p.externalId, workerErr.err, p.name, workerErr.worker.id, workerErr.err.Error())
-				}
-				return err
-			} else {
-				//_log.Debug("Pool - SHUTDOWN - SUCCESS: ExternalId, PoolName, ActiveTaskCount, duration", p.externalId, p.name, len(p.taskQueueCh), time.Now().Sub(tic))
-				return nil
+			// Накопленные ошибки worker залогируем, последнюю передадим на верх
+			for workerErr := range p.workerErrCh {
+				//_log.Debug("Pool online - DONE - Worker error: error", workerErr.err.Error())
+				err = _err.WithCauseTyped(_err.ERR_WORKER_POOL_WORKER_ERROR, p.externalId, workerErr.err, p.name, workerErr.worker.id, workerErr.err.Error()).PrintfError()
 			}
-		} // Проверим ошибки от worker, которые накопились в канале
+		} else {
+			//_log.Debug("Pool - SHUTDOWN - SUCCESS: ExternalId, PoolName, ActiveTaskCount, duration", p.externalId, p.name, len(p.taskQueueCh), time.Now().Sub(tic))
+		}
 	}
-	return nil
+
+	return err
 }
 
 // stopWorkersUnsafe останавливает запущенных в фоне worker
@@ -490,10 +481,10 @@ func (p *Pool) stopWorkersUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout 
 
 	stopStartTime := time.Now() // отсчет времени от начала остановки
 
-	// ждем остановки всех workers или предельного shutdownTimeout
+	// Ждем остановки всех workers или предельного shutdownTimeout
 	for {
 
-		// Превышено предельное время "жесткой" остановки, в противном случае ждем отработки всех текущих задач worker
+		// Превышено shutdownTimeout остановки, в противном случае ждем отработки всех текущих задач worker
 		if shutdownTimeout != 0 && time.Now().After(stopStartTime.Add(shutdownTimeout)) {
 			//_log.Info("Pool - STOP WORKER INTERRUPT - exceeded StopTimeout: ExternalId, PoolName, ActiveTaskCount, StopTimeout, State", p.externalId, p.name, len(p.taskQueueCh), shutdownTimeout, p.state)
 			p.setStateUnsafe(POOL_STATE_TERMINATE_TIMEOUT)
@@ -507,7 +498,6 @@ func (p *Pool) stopWorkersUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout 
 			if worker.state != WORKER_STATE_TERMINATED {
 				//_log.Debug("Pool - WORKER STILL WORKING: ExternalId, PoolName, WorkerId, ActiveTaskCount, State", p.externalId, p.name, worker.id, len(p.taskQueueCh), p.state)
 				anyNonStoppedWorker = true // Есть хоть один не остановленный
-				break
 			}
 		}
 

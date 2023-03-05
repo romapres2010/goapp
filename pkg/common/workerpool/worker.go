@@ -88,9 +88,6 @@ func newWorker(parentCtx context.Context, pool *Pool, taskQueueCh <-chan *Task, 
 
 // run - запускает worker
 func (wr *Worker) run(wg *sync.WaitGroup) {
-	if wr == nil {
-		return
-	}
 
 	// Заблокируем worker на время запуска, чтобы исключить одновременное использование одного указателя
 	if wr.mx.TryLock() { // Использование TryLock не рекомендуется, но в данном случае это очень удобно
@@ -217,6 +214,9 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 
 // Stop - принудительная остановка worker, не дожидаясь отработки всей очереди
 func (wr *Worker) Stop(shutdownMode PoolShutdownMode) {
+	if wr == nil {
+		return
+	}
 
 	//_log.Debug("Worker - STOP: PoolName, WorkerId, WorkerExternalId, State", wr.pool.name, wr.id, wr.externalId, wr.state)
 

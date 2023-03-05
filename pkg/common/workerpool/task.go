@@ -216,9 +216,9 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		// Ожидаем завершения функции обработчика, наступления timeout или команды на закрытие task
 		select {
 		case <-ts.localDoneCh:
+			ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 			ts.duration = time.Now().Sub(tic)
 			ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
-			ts.timer.Stop() // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 			//_log.Debug("Task - DONE: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 			return
 		case _, ok := <-ts.stopCh:
@@ -236,6 +236,7 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 				//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 				ts.cancel()
 			}
+			close(ts.localDoneCh)
 			return
 		case <-ts.timer.C:
 			//_log.Info("Task - INTERRUPT - exceeded Timeout: WorkerId, TaskExternalId, TaskName, Timeout", workerID, ts.externalId, ts.name, timeout)
@@ -246,6 +247,7 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 				//_log.Debug("Task - close local context: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 				ts.cancel()
 			}
+			close(ts.localDoneCh)
 			return
 
 			// !!! вариант с time.After(ts.timeout) использовать нельзя, так как будут оставаться "повешенными" таймеры
