@@ -203,11 +203,11 @@ func (wr *Worker) run(wg *sync.WaitGroup) {
 				_log.Error("Worker - STOP - stop chanel closed: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
 			}
 			return
-		case <-wr.parentCtx.Done():
-			// закрыт родительский контекст
-			//_log.Info("Worker - STOP - got parent context close: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
-			wr.setStateUnsafe(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
-			return
+			//case <-wr.parentCtx.Done():
+			//	// закрыт родительский контекст
+			//	//_log.Info("Worker - STOP - got parent context close: PoolName, WorkerId, WorkerExternalId", wr.pool.name, wr.id, wr.externalId)
+			//	wr.setStateUnsafe(WORKER_STATE_TERMINATING_PARENT_CTX_CLOSED)
+			//	return
 		}
 	}
 }

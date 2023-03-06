@@ -159,28 +159,32 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		return
 	}
 
-	var tic = time.Now() // временная метка начала обработки task
-
-	// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
-	defer func() {
-		if r := recover(); r != nil {
-			ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
-			ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
-		}
+	if ts.timeout < 0 {
+		// "Короткие" task (timeout < 0) не контролируем по timeout. Их нельзя прервать. Функция-обработчик запускается в goroutine worker
+		ts.err, ts.responses = ts.f(ts.parentCtx, nil, ts.requests...)
+		ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
 
 		if ts.doneCh != nil {
 			ts.doneCh <- struct{}{}
 		}
-	}()
 
-	if ts.timeout < 0 {
-		// "Короткие" task (timeout < 0) не контролируем по timeout. Их нельзя прервать. Функция-обработчик запускается в goroutine worker
-		ts.err, ts.responses = ts.f(ts.parentCtx, nil, ts.requests...)
-		ts.duration = time.Now().Sub(tic)
-		ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
 		return
 	} else {
 		// "Длинные" task запускаем в фоне и ожидаем завершения в отдельный локальный канал. Контролируем timeout
+
+		// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
+		defer func() {
+			if r := recover(); r != nil {
+				ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
+				ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
+			}
+
+			if ts.doneCh != nil {
+				ts.doneCh <- struct{}{}
+			}
+		}()
+
+		var tic = time.Now() // временная метка начала обработки task
 
 		go func() {
 			defer func() {
