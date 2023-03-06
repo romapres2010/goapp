@@ -166,6 +166,7 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 			ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
 		}
 
+		// Возможна ситуация, когда канал закрыт, например, если "внешний мир" нас не дождался по причине своего таймаута, тогда канал уже будет закрыт
 		if ts.doneCh != nil {
 			ts.doneCh <- struct{}{}
 		}
