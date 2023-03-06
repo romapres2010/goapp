@@ -1,7 +1,7 @@
-[# Шаблон backend сервера на Golang — часть 5 - Worker pool](https://habr.com/ru/post/720286/)
+[# Шаблон backend сервера на Golang — часть 5 - оптимизация Worker pool](https://habr.com/ru/post/720286/)
 
 
-[Пятая часть](https://habr.com/ru/post/720286/) посвящена Worker pool и особенностям его работы в составе микросервиса, развернутого в Kubernetes.
+[Пятая часть](https://habr.com/ru/post/720286/) посвящена оптимизации Worker pool и особенностям его работы в составе микросервиса, развернутого в Kubernetes.
 
 Представленный Worker pool поддерживает работу с двумя типами задач
 - "Короткие" - не контролируется предельный timeout выполнения и их нельзя прервать
@@ -37,7 +37,7 @@ _Для task, которые должны выполняться быстрее 
 3. Структура Task
 4. Структура Worker
 5. Структура Pool
-6. Оптимизация накладных расходов Worker pool
+6. Оптимизация Worker pool
 7. Нагрузочное тестирование Worker pool
 8. Профилирование Worker pool
 
@@ -180,8 +180,6 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		return
 	}
 
-	var tic = time.Now() // временная метка начала обработки task
-
 	// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
 	defer func() {
 		if r := recover(); r != nil {
@@ -195,11 +193,11 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 	if ts.timeout < 0 {
 		// "Короткие" task (timeout < 0) не контролируем по timeout. Их нельзя прервать. Функция-обработчик запускается в goroutine worker
 		ts.err, ts.responses = ts.f(ts.parentCtx, nil, ts.requests...)
-		ts.duration = time.Now().Sub(tic)
 		ts.setStateUnsafe(TASK_STATE_DONE_SUCCESS)
 		return
 	} else {
 		// "Длинные" task запускаем в фоне и ожидаем завершения в отдельный локальный канал. Контролируем timeout
+		var tic = time.Now() // временная метка начала обработки task
 
 		go func() {
 			defer func() {
@@ -743,13 +741,28 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 }
 ```
 
-## 6. Оптимизация накладных расходов Worker pool
+## 6. Оптимизация Worker pool
 
 ### Оптимизация расхода памяти на создание task
 
-Основные расходы памяти приходятся на создание новой структуры task, при добавлении задачи в очередь. После выполнения task структура будет собрана GC.
+Основные расходы памяти приходятся на создание новой структуры task при добавлении задачи в очередь. После выполнения task структура будет собрана GC.
 
 Для решения этой проблемы отлично подходит sync.Pool. Вместо, того, чтобы "выбрасывать" task после отработки, будет складывать их в sync.Pool, а при добавлении новой задачи в очередь, брать их из sync.Pool.
+
+``` go
+	// Подготовим список задач для запуска
+	for i, value := range *wpFactorialReqResp.NumArray {
+		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
+		tasks = append(tasks, task)
+	}
+
+	// в конце обработки отправить task в кэш для повторного использования
+	defer func() {
+		for _, task := range tasks {
+			task.Delete()
+		}
+	}()
+```
 
 ### Оптимизация работы с time.Timer
 Для того чтобы контролировать время выполнения функции-обработчика task, используется time.Timer.
@@ -770,7 +783,7 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 ```
 
 Только есть одно "но", time.After создает новый канал для контроля времени и этот канал не будет удален CG, пока таймер не сработает.
-В результате получите огромный расход памяти и потери по времени в 2-3 раза на интенсивных операциях с task. Ниже в нагрузочном тесте будет пример, где легко можно получить расход памяти до 5-10 Гбайт
+В результате получите большой расход памяти и потери по времени в 2-3 раза на интенсивных операциях с task. 
 
 Вместо time.After, в приведенном шаблоне используется явное управление созданием, остановкой и сбросом time.Timer.
 - time.Timer создается один раз при создании новой task и устанавливается в максимальное значение (константа workerpoolю.POOL_MAX_TIMEOUT) 
@@ -1144,27 +1157,31 @@ func calculateEmptyFn(parentCtx context.Context, ctx context.Context, data ...in
 
 ### Результат профилирования
 
-Скрины с профилирования выложены в каталог [doc/image](https://github.com/romapres2010/goapp/tree/master/doc/image)
+#### Результат профилирования для "длинных" task
 
-1. Результат профилирования для "длинных" task
-    - Memory
-      - workerpool.(*Worker).run - память не выделялась
-      - workerpool.(*Task).process - выделено память для 2042881 объектов, всего 33030648 байт - 16 байт на один task
-    - CPU
-      - workerpool.(*Worker).run - 1480 ns из которых,
-        - чтение каналов очереди задач и остановки - 350 ns  
-      - workerpool.(*Task).process - 1100 ns из которых, 
-        - 390 ns - ожидание информации в канал о завершении функции-обработчика и таймера, 
-        - 140 ns - запуск функции-обработчика в отдельной goroutine
-        - 270 ns - информирование "внешнего мира" о завершении task в канал ответа 
-        - 130 ns - перезапуск и остановка таймера,  
+![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-06_09-39-42.png)
 
-3. Результат профилирования для "коротких" task
-   - Memory
-       - workerpool.(*Worker).run - память не выделялась
-       - workerpool.(*Task).process - память не выделялась
-   - CPU
-     - workerpool.(*Worker).run - 380 ns из которых,
-       - чтение каналов очереди задач и остановки - 170 ns 
-     - workerpool.(*Task).process - 170 ns из которых,
-         - 110 ns - информирование "внешнего мира" о завершении task в канал ответа
+- Memory
+  - workerpool.(*Worker).run - память не выделялась
+  - workerpool.(*Task).process - выделено память для 2042881 объектов, всего 33030648 байт - 16 байт на один task
+- CPU
+  - workerpool.(*Worker).run - 1480 ns из которых,
+    - чтение каналов очереди задач и остановки - 350 ns  
+  - workerpool.(*Task).process - 1100 ns из которых, 
+    - 390 ns - ожидание информации в канал о завершении функции-обработчика и таймера, 
+    - 140 ns - запуск функции-обработчика в отдельной goroutine
+    - 270 ns - информирование "внешнего мира" о завершении task в канал ответа 
+    - 130 ns - перезапуск и остановка таймера,  
+
+#### Результат профилирования для "коротких" task
+
+![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-06_09-21-45.png)
+
+- Memory
+    - workerpool.(*Worker).run - память не выделялась
+    - workerpool.(*Task).process - память не выделялась
+- CPU
+  - workerpool.(*Worker).run - 380 ns из которых,
+    - чтение каналов очереди задач и остановки - 170 ns 
+  - workerpool.(*Task).process - 170 ns из которых,
+      - 110 ns - информирование "внешнего мира" о завершении task в канал ответа
