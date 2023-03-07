@@ -800,14 +800,14 @@ func (p *Pool) shutdownUnsafe(shutdownMode PoolShutdownMode, shutdownTimeout tim
 
 Такой подход позволяет постоянно использовать один и тот же time.Timer.
 
-Так выглядит использование памяти оптимизированного workerp pool под нагрузкой - всего 16,5 Мбайт
+Так выглядит использование памяти оптимизированного workerp pool под нагрузкой - всего 16 Мбайт
 
-![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-06_09-55-46.png)
+![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-07_09-16-32.png)
 
 
-А так выглядит вариант с неправильным использованием time.After под нагрузкой - уже 3117 Мбайт
+А так выглядит вариант с неправильным использованием time.After под нагрузкой - уже 3255 Мбайт
 
-![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-07_09-00-29.png)
+![](https://raw.githubusercontent.com/romapres2010/goapp/master/doc/image/2023-03-07_09-13-36.png)
 
 ### Реализация TaskPool 
 
