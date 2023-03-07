@@ -76,7 +76,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		for i, value := range *wpFactorialReqResp.NumArray {
 			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
 			task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, -1*time.Second, calculateFactorialFn, value)
-			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, 1*time.Second, calculateFactorialFn, value)
+			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, 1000*time.Second, calculateFactorialFn, value)
 			tasks = append(tasks, task)
 		}
 
