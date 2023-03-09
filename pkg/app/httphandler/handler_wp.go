@@ -74,9 +74,9 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 
 		// Подготовим список задач для запуска
 		for i, value := range *wpFactorialReqResp.NumArray {
-			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
-			task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, -1*time.Second, calculateFactorialFn, value)
-			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, uint64(i), requestID, 1000*time.Second, calculateFactorialFn, value)
+			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, nil, uint64(i), requestID, wpService.GetWPConfig().TaskTimeout, calculateFactorialFn, value)
+			task := _wp.NewTask(ctx, "CalculateFactorial", nil, nil, uint64(i), requestID, -1*time.Second, calculateFactorialFn, value)
+			//task := _wp.NewTask(ctx, "CalculateFactorial", nil, nil, uint64(i), requestID, 1000*time.Second, calculateFactorialFn, value)
 			tasks = append(tasks, task)
 		}
 
@@ -90,6 +90,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		// Запускаем обработку в общий background pool
 		//_log.Debug("Start with global worker pool: requestID", requestID)
 		err = wpService.RunTasksGroupWG(requestID, tasks, "Calculate - background")
+		//err = wpService.RunTasksGroupCh(requestID, tasks, "Calculate - background")
 
 		// Анализ результатов
 		if err == nil {
@@ -161,7 +162,7 @@ func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestI
 
 	// Подготовим список задач для запуска
 	for i, value := range *wpFactorialReqResp.NumArray {
-		task := _wp.NewTask(ctx, "", nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
+		task := _wp.NewTask(ctx, "", nil, nil, uint64(i), requestID, -1*time.Second, calculateEmptyFn, value)
 		tasks = append(tasks, task)
 	}
 
@@ -174,6 +175,7 @@ func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestI
 
 	// Запускаем обработку в общий background pool
 	err = wpService.RunTasksGroupWG(requestID, tasks, "")
+	//err = wpService.RunTasksGroupCh(requestID, tasks, "")
 
 	return err
 }

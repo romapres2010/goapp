@@ -98,6 +98,58 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 
 	//_log.Debug("Pool service - START: ExternalId, WorkerPoolName, TaskName", externalId, s.name, taskGroupName)
 
+	var wgCnt int         // сколько task было отправлено = wg.Add
+	var wg sync.WaitGroup // все task выполняются в одной WaitGroup
+
+	var startTime = time.Now() // отсчет времени от начала обработки
+
+	// добавляем задачи в определенную группу, группа задач определяется каналом завершения
+	for _, task := range tasks {
+		if task != nil { // пустые task игнорируем
+
+			// Превышено максимальное время выполнения
+			if s.cfg.TotalTimeout > 0 && time.Now().After(startTime.Add(s.cfg.TotalTimeout)) {
+				err = _err.NewTyped(_err.ERR_WORKER_POOL_TIMEOUT_ERROR, externalId, task.GetExternalId(), s.cfg.TotalTimeout).PrintfError()
+				return err
+			}
+
+			task.SetWgUnsafe(&wg) // установим общий канал окончания
+
+			wgCnt++
+			wg.Add(1)
+
+			// Отправляем в канал очереди задач, если канал заполнен - то ожидание
+			if err = s.AddTask(task); err != nil {
+				// Возможна ситуация, когда pool уже остановлен и закрыт канал очереди задач
+				return err
+			}
+		}
+	}
+
+	// Ожидать выполнения всех задач task в группе
+	wg.Wait()
+
+	if err != nil {
+		//_log.Debug("Pool service - ERROR: externalId, WorkerPoolName, TaskName, error", externalId, s.name, taskGroupName, err.Error())
+	} else {
+		//_log.Debug("Pool service - SUCCESS: externalId, WorkerPoolName, TaskName", externalId, s.name, taskGroupName)
+	}
+
+	return err
+}
+
+// RunTasksGroupCh - запустить группу задач в отдельной chanel с возможностью остановки
+func (s *Service) RunTasksGroupCh(externalId uint64, tasks []*_wp.Task, taskGroupName string) (err error) {
+
+	// Функция восстановления после паники
+	defer func() {
+		if r := recover(); r != nil {
+			err = _recover.GetRecoverError(r, externalId, s.name)
+		}
+	}()
+
+	//_log.Debug("Pool service - START: ExternalId, WorkerPoolName, TaskName", externalId, s.name, taskGroupName)
+
 	var wgCnt int                                   // сколько task было отправлено = wg.Add
 	var wg sync.WaitGroup                           // все task выполняются в одной WaitGroup
 	var doneCh = make(chan interface{}, len(tasks)) // канал ответов об окончании задач
@@ -115,15 +167,16 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 				return err
 			}
 
-			task.SetDoneCh(doneCh) // установим общий канал окончания
+			task.SetDoneChUnsafe(doneCh) // установим общий канал окончания
+
+			wgCnt++
+			wg.Add(1)
 
 			// Отправляем в канал очереди задач, если канал заполнен - то ожидание
 			if err = s.AddTask(task); err != nil {
 				// Возможна ситуация, когда pool уже остановлен и закрыт канал очереди задач
 				return err
 			}
-			wgCnt++
-			wg.Add(1)
 		}
 	}
 

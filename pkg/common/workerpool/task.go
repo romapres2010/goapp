@@ -30,7 +30,8 @@ type Task struct {
 	cancel    context.CancelFunc // функция закрытия контекста для task
 
 	externalId  uint64             // внешний идентификатор запроса, в рамках которого работает task - для целей логирования
-	doneCh      chan<- interface{} // внешний канал сигнала во "внешний мир" о завершении выполнения функции-обработчике
+	doneCh      chan<- interface{} // канал сигнала во "внешний мир" о завершении выполнения функции-обработчике
+	wg          *sync.WaitGroup    // сигнал во "внешний мир" можно передавать через sync.WaitGroup
 	stopCh      chan interface{}   // канал команды на остановку task со стороны "внешнего мира"
 	localDoneCh chan interface{}   // локальный канал task - сигнал о завершении выполнения функции-обработчике для "длинных" task
 
@@ -51,7 +52,7 @@ type Task struct {
 	mx sync.RWMutex
 }
 
-func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, id uint64, externalId uint64, timeout time.Duration, f func(context.Context, context.Context, ...interface{}) (error, []interface{}), requests ...interface{}) *Task {
+func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, wg *sync.WaitGroup, id uint64, externalId uint64, timeout time.Duration, f func(context.Context, context.Context, ...interface{}) (error, []interface{}), requests ...interface{}) *Task {
 	if f == nil || parentCtx == nil {
 		return nil
 	}
@@ -67,6 +68,7 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 
 		task.externalId = externalId
 		task.doneCh = doneCh
+		task.wg = wg
 
 		task.id = id
 		task.setStateUnsafe(TASK_STATE_NEW)
@@ -104,9 +106,14 @@ func (ts *Task) setStateUnsafe(state TaskState) {
 	ts.state = state
 }
 
-// SetDoneCh - внешний мир может установить канал для уведомления о завершении
-func (ts *Task) SetDoneCh(doneCh chan<- interface{}) {
+// SetDoneChUnsafe - внешний мир может установить канал для уведомления о завершении
+func (ts *Task) SetDoneChUnsafe(doneCh chan<- interface{}) {
 	ts.doneCh = doneCh
+}
+
+// SetWgUnsafe - внешний мир может установить канал для уведомления о завершении
+func (ts *Task) SetWgUnsafe(wg *sync.WaitGroup) {
+	ts.wg = wg
 }
 
 // GetExternalId - считать externalId из task
@@ -169,6 +176,11 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		// Возможна ситуация, когда канал закрыт, например, если "внешний мир" нас не дождался по причине своего таймаута, тогда канал уже будет закрыт
 		if ts.doneCh != nil {
 			ts.doneCh <- struct{}{}
+		}
+
+		// Если работали в рамках WaitGroup, то уменьшим счетчик
+		if ts.wg != nil {
+			ts.wg.Done()
 		}
 	}()
 

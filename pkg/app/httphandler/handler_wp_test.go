@@ -43,7 +43,7 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 		WPCfg: _wp.Config{
 			TaskQueueSize:     0,
 			TaskTimeout:       20000 * time.Millisecond,
-			WorkerConcurrency: 4,
+			WorkerConcurrency: 8,
 			WorkerTimeout:     30000 * time.Millisecond,
 		},
 	}
