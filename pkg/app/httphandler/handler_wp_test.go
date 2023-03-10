@@ -43,7 +43,7 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 		WPCfg: _wp.Config{
 			TaskQueueSize:     0,
 			TaskTimeout:       20000 * time.Millisecond,
-			WorkerConcurrency: 8,
+			WorkerConcurrency: 4,
 			WorkerTimeout:     30000 * time.Millisecond,
 		},
 	}
@@ -72,8 +72,8 @@ func BenchmarkCalculateFactorial(b *testing.B) {
 			//NumArray: NumArray2048,
 			//NumArray: NumArray4096,
 		}
-		_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
-		//_ = calculateEmpty(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
+		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
+		_ = calculateEmpty(parentCtx, wpService, 0, wpFactorialReqResp, "bg", tasks)
 		//_ = calculateFactorial(parentCtx, wpService, 0, wpFactorialReqResp, "online", tasks)
 	}
 

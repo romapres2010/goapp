@@ -170,6 +170,9 @@ func (p *Pool) AddTask(task *Task) (err error) {
 	}()
 
 	_metrics.IncWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - увеличить
+	if task.wg != nil {
+		task.wg.Add(1) // Если работаем в рамках WaitGroup
+	}
 	p.taskQueueCh <- task                     // Очередь имеет ограниченный размер - возможно ожидание, пока не появится свободное место
 	_metrics.DecWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - отправили - уменьшить
 

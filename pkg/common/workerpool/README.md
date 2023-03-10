@@ -112,7 +112,8 @@ type Task struct {
 	cancel    context.CancelFunc // функция закрытия контекста для task
 
 	externalId  uint64             // внешний идентификатор запроса, в рамках которого работает task - для целей логирования
-	doneCh      chan<- interface{} // внешний канал сигнала во "внешний мир" о завершении выполнения функции-обработчике
+	doneCh      chan<- interface{} // канал сигнала во "внешний мир" о завершении выполнения функции-обработчике
+	wg          *sync.WaitGroup    // сигнал во "внешний мир" можно передавать через sync.WaitGroup
 	stopCh      chan interface{}   // канал команды на остановку task со стороны "внешнего мира"
 	localDoneCh chan interface{}   // локальный канал task - сигнал о завершении выполнения функции-обработчике для "длинных" task
 
@@ -140,6 +141,9 @@ type TaskState int
 
 const (
 	TASK_STATE_NEW                    TaskState = iota // task создан
+	TASK_STATE_POOL_GET                                // task получен из pool
+	TASK_STATE_POOL_PUT                                // task отправлен в pool
+	TASK_STATE_READY                                   // task готов к обработкам
 	TASK_STATE_IN_PROCESS                              // task выполняется
 	TASK_STATE_DONE_SUCCESS                            // task завершился
 	TASK_STATE_RECOVER_ERR                             // task остановился из-за паники
@@ -168,27 +172,33 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 	if ts.mx.TryLock() { // Использование TryLock не рекомендуется, но в данном случае это очень удобно
 		defer ts.mx.Unlock()
 	} else {
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_ALREADY_LOCKED, ts.externalId, ts.name, ts.state).PrintfError()
+		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_ALREADY_LOCKED, ts.externalId, ts.name, ts.state, ts.prevState).PrintfError()
 		return
 	}
 
-	// Проверим, что запускать можно только новый task
-	if ts.state == TASK_STATE_NEW {
+	// Проверим, что запускать можно только готовый task
+	if ts.state == TASK_STATE_READY {
 		ts.setStateUnsafe(TASK_STATE_IN_PROCESS)
 	} else {
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
+		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_INCORRECT_STATE, ts.externalId, ts.name, ts.state, ts.prevState, "READY").PrintfError()
 		return
 	}
 
-	// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
+	// Обрабатываем панику task
 	defer func() {
 		if r := recover(); r != nil {
 			ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
 			ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
 		}
+	}()
 
-		// Возможна ситуация, когда канал закрыт, например, если "внешний мир" нас не дождался по причине своего таймаута, тогда канал уже будет закрыт  
+	// Информируем "внешний мир" о завершении работы task в отдельный канал или через wg
+	defer func() {
+		// Возможна ситуация, когда канал закрыт, например, если "внешний мир" нас не дождался по причине своего таймаута, тогда канал уже будет закрыт
 		if ts.doneCh != nil { ts.doneCh <- struct{}{} }
+
+		// Если работали в рамках WaitGroup, то уменьшим счетчик
+		if ts.wg != nil { ts.wg.Done() }
 	}()
 
 	if ts.timeout < 0 {
@@ -208,6 +218,9 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 
 				// Отправляем сигнал и закрываем канал, task не контролирует, успешно или нет завершился обработчик
 				if ts.localDoneCh != nil { ts.localDoneCh <- struct{}{} }
+						
+				// Если работали в рамках WaitGroup, то уменьшим счетчик
+				if ts.wg != nil { ts.wg.Done() }
 			}()
 
 			// Обработчик получает родительский контекст и локальный контекст task.
@@ -680,6 +693,7 @@ func (p *Pool) AddTask(task *Task) (err error) {
 	}()
 	
 	_metrics.IncWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - увеличить
+	if task.wg != nil { task.wg.Add(1) }      // Если работаем в рамках WaitGroup
 	p.taskQueueCh <- task                     // Очередь имеет ограниченный размер - возможно ожидание, пока не появится свободное место
 	_metrics.DecWPAddTaskWaitCountVec(p.name) // Счетчик ожиданий отправки в очередь - отправили - уменьшить
 
@@ -843,6 +857,7 @@ func newTaskPool() *TaskPool {
 				task.timer = time.NewTimer(POOL_MAX_TIMEOUT)                     // новый таймер - начально максимальное время ожидания
 				task.timer.Stop()                                                // остановим таймер, сбрасывать канал не требуется, так как он не сработал
 				task.ctx, task.cancel = context.WithCancel(context.Background()) // создаем локальный контекст с отменой
+				task.setStateUnsafe(TASK_STATE_NEW)                              // установим состояние task
 				return task
 			},
 		},
@@ -854,17 +869,21 @@ func newTaskPool() *TaskPool {
 func (p *TaskPool) getTask() *Task {
 	atomic.AddUint64(&countGet, 1)
 	task := p.pool.Get().(*Task)
+	if task.state != TASK_STATE_NEW {
+		task.setStateUnsafe(TASK_STATE_POOL_GET) // установим состояние task
+	}
 	return task
 }
 
 // putTask return Task to pool
 func (p *TaskPool) putTask(task *Task) {
 	// Если task не был успешно завершен, то в нем могли быть закрыты каналы или сработал таймер - такие не подходят для повторного использования
-	if task.state == TASK_STATE_NEW || task.state == TASK_STATE_DONE_SUCCESS {
+	if task.state == TASK_STATE_NEW || task.state == TASK_STATE_DONE_SUCCESS || task.state == TASK_STATE_POOL_GET {
 		atomic.AddUint64(&countPut, 1)
-		task.requests = nil  // обнулить указатель, чтобы освободить для сбора мусора
-		task.responses = nil // обнулить указатель, чтобы освободить для сбора мусора
-		p.pool.Put(task)     // отправить в pool
+		task.requests = nil                // обнулить указатель, чтобы освободить для сбора мусора
+		task.responses = nil               // обнулить указатель, чтобы освободить для сбора мусора
+		task.setState(TASK_STATE_POOL_PUT) // установим состояние task с ожиданием разблокировки
+		p.pool.Put(task)                   // отправить в pool
 	}
 }
 
@@ -875,6 +894,8 @@ var gTaskPool = newTaskPool()
 func (p *Pool) PrintTaskPoolStats() {
 	if p != nil {
 		_log.Info("Usage task pool: countGet, countPut, countNew", countGet, countPut, countNew)
+	} else {
+		_ = _err.NewTyped(_err.ERR_INCORRECT_CALL_ERROR, _err.ERR_UNDEFINED_ID, "p != nil").PrintfError()
 	}
 }
 ```

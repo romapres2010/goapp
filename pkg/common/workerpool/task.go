@@ -15,6 +15,9 @@ type TaskState int
 
 const (
 	TASK_STATE_NEW                    TaskState = iota // task создан
+	TASK_STATE_POOL_GET                                // task получен из pool
+	TASK_STATE_POOL_PUT                                // task отправлен в pool
+	TASK_STATE_READY                                   // task готов к обработкам
 	TASK_STATE_IN_PROCESS                              // task выполняется
 	TASK_STATE_DONE_SUCCESS                            // task завершился
 	TASK_STATE_RECOVER_ERR                             // task остановился из-за паники
@@ -35,11 +38,12 @@ type Task struct {
 	stopCh      chan interface{}   // канал команды на остановку task со стороны "внешнего мира"
 	localDoneCh chan interface{}   // локальный канал task - сигнал о завершении выполнения функции-обработчике для "длинных" task
 
-	id      uint64        // номер task - для целей логирования
-	state   TaskState     // состояние жизненного цикла task
-	name    string        // наименование task для логирования и мониторинга
-	timeout time.Duration // максимальное время выполнения для "длинных" task
-	timer   *time.Timer   // таймер остановки по timeout для "длинных" task
+	id        uint64        // номер task - для целей логирования
+	state     TaskState     // состояние жизненного цикла task
+	prevState TaskState     // предыдущее состояние жизненного цикла task - для контроля перехода статусов
+	name      string        // наименование task для логирования и мониторинга
+	timeout   time.Duration // максимальное время выполнения для "длинных" task
+	timer     *time.Timer   // таймер остановки по timeout для "длинных" task
 
 	requests  []interface{} // входные данные запроса - передаются в функцию-обработчик
 	responses []interface{} // результаты обработки запроса в функции-обработчике
@@ -60,8 +64,10 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 	// получаем task из глобального кэш
 	task := gTaskPool.getTask()
 
-	task.mx.Lock()
-	defer task.mx.Unlock()
+	// Блокировать не требуется, после получения из кэша с ним ни кто не работает
+	//task.mx.Lock()
+	//defer task.mx.Unlock()
+	// Блокировать не требуется, после получения из кэша с ним ни кто не работает
 
 	{ // установим все значения в начальные значения, после получения из кэша
 		task.parentCtx = parentCtx
@@ -71,7 +77,6 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 		task.wg = wg
 
 		task.id = id
-		task.setStateUnsafe(TASK_STATE_NEW)
 		task.name = name
 		task.timeout = timeout
 
@@ -82,13 +87,15 @@ func NewTask(parentCtx context.Context, name string, doneCh chan<- interface{}, 
 		task.duration = 0
 
 		task.f = f
+
+		task.setStateUnsafe(TASK_STATE_READY) // готов к обработке
 	} // установим все значения в начальные значения, после получения из кэша
 
 	return task
 }
 
-// Delete - отправить в кэш
-func (ts *Task) Delete() {
+// DeleteUnsafe - отправить в кэш
+func (ts *Task) DeleteUnsafe() {
 	if ts != nil {
 		gTaskPool.putTask(ts)
 	}
@@ -103,6 +110,7 @@ func (ts *Task) setState(state TaskState) {
 
 // setStateUnsafe - установка состояния жизненного цикла task
 func (ts *Task) setStateUnsafe(state TaskState) {
+	ts.prevState = ts.state
 	ts.state = state
 }
 
@@ -152,27 +160,30 @@ func (ts *Task) process(workerID uint, workerTimeout time.Duration) {
 		defer ts.mx.Unlock()
 	} else {
 		//_log.Info("TASK - already locked for process: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_ALREADY_LOCKED, ts.externalId, ts.name, ts.state).PrintfError()
+		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_ALREADY_LOCKED, ts.externalId, ts.name, ts.state, ts.prevState).PrintfError()
 		return
 	}
 
-	// Проверим, что запускать можно только новый task
-	if ts.state == TASK_STATE_NEW {
+	// Проверим, что запускать можно только готовый task
+	if ts.state == TASK_STATE_READY {
 		ts.setStateUnsafe(TASK_STATE_IN_PROCESS)
 		//_log.Debug("START task: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
 	} else {
 		//_log.Info("TASK - has incorrect state to run: WorkerID, TaskId, TaskExternalId, TaskName", workerID, ts.id, ts.externalId, ts.name)
-		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_INCORRECT_STATE, ts.externalId, ts.name, ts.state, "NEW").PrintfError()
+		ts.err = _err.NewTyped(_err.ERR_WORKER_POOL_TASK_INCORRECT_STATE, ts.externalId, ts.name, ts.state, ts.prevState, "READY").PrintfError()
 		return
 	}
 
-	// Обрабатываем панику task и информируем "внешний мир" о завершении работы task в отдельный канал
+	// Обрабатываем панику task
 	defer func() {
 		if r := recover(); r != nil {
 			ts.err = _recover.GetRecoverError(r, ts.externalId, ts.name)
 			ts.setStateUnsafe(TASK_STATE_RECOVER_ERR)
 		}
+	}()
 
+	// Информируем "внешний мир" о завершении работы task в отдельный канал или через wg
+	defer func() {
 		// Возможна ситуация, когда канал закрыт, например, если "внешний мир" нас не дождался по причине своего таймаута, тогда канал уже будет закрыт
 		if ts.doneCh != nil {
 			ts.doneCh <- struct{}{}

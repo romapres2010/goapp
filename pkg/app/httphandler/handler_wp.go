@@ -83,7 +83,7 @@ func calculateFactorial(ctx context.Context, wpService *_wpservice.Service, requ
 		// в конце обработки отправить task в кэш для повторного использования
 		defer func() {
 			for _, task := range tasks {
-				task.Delete()
+				task.DeleteUnsafe()
 			}
 		}()
 
@@ -169,7 +169,7 @@ func calculateEmpty(ctx context.Context, wpService *_wpservice.Service, requestI
 	// в конце обработки отправить task в кэш для повторного использования
 	defer func() {
 		for _, task := range tasks {
-			task.Delete()
+			task.DeleteUnsafe()
 		}
 	}()
 

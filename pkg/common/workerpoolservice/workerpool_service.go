@@ -74,7 +74,7 @@ func (s *Service) AddTask(task *_wp.Task) error {
 	if task != nil {
 		err := s.pool.AddTask(task)
 		if err != nil {
-			return _err.WithCauseTyped(_err.ERR_ERROR, task.GetExternalId(), err, "UTCE Calculator was shutting down")
+			return _err.WithCauseTyped(_err.ERR_ERROR, task.GetExternalId(), err, "Worker pool was shutting down").PrintfError()
 		}
 		return nil
 	}
@@ -98,7 +98,6 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 
 	//_log.Debug("Pool service - START: ExternalId, WorkerPoolName, TaskName", externalId, s.name, taskGroupName)
 
-	var wgCnt int         // сколько task было отправлено = wg.Add
 	var wg sync.WaitGroup // все task выполняются в одной WaitGroup
 
 	var startTime = time.Now() // отсчет времени от начала обработки
@@ -113,16 +112,16 @@ func (s *Service) RunTasksGroupWG(externalId uint64, tasks []*_wp.Task, taskGrou
 				return err
 			}
 
-			task.SetWgUnsafe(&wg) // установим общий канал окончания
+			task.SetWgUnsafe(&wg) // установим общий WaitGroup окончания
 
-			wgCnt++
-			wg.Add(1)
+			//wg.Add(1)
 
 			// Отправляем в канал очереди задач, если канал заполнен - то ожидание
 			if err = s.AddTask(task); err != nil {
 				// Возможна ситуация, когда pool уже остановлен и закрыт канал очереди задач
 				return err
 			}
+
 		}
 	}
 
