@@ -654,3 +654,11 @@ Loading test data: tableName=currencies
 Liquibase command 'update' was executed successfully.
 ================= APP liquibase Upgrade =================
 No resources found in go-app namespace.
+================= APP liquibase =================
+No resources found in go-app namespace.
+================= APP liquibase Install Empty =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-empty (init)
+unable to retrieve container logs for docker://904cf3632428ad4795de1abb46e11176678005fa5556f8457888bd5d67214d7b================= APP liquibase Install test data =================
+Defaulted container "dev-app-liquibase" out of: dev-app-liquibase, init-app-liquibase-install-testdata (init)
+unable to retrieve container logs for docker://ad2a248be91e71c58af48684f602ba3b50d1856a3622de395fb5075973fd8f9b================= APP liquibase Upgrade =================
+No resources found in go-app namespace.

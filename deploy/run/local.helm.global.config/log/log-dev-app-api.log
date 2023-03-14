@@ -1,6 +1,6 @@
 Defaulted container "app-api" out of: app-api, init-app-api (init)
-2023-03-12 05:37:16.949933    info    metrics/metrics.go:92    New() - Creating new metrics service
-2023-03-12 05:37:16.950586    info    metrics/metrics.go:128    New() - Dependency: ['
+2023-03-14 06:02:43.965363    info    metrics/metrics.go:92    New() - Creating new metrics service
+2023-03-14 06:02:43.966445    info    metrics/metrics.go:128    New() - Dependency: ['
 app_name
   github.com/beorn7/perks:  v1.0.1
   github.com/cespare/xxhash/v2:  v2.2.0
@@ -33,14 +33,14 @@ app_name
   gopkg.in/ldap.v3:  v3.1.0
   gopkg.in/natefinch/lumberjack.v2:  v2.2.1
   gopkg.in/yaml.v3:  v3.0.1']
-2023-03-12 05:37:16.952132    info    app/main.go:228    main() - Starting up server
-2023-03-12 05:37:16.952596    info    app/main.go:185    main.func1() - Load config file 'configfile'='/app/defcfg/app.global.yaml' from environment 'APP_CONFIG_FILE'
-2023-03-12 05:37:16.952644    info    config/config.go:122    (*Config).LoadYamlConfig() - Loading config from file: FileName['/app/defcfg/app.global.yaml']
-2023-03-12 05:37:16.952756    info    config/config.go:130    (*Config).LoadYamlConfig() - Config file exist: FileName, FileInfo['/app/defcfg/app.global.yaml', '&{app.global.yaml 15340 493 {712702800 63813683193 0x100a240} {1048786 538651 1 33261 0 0 0 0 15340 4096 32 {1678597697 583254000} {1678086393 712702800} {1678597697 313254000} [0 0 0]}}']
-2023-03-12 05:37:16.957671    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'http_server.listen_spec'='0.0.0.0:8080' was replaced with environment 'APP_HTTP_LISTEN_SPEC'='0.0.0.0:8080'
-2023-03-12 05:37:16.957881    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'logger.global_level'='INFO' was replaced with environment 'APP_LOG_LEVEL'='INFO'
-2023-03-12 05:37:16.957900    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'logger.log_file'='/app/log/app.log' was replaced with environment 'APP_LOG_FILE'='/app/log/app.log'
-2023-03-12 05:37:16.957948    error    logger/logger.go:419    CloseLogger() - sync /dev/stdout: invalid argument
+2023-03-14 06:02:43.972882    info    app/main.go:228    main() - Starting up server
+2023-03-14 06:02:43.973140    info    app/main.go:185    main.func1() - Load config file 'configfile'='/app/defcfg/app.global.yaml' from environment 'APP_CONFIG_FILE'
+2023-03-14 06:02:43.973199    info    config/config.go:122    (*Config).LoadYamlConfig() - Loading config from file: FileName['/app/defcfg/app.global.yaml']
+2023-03-14 06:02:43.973303    info    config/config.go:130    (*Config).LoadYamlConfig() - Config file exist: FileName, FileInfo['/app/defcfg/app.global.yaml', '&{app.global.yaml 15340 493 {712702800 63813683193 0x100a240} {1048714 538651 1 33261 0 0 0 0 15340 4096 32 {1678597697 583254000} {1678086393 712702800} {1678597697 313254000} [0 0 0]}}']
+2023-03-14 06:02:43.974828    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'http_server.listen_spec'='0.0.0.0:8080' was replaced with environment 'APP_HTTP_LISTEN_SPEC'='0.0.0.0:8080'
+2023-03-14 06:02:43.974937    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'logger.global_level'='INFO' was replaced with environment 'APP_LOG_LEVEL'='INFO'
+2023-03-14 06:02:43.975003    info    config/config.go:105    replaceCfgArgsEnv() - YAML config parameter 'logger.log_file'='/app/log/app.log' was replaced with environment 'APP_LOG_FILE'='/app/log/app.log'
+2023-03-14 06:02:43.975138    error    logger/logger.go:419    CloseLogger() - sync /dev/stdout: invalid argument
 github.com/romapres2010/goapp/pkg/common/logger.CloseLogger
 	/app/pkg/common/logger/logger.go:419
 github.com/romapres2010/goapp/pkg/common/logger.SetGlobalConfig
@@ -55,20 +55,20 @@ main.main
 	/app/cmd/app/main.go:231
 runtime.main
 	/usr/local/go/src/runtime/proc.go:250
-2023-03-12 05:37:16.957980    info    logger/logger.go:154    gClose() - Logger - close all
-2023-03-12 05:37:16.957994    info    logger/logger.go:250    newZapLogger() - Setup zap logger
-2023-03-12 05:37:16.958120    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', 'INFO', 'lumberjack', 'console']
-2023-03-12 05:37:16.958143    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.debug.log']
-2023-03-12 05:37:16.958166    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['ERROR', '', 'lumberjack', 'console']
-2023-03-12 05:37:16.958295    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.error.log']
-2023-03-12 05:37:16.958318    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', '', 'stdout', 'console']
-2023-03-12 05:37:16.958333    info    logger/logger.go:313    newZapLogger() - Zap logger - core DISABLE: log_to, encoding['stderr', 'console']
-2023-03-12 05:37:16.958531    info    logger/logger.go:202    SetGlobalConfig() - Logger settings applied: cfg['{true INFO /app/log/app.log {true false false error false [{true  INFO lumberjack  console 0xc0002bd5f0 {msg level ts log caller  stacktrace false 
- lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true ERROR  lumberjack  console 0xc0002bd680 {msg level ts log caller  stacktrace false 
+2023-03-14 06:02:43.975206    info    logger/logger.go:154    gClose() - Logger - close all
+2023-03-14 06:02:43.975251    info    logger/logger.go:250    newZapLogger() - Setup zap logger
+2023-03-14 06:02:43.975338    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', 'INFO', 'lumberjack', 'console']
+2023-03-14 06:02:43.975382    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.debug.log']
+2023-03-14 06:02:43.975467    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['ERROR', '', 'lumberjack', 'console']
+2023-03-14 06:02:43.975533    info    logger/logger.go:212    NewFileLogger() - File logger - log to file: FileName['/app/log/app.log.error.log']
+2023-03-14 06:02:43.975588    info    logger/logger.go:272    newZapLogger() - Zap logger - add core: minLevel, maxLevel, log_to, encoding['', '', 'stdout', 'console']
+2023-03-14 06:02:43.975713    info    logger/logger.go:313    newZapLogger() - Zap logger - core DISABLE: log_to, encoding['stderr', 'console']
+2023-03-14 06:02:43.975816    info    logger/logger.go:202    SetGlobalConfig() - Logger settings applied: cfg['{true INFO /app/log/app.log {true false false error false [{true  INFO lumberjack  console 0xc0002e8540 {msg level ts log caller  stacktrace false 
+ lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true ERROR  lumberjack  console 0xc0002e85d0 {msg level ts log caller  stacktrace false 
  lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {true   stdout  console <nil> {msg level ts log caller  stacktrace false 
  lower iso8601 2006-01-02 15:04:05.000000 ms short     }} {false ERROR  stderr  console <nil> {msg level ts log caller  stacktrace false 
  lower iso8601 2006-01-02 15:04:05.000000 ms short     }}] <nil>}}']
-2023-03-12 05:37:16.961379    info    app/main.go:203    main.func1() - Configuration: 
+2023-03-14 06:02:43.977124    info    app/main.go:203    main.func1() - Configuration: 
 ['
 memory_limit: 2000000000
 config_file: /app/defcfg/app.global.yaml
@@ -317,8 +317,8 @@ metrics:
     collect_wp_worker_process_count_vec: false
     collect_wp_task_process_duration_ms_by_name: false
 ']
-2023-03-12 05:37:16.961557    info    metrics/metrics.go:92    New() - Creating new metrics service
-2023-03-12 05:37:16.962164    info    metrics/metrics.go:128    New() - Dependency: ['
+2023-03-14 06:02:43.977296    info    metrics/metrics.go:92    New() - Creating new metrics service
+2023-03-14 06:02:43.977744    info    metrics/metrics.go:128    New() - Dependency: ['
 app_name
   github.com/beorn7/perks:  v1.0.1
   github.com/cespare/xxhash/v2:  v2.2.0
@@ -351,34 +351,34 @@ app_name
   gopkg.in/ldap.v3:  v3.1.0
   gopkg.in/natefinch/lumberjack.v2:  v2.2.1
   gopkg.in/yaml.v3:  v3.0.1']
-2023-03-12 05:37:16.962374    info    app/main.go:212    main.func1() - Set Memory Limit: MemoryLimit['2000000000']
-2023-03-12 05:37:16.962400    info    daemon/daemon.go:48    New() - Create new daemon
-2023-03-12 05:37:16.962440    info    httplog/httplog.go:42    New() - Creating new HTTP traffic logger
-2023-03-12 05:37:16.962477    info    httplog/httplog.go:72    (*Logger).SetConfig() - Set HTTP logger config: cfg['{false true true true true true 0xc0002bd7a0}']
-2023-03-12 05:37:16.962878    info    httpservice/httpservice.go:135    New() - Creating new HTTP service
-2023-03-12 05:37:16.962897    info    httpservice/httpservice.go:175    New() - HTTP service was created
-2023-03-12 05:37:16.962910    info    httphandler/httphandler.go:35    New() - Creating new HTTP service
-2023-03-12 05:37:16.962931    info    httphandler/httphandler.go:62    New() - HTTP service was created
-2023-03-12 05:37:16.962948    info    httpservice/httpservice.go:183    (*Service).SetHttpHandler() - Register HTTP handlers
-2023-03-12 05:37:16.963025    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['HealthHandler', 'GET', '/app/system/health']
-2023-03-12 05:37:16.963054    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['ReadyHandler', 'GET', '/app/system/ready']
-2023-03-12 05:37:16.963069    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['WpHandlerFactorial', 'POST', '/app/system/wp_factorial']
-2023-03-12 05:37:16.963080    info    httpserver/httpserver.go:57    New() - Creating new HTTP server
-2023-03-12 05:37:16.963286    info    httpserver/httpserver.go:165    New() - Created new TCP listener: network = 'tcp', address['0.0.0.0:8080']
-2023-03-12 05:37:16.963517    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/health', 'GET']
-2023-03-12 05:37:16.963576    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/echo', 'POST']
-2023-03-12 05:37:16.963654    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/refresh', 'POST']
-2023-03-12 05:37:16.963708    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httplog', 'POST']
-2023-03-12 05:37:16.963786    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'GET']
-2023-03-12 05:37:16.963887    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'POST']
-2023-03-12 05:37:16.963973    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/signin', 'POST']
-2023-03-12 05:37:16.964044    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httperrlog', 'POST']
-2023-03-12 05:37:16.964198    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/loglevel', 'POST']
-2023-03-12 05:37:16.964308    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/ready', 'GET']
-2023-03-12 05:37:16.964449    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/wp_factorial', 'POST']
-2023-03-12 05:37:16.964479    info    httpserver/httpserver.go:212    New() - HTTP server is created
-2023-03-12 05:37:16.964507    info    daemon/daemon.go:103    New() - New daemon was created
-2023-03-12 05:37:16.964528    info    app/main.go:222    main.func1() - Server is startup: Version['version '2.0.1', commit 'd8bc0c4', build time '2023-03-12_05:06:36'']
-2023-03-12 05:37:16.964556    info    daemon/daemon.go:110    (*Daemon).Run() - Starting daemon
-2023-03-12 05:37:16.964634    info    daemon/daemon.go:118    (*Daemon).Run() - Daemon was running. For exit <CTRL-c>
-2023-03-12 05:37:16.965028    info    httpserver/httpserver.go:234    (*Server).Run() - Starting HTTP server
+2023-03-14 06:02:43.978007    info    app/main.go:212    main.func1() - Set Memory Limit: MemoryLimit['2000000000']
+2023-03-14 06:02:43.978070    info    daemon/daemon.go:48    New() - Create new daemon
+2023-03-14 06:02:43.978146    info    httplog/httplog.go:42    New() - Creating new HTTP traffic logger
+2023-03-14 06:02:43.978219    info    httplog/httplog.go:72    (*Logger).SetConfig() - Set HTTP logger config: cfg['{false true true true true true 0xc0002e86f0}']
+2023-03-14 06:02:43.978345    info    httpservice/httpservice.go:135    New() - Creating new HTTP service
+2023-03-14 06:02:43.978412    info    httpservice/httpservice.go:175    New() - HTTP service was created
+2023-03-14 06:02:43.978479    info    httphandler/httphandler.go:35    New() - Creating new HTTP service
+2023-03-14 06:02:43.978537    info    httphandler/httphandler.go:62    New() - HTTP service was created
+2023-03-14 06:02:43.978584    info    httpservice/httpservice.go:183    (*Service).SetHttpHandler() - Register HTTP handlers
+2023-03-14 06:02:43.978691    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['HealthHandler', 'GET', '/app/system/health']
+2023-03-14 06:02:43.978773    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['ReadyHandler', 'GET', '/app/system/ready']
+2023-03-14 06:02:43.978898    info    httpservice/httpservice.go:215    (*Service).SetHttpHandler() - Register HTTP handler: HandlerName, Method, FullPath['WpHandlerFactorial', 'POST', '/app/system/wp_factorial']
+2023-03-14 06:02:43.978959    info    httpserver/httpserver.go:57    New() - Creating new HTTP server
+2023-03-14 06:02:43.989827    info    httpserver/httpserver.go:165    New() - Created new TCP listener: network = 'tcp', address['0.0.0.0:8080']
+2023-03-14 06:02:43.990137    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/loglevel', 'POST']
+2023-03-14 06:02:43.990328    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'GET']
+2023-03-14 06:02:43.990479    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/health', 'GET']
+2023-03-14 06:02:43.990617    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/ready', 'GET']
+2023-03-14 06:02:43.990765    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/signin', 'POST']
+2023-03-14 06:02:43.990905    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httperrlog', 'POST']
+2023-03-14 06:02:43.991064    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/httplog', 'POST']
+2023-03-14 06:02:43.991201    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/config/logger', 'POST']
+2023-03-14 06:02:43.991376    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/app/system/wp_factorial', 'POST']
+2023-03-14 06:02:43.991490    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/echo', 'POST']
+2023-03-14 06:02:43.991674    info    httpserver/httpserver.go:188    New() - Handler is registered: Path, Method['/system/auth/refresh', 'POST']
+2023-03-14 06:02:43.991826    info    httpserver/httpserver.go:212    New() - HTTP server is created
+2023-03-14 06:02:43.991923    info    daemon/daemon.go:103    New() - New daemon was created
+2023-03-14 06:02:43.992036    info    app/main.go:222    main.func1() - Server is startup: Version['version '2.0.1', commit 'd8bc0c4', build time '2023-03-12_05:06:36'']
+2023-03-14 06:02:43.992151    info    daemon/daemon.go:110    (*Daemon).Run() - Starting daemon
+2023-03-14 06:02:43.992302    info    daemon/daemon.go:118    (*Daemon).Run() - Daemon was running. For exit <CTRL-c>
+2023-03-14 06:02:43.992711    info    httpserver/httpserver.go:234    (*Server).Run() - Starting HTTP server
