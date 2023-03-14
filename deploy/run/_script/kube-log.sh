@@ -34,7 +34,7 @@ kubectl logs --tail=-1 -n $KUBE_NAMESPACE -l tier=app-liquibase,variant=$KUBE_VA
 echo "================= APP liquibase Install Empty =================" 1>>$APP_LIQUIBASE_LOG_FILE 2>&1
 kubectl logs --tail=-1 -n $KUBE_NAMESPACE -l tier=app-liquibase-install-empty,variant=$KUBE_VARIANT 1>>$APP_LIQUIBASE_LOG_FILE 2>&1
 
-echo "================= APP liquibase Install Mdg =================" 1>>$APP_LIQUIBASE_LOG_FILE 2>&1
+echo "================= APP liquibase Install test data =================" 1>>$APP_LIQUIBASE_LOG_FILE 2>&1
 kubectl logs --tail=-1 -n $KUBE_NAMESPACE -l tier=app-liquibase-install-testdata,variant=$KUBE_VARIANT 1>>$APP_LIQUIBASE_LOG_FILE 2>&1
 
 echo "================= APP liquibase Upgrade =================" 1>>$APP_LIQUIBASE_LOG_FILE 2>&1

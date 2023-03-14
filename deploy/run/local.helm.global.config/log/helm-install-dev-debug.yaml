@@ -1,8 +1,8 @@
 install.go:192: [debug] Original chart version: ""
-install.go:209: [debug] CHART PATH: D:\Projects\go\http\deploy\helm\app
+install.go:209: [debug] CHART PATH: D:\Projects\go\goapp\deploy\helm\app
 
 NAME: dev
-LAST DEPLOYED: Sun Feb 12 21:25:51 2023
+LAST DEPLOYED: Sun Mar 12 08:35:57 2023
 NAMESPACE: go-app
 STATUS: pending-install
 REVISION: 1
@@ -18,7 +18,7 @@ appApi:
     targetMemoryUtilizationPercentage: 90
   image:
     repository: romapres2010/app-api
-    tag: 2.0.0
+    tag: 2.0.1
   replicaCount: 1
   resources:
     limits:
@@ -28,7 +28,7 @@ appApi:
       cpu: 100m
       memory: 300Mi
   service:
-    port: 3000
+    port: 3001
     type: LoadBalancer
 configData:
   appConfigFile: /app/defcfg/app.global.yaml
@@ -57,7 +57,7 @@ secretData:
   appPgPass: postgres
   appPgUser: postgres
 variant: ""
-version: 2.0.0
+version: 2.0.1
 
 COMPUTED VALUES:
 appApi:
@@ -73,7 +73,7 @@ appApi:
     hostname: docker.io
     pullPolicy: IfNotPresent
     repository: romapres2010/app-api
-    tag: 2.0.0
+    tag: 2.0.1
   imagePullSecrets: []
   nodeSelector: {}
   podAnnotations: {}
@@ -89,7 +89,7 @@ appApi:
   restartPolicy: Always
   securityContext: {}
   service:
-    port: 3000
+    port: 3001
     type: LoadBalancer
   terminationGracePeriodSeconds: 60
   tierSuffix: api
@@ -160,7 +160,7 @@ serviceAccount:
   create: false
   name: ""
 variant: ""
-version: 2.0.0
+version: 2.0.1
 
 HOOKS:
 ---
@@ -217,7 +217,7 @@ spec:
           command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"] # wait for db to be ready
       containers:
         - name: dev-app-liquibase
-          image: "romapres2010/app-liquibase:2.0.0"
+          image: "romapres2010/app-liquibase:2.0.1"
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PG_HOST
@@ -306,7 +306,7 @@ spec:
           command: ['sh', '-c', "until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done"] # wait for db to be ready
       containers:
         - name: dev-app-liquibase
-          image: "romapres2010/app-liquibase:2.0.0"
+          image: "romapres2010/app-liquibase:2.0.1"
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PG_HOST
@@ -452,7 +452,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 3000
+    - port: 3001
       targetPort: apiport
       protocol: TCP
       name: apiport
@@ -550,7 +550,7 @@ spec:
         - name: app-api
           securityContext:
             {}
-          image: "romapres2010/app-api:2.0.0"
+          image: "romapres2010/app-api:2.0.1"
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_PG_HOST
@@ -791,5 +791,5 @@ spec:
               service:
                 name: dev-app-api
                 port:
-                  number: 3000
+                  number: 3001
 

@@ -5,49 +5,49 @@ Kube namespace: go-app
 Kube variant: dev
 
 ================= kubectl get pods =================
-NAME                                       READY   STATUS      RESTARTS        AGE     IP          NODE             NOMINATED NODE   READINESS GATES
-dev-app-api-5b76589b77-ttlql               1/1     Running     2 (9m20s ago)   9m36s   10.1.2.42   docker-desktop   <none>           <none>
-dev-app-db-8c6cbfcc4-qsqc8                 1/1     Running     0               9m36s   10.1.2.44   docker-desktop   <none>           <none>
-dev-app-liquibase-install-empty-8sh6q      0/1     Completed   0               9m36s   10.1.2.43   docker-desktop   <none>           <none>
-dev-app-liquibase-install-testdata-stg2v   0/1     Completed   0               9m7s    10.1.2.45   docker-desktop   <none>           <none>
+NAME                                       READY   STATUS      RESTARTS   AGE   IP          NODE             NOMINATED NODE   READINESS GATES
+dev-app-api-599b9f4fd4-n8f8h               1/1     Running     0          34m   10.1.2.54   docker-desktop   <none>           <none>
+dev-app-db-8c6cbfcc4-qps2j                 1/1     Running     0          34m   10.1.2.55   docker-desktop   <none>           <none>
+dev-app-liquibase-install-empty-rn5dd      0/1     Completed   0          34m   10.1.2.56   docker-desktop   <none>           <none>
+dev-app-liquibase-install-testdata-bsgnd   0/1     Completed   0          32m   10.1.2.57   docker-desktop   <none>           <none>
 
 ================= kubectl get StatefulSet =================
 No resources found in go-app namespace.
 
 ================= kubectl get deployment =================
-NAME          READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES                       SELECTOR
-dev-app-api   1/1     1            1           9m36s   app-api      romapres2010/app-api:2.0.0   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-api,variant=dev
-dev-app-db    1/1     1            1           9m36s   app-db       postgres:14.5-alpine         app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-db,variant=dev
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                       SELECTOR
+dev-app-api   1/1     1            1           34m   app-api      romapres2010/app-api:2.0.1   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-api,variant=dev
+dev-app-db    1/1     1            1           34m   app-db       postgres:14.5-alpine         app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-db,variant=dev
 
 ================= kubectl get service =================
-NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE     SELECTOR
-dev-app-api   LoadBalancer   10.100.45.206   localhost     3000:30559/TCP   9m36s   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-api
-dev-app-db    NodePort       10.97.57.214    <none>        5432:32168/TCP   9m36s   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-db
+NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+dev-app-api   LoadBalancer   10.98.42.70     localhost     3001:30247/TCP   34m   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-api
+dev-app-db    NodePort       10.102.115.58   <none>        5432:31397/TCP   34m   app.kubernetes.io/instance=dev,app.kubernetes.io/name=app,tier=app-db
 
 ================= kubectl get configmap =================
 NAME             DATA   AGE
-dev-app-config   11     9m37s
+dev-app-config   11     34m
 
 ================= kubectl get secret =================
 NAME                 TYPE     DATA   AGE
-dev-app-secret       Opaque   2      9m37s
-dev-app-secret-cfg   Opaque   2      9m37s
+dev-app-secret       Opaque   2      34m
+dev-app-secret-cfg   Opaque   2      34m
 
 ================= kubectl get pvc =================
-NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE     VOLUMEMODE
-dev-app-db-claim   Bound    pvc-99578510-0832-4897-b4fd-ef18f29ddd34   100Mi      RWO            hostpath       9m37s   Filesystem
+NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE   VOLUMEMODE
+dev-app-db-claim   Bound    pvc-5da4ad47-6732-4941-a35a-7990f0a5d290   100Mi      RWO            hostpath       34m   Filesystem
 
 ================= kubectl get pv =================
-NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE     VOLUMEMODE
-pvc-99578510-0832-4897-b4fd-ef18f29ddd34   100Mi      RWO            Delete           Bound    go-app/dev-app-db-claim   hostpath                9m37s   Filesystem
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE   VOLUMEMODE
+pvc-5da4ad47-6732-4941-a35a-7990f0a5d290   100Mi      RWO            Delete           Bound    go-app/dev-app-db-claim   hostpath                34m   Filesystem
 
 ================= kubectl get hpa =================
 NAME              REFERENCE                TARGETS          MINPODS   MAXPODS   REPLICAS   AGE
-dev-app-api-hpa   Deployment/dev-app-api   8%/90%, 1%/90%   1         3         1          9m37s
+dev-app-api-hpa   Deployment/dev-app-api   6%/90%, 1%/90%   1         3         1          34m
 
 ================= kubectl get ingress =================
 NAME                  CLASS    HOSTS       ADDRESS   PORTS   AGE
-dev-app-api-ingress   <none>   localhost             80      9m38s
+dev-app-api-ingress   <none>   localhost             80      34m
 
 ======================================================
 ================= Describe resources =================
@@ -55,26 +55,26 @@ Kube namespace: go-app
 Kube variant: dev
 
 ================= kubectl describe pods =================
-Name:             dev-app-api-5b76589b77-ttlql
+Name:             dev-app-api-599b9f4fd4-n8f8h
 Namespace:        go-app
 Priority:         0
 Service Account:  default
 Node:             docker-desktop/192.168.65.4
-Start Time:       Sun, 12 Feb 2023 21:25:52 +0300
+Start Time:       Sun, 12 Mar 2023 08:35:59 +0300
 Labels:           app.kubernetes.io/instance=dev
                   app.kubernetes.io/name=app
-                  pod-template-hash=5b76589b77
+                  pod-template-hash=599b9f4fd4
                   tier=app-api
                   variant=dev
 Annotations:      <none>
 Status:           Running
-IP:               10.1.2.42
+IP:               10.1.2.54
 IPs:
-  IP:           10.1.2.42
-Controlled By:  ReplicaSet/dev-app-api-5b76589b77
+  IP:           10.1.2.54
+Controlled By:  ReplicaSet/dev-app-api-599b9f4fd4
 Init Containers:
   init-app-api:
-    Container ID:  docker://fc0ed0dc9cb2baa93a7f5f539174fd1173ed6d5311aa3cb3ac2bf84751bdb643
+    Container ID:  docker://401d1da2a2b35f5c4d7eb3a4d0e6064cbfa502b92e937a46d76782b620034b3a
     Image:         busybox:1.28
     Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
     Port:          <none>
@@ -86,8 +86,8 @@ Init Containers:
     State:          Terminated
       Reason:       Completed
       Exit Code:    0
-      Started:      Sun, 12 Feb 2023 21:25:53 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:05 +0300
+      Started:      Sun, 12 Mar 2023 08:36:02 +0300
+      Finished:     Sun, 12 Mar 2023 08:37:16 +0300
     Ready:          True
     Restart Count:  0
     Environment:
@@ -95,23 +95,18 @@ Init Containers:
       APP_PG_PORT:    <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>    Optional: false
       APP_PG_DBNAME:  <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
     Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-xh7fg (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fc6q5 (ro)
 Containers:
   app-api:
-    Container ID:   docker://3e66f154d0683f98985499fd884a32dbe498268a86d6ea169434f187531da69a
-    Image:          romapres2010/app-api:2.0.0
-    Image ID:       docker://sha256:4cb4332c287cca666e45d33ded5c6d0670f22f2e408a25412486c86824d973cd
+    Container ID:   docker://66dadd34dd1db53ca913691ea93bf0a44c2c265bb31644b966a1a6e989530b7f
+    Image:          romapres2010/app-api:2.0.1
+    Image ID:       docker://sha256:02be266f1ad872697867e1c8bc94a9d453ec3c77528e52222871350eab43d3a9
     Port:           8080/TCP
     Host Port:      0/TCP
     State:          Running
-      Started:      Sun, 12 Feb 2023 21:26:25 +0300
-    Last State:     Terminated
-      Reason:       Error
-      Exit Code:    1
-      Started:      Sun, 12 Feb 2023 21:26:08 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:08 +0300
+      Started:      Sun, 12 Mar 2023 08:37:16 +0300
     Ready:          True
-    Restart Count:  2
+    Restart Count:  0
     Limits:
       cpu:     1
       memory:  2Gi
@@ -131,7 +126,7 @@ Containers:
       APP_LOG_LEVEL:         <set to the key 'APP_LOG_LEVEL' of config map 'dev-app-config'>         Optional: false
       APP_LOG_FILE:          <set to the key 'APP_LOG_FILE' of config map 'dev-app-config'>          Optional: false
     Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-xh7fg (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-fc6q5 (ro)
 Conditions:
   Type              Status
   Initialized       True 
@@ -139,7 +134,7 @@ Conditions:
   ContainersReady   True 
   PodScheduled      True 
 Volumes:
-  kube-api-access-xh7fg:
+  kube-api-access-fc6q5:
     Type:                    Projected (a volume that contains injected data from multiple sources)
     TokenExpirationSeconds:  3607
     ConfigMapName:           kube-root-ca.crt
@@ -150,24 +145,23 @@ Node-Selectors:              <none>
 Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type     Reason     Age                    From               Message
-  ----     ------     ----                   ----               -------
-  Normal   Scheduled  9m38s                  default-scheduler  Successfully assigned go-app/dev-app-api-5b76589b77-ttlql to docker-desktop
-  Normal   Pulled     9m37s                  kubelet            Container image "busybox:1.28" already present on machine
-  Normal   Created    9m37s                  kubelet            Created container init-app-api
-  Normal   Started    9m37s                  kubelet            Started container init-app-api
-  Warning  BackOff    9m17s (x3 over 9m21s)  kubelet            Back-off restarting failed container
-  Normal   Pulled     9m6s (x3 over 9m24s)   kubelet            Container image "romapres2010/app-api:2.0.0" already present on machine
-  Normal   Created    9m5s (x3 over 9m24s)   kubelet            Created container app-api
-  Normal   Started    9m5s (x3 over 9m23s)   kubelet            Started container app-api
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  34m   default-scheduler  Successfully assigned go-app/dev-app-api-599b9f4fd4-n8f8h to docker-desktop
+  Normal  Pulled     34m   kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    34m   kubelet            Created container init-app-api
+  Normal  Started    34m   kubelet            Started container init-app-api
+  Normal  Pulled     33m   kubelet            Container image "romapres2010/app-api:2.0.1" already present on machine
+  Normal  Created    33m   kubelet            Created container app-api
+  Normal  Started    33m   kubelet            Started container app-api
 
 
-Name:             dev-app-db-8c6cbfcc4-qsqc8
+Name:             dev-app-db-8c6cbfcc4-qps2j
 Namespace:        go-app
 Priority:         0
 Service Account:  default
 Node:             docker-desktop/192.168.65.4
-Start Time:       Sun, 12 Feb 2023 21:25:53 +0300
+Start Time:       Sun, 12 Mar 2023 08:35:59 +0300
 Labels:           app.kubernetes.io/instance=dev
                   app.kubernetes.io/name=app
                   pod-template-hash=8c6cbfcc4
@@ -175,19 +169,19 @@ Labels:           app.kubernetes.io/instance=dev
                   variant=dev
 Annotations:      <none>
 Status:           Running
-IP:               10.1.2.44
+IP:               10.1.2.55
 IPs:
-  IP:           10.1.2.44
+  IP:           10.1.2.55
 Controlled By:  ReplicaSet/dev-app-db-8c6cbfcc4
 Containers:
   app-db:
-    Container ID:   docker://ce78fbd4865a81d443385825f8bc2d5dafc5ff86ef01973d479df849a1c3dd30
+    Container ID:   docker://f7131f3105e543bebacd4356b2a213764ed56aba07e466045a4adf446dc8d035
     Image:          postgres:14.5-alpine
     Image ID:       docker-pullable://postgres@sha256:377e707c672fd6bc4463037d2c84bb1d22476088026c4b014710b09e71c782f0
     Port:           5432/TCP
     Host Port:      0/TCP
     State:          Running
-      Started:      Sun, 12 Feb 2023 21:25:54 +0300
+      Started:      Sun, 12 Mar 2023 08:36:03 +0300
     Ready:          True
     Restart Count:  0
     Liveness:       exec [pg_isready] delay=0s timeout=5s period=10s #success=1 #failure=5
@@ -199,7 +193,7 @@ Containers:
       PGUSER:             <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>        Optional: false
     Mounts:
       /var/lib/postgresql/data from dev-app-db-volume (rw)
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-r7b95 (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-9vnbc (ro)
 Conditions:
   Type              Status
   Initialized       True 
@@ -211,201 +205,7 @@ Volumes:
     Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
     ClaimName:  dev-app-db-claim
     ReadOnly:   false
-  kube-api-access-r7b95:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type     Reason            Age    From               Message
-  ----     ------            ----   ----               -------
-  Warning  FailedScheduling  9m38s  default-scheduler  0/1 nodes are available: 1 pod has unbound immediate PersistentVolumeClaims. preemption: 0/1 nodes are available: 1 Preemption is not helpful for scheduling.
-  Normal   Scheduled         9m37s  default-scheduler  Successfully assigned go-app/dev-app-db-8c6cbfcc4-qsqc8 to docker-desktop
-  Normal   Pulled            9m36s  kubelet            Container image "postgres:14.5-alpine" already present on machine
-  Normal   Created           9m36s  kubelet            Created container app-db
-  Normal   Started           9m35s  kubelet            Started container app-db
-
-
-Name:             dev-app-liquibase-install-empty-8sh6q
-Namespace:        go-app
-Priority:         0
-Service Account:  default
-Node:             docker-desktop/192.168.65.4
-Start Time:       Sun, 12 Feb 2023 21:25:52 +0300
-Labels:           app.kubernetes.io/instance=dev
-                  app.kubernetes.io/name=app
-                  controller-uid=10853f77-4dbd-46cf-b8c1-778621c04613
-                  job-name=dev-app-liquibase-install-empty
-                  tier=app-liquibase-install-empty
-                  variant=dev
-Annotations:      <none>
-Status:           Succeeded
-IP:               10.1.2.43
-IPs:
-  IP:           10.1.2.43
-Controlled By:  Job/dev-app-liquibase-install-empty
-Init Containers:
-  init-app-liquibase-install-empty:
-    Container ID:  docker://caf9829fbb4a87cba257b17612f4a4acbb6975743e30cac2a70362e47dc2d843
-    Image:         busybox:1.28
-    Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
-    Port:          <none>
-    Host Port:     <none>
-    Command:
-      sh
-      -c
-      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
-    State:          Terminated
-      Reason:       Completed
-      Exit Code:    0
-      Started:      Sun, 12 Feb 2023 21:25:53 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:05 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment:
-      APP_PG_HOST:    <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>    Optional: false
-      APP_PG_PORT:    <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>    Optional: false
-      APP_PG_DBNAME:  <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
-    Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mzjzs (ro)
-Containers:
-  dev-app-liquibase:
-    Container ID:  docker://75721c5b8a794ee8d59b4246147433c8147471d61c6ffbae9744c43f3dc45b04
-    Image:         romapres2010/app-liquibase:2.0.0
-    Image ID:      docker://sha256:43d347685e049d84675c0f0b24692f3ef984c1e8512ee2fdb1b1195fcd933f10
-    Port:          <none>
-    Host Port:     <none>
-    Command:
-      sh
-      -c
-      docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_EMPTY_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
-    State:          Terminated
-      Reason:       Completed
-      Exit Code:    0
-      Started:      Sun, 12 Feb 2023 21:26:07 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:17 +0300
-    Ready:          False
-    Restart Count:  0
-    Environment:
-      APP_PG_HOST:                     <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>                     Optional: false
-      APP_PG_PORT:                     <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>                     Optional: false
-      APP_PG_DBNAME:                   <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>                   Optional: false
-      APP_PG_USER:                     <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>                         Optional: false
-      APP_PG_PASS:                     <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>                         Optional: false
-      APP_PG_INSTALL_EMPTY_CHANGELOG:  <set to the key 'APP_PG_INSTALL_EMPTY_CHANGELOG' of config map 'dev-app-config'>  Optional: false
-    Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mzjzs (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             False 
-  ContainersReady   False 
-  PodScheduled      True 
-Volumes:
-  kube-api-access-mzjzs:
-    Type:                    Projected (a volume that contains injected data from multiple sources)
-    TokenExpirationSeconds:  3607
-    ConfigMapName:           kube-root-ca.crt
-    ConfigMapOptional:       <nil>
-    DownwardAPI:             true
-QoS Class:                   BestEffort
-Node-Selectors:              <none>
-Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
-                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
-Events:
-  Type    Reason     Age    From               Message
-  ----    ------     ----   ----               -------
-  Normal  Scheduled  9m38s  default-scheduler  Successfully assigned go-app/dev-app-liquibase-install-empty-8sh6q to docker-desktop
-  Normal  Pulled     9m37s  kubelet            Container image "busybox:1.28" already present on machine
-  Normal  Created    9m37s  kubelet            Created container init-app-liquibase-install-empty
-  Normal  Started    9m37s  kubelet            Started container init-app-liquibase-install-empty
-  Normal  Pulled     9m24s  kubelet            Container image "romapres2010/app-liquibase:2.0.0" already present on machine
-  Normal  Created    9m23s  kubelet            Created container dev-app-liquibase
-  Normal  Started    9m23s  kubelet            Started container dev-app-liquibase
-
-
-Name:             dev-app-liquibase-install-testdata-stg2v
-Namespace:        go-app
-Priority:         0
-Service Account:  default
-Node:             docker-desktop/192.168.65.4
-Start Time:       Sun, 12 Feb 2023 21:26:21 +0300
-Labels:           app.kubernetes.io/instance=dev
-                  app.kubernetes.io/name=app
-                  controller-uid=3c5b37a5-8b01-4f43-aa11-2556a1a9d736
-                  job-name=dev-app-liquibase-install-testdata
-                  tier=app-liquibase-install-testdata
-                  variant=dev
-Annotations:      <none>
-Status:           Succeeded
-IP:               10.1.2.45
-IPs:
-  IP:           10.1.2.45
-Controlled By:  Job/dev-app-liquibase-install-testdata
-Init Containers:
-  init-app-liquibase-install-testdata:
-    Container ID:  docker://b603b1b75c8295b3036ff45c79274f83f269a424ab46f6e37b7d29499bb7a6d9
-    Image:         busybox:1.28
-    Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
-    Port:          <none>
-    Host Port:     <none>
-    Command:
-      sh
-      -c
-      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
-    State:          Terminated
-      Reason:       Completed
-      Exit Code:    0
-      Started:      Sun, 12 Feb 2023 21:26:22 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:22 +0300
-    Ready:          True
-    Restart Count:  0
-    Environment:
-      APP_PG_HOST:    <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>    Optional: false
-      APP_PG_PORT:    <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>    Optional: false
-      APP_PG_DBNAME:  <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
-    Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-bhglh (ro)
-Containers:
-  dev-app-liquibase:
-    Container ID:  docker://8632efd6b191738b1236ae77ff78e749f3383f3d3ec5cec1635b537cf2b33b6e
-    Image:         romapres2010/app-liquibase:2.0.0
-    Image ID:      docker://sha256:43d347685e049d84675c0f0b24692f3ef984c1e8512ee2fdb1b1195fcd933f10
-    Port:          <none>
-    Host Port:     <none>
-    Command:
-      sh
-      -c
-      docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_TESTDATA_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
-    State:          Terminated
-      Reason:       Completed
-      Exit Code:    0
-      Started:      Sun, 12 Feb 2023 21:26:23 +0300
-      Finished:     Sun, 12 Feb 2023 21:26:34 +0300
-    Ready:          False
-    Restart Count:  0
-    Environment:
-      APP_PG_HOST:                        <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>                        Optional: false
-      APP_PG_PORT:                        <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>                        Optional: false
-      APP_PG_DBNAME:                      <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>                      Optional: false
-      APP_PG_USER:                        <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>                            Optional: false
-      APP_PG_PASS:                        <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>                            Optional: false
-      APP_PG_INSTALL_TESTDATA_CHANGELOG:  <set to the key 'APP_PG_INSTALL_TESTDATA_CHANGELOG' of config map 'dev-app-config'>  Optional: false
-    Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-bhglh (ro)
-Conditions:
-  Type              Status
-  Initialized       True 
-  Ready             False 
-  ContainersReady   False 
-  PodScheduled      True 
-Volumes:
-  kube-api-access-bhglh:
+  kube-api-access-9vnbc:
     Type:                    Projected (a volume that contains injected data from multiple sources)
     TokenExpirationSeconds:  3607
     ConfigMapName:           kube-root-ca.crt
@@ -418,18 +218,211 @@ Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists fo
 Events:
   Type    Reason     Age   From               Message
   ----    ------     ----  ----               -------
-  Normal  Scheduled  9m9s  default-scheduler  Successfully assigned go-app/dev-app-liquibase-install-testdata-stg2v to docker-desktop
-  Normal  Pulled     9m8s  kubelet            Container image "busybox:1.28" already present on machine
-  Normal  Created    9m8s  kubelet            Created container init-app-liquibase-install-testdata
-  Normal  Started    9m7s  kubelet            Started container init-app-liquibase-install-testdata
-  Normal  Pulled     9m7s  kubelet            Container image "romapres2010/app-liquibase:2.0.0" already present on machine
-  Normal  Created    9m7s  kubelet            Created container dev-app-liquibase
-  Normal  Started    9m7s  kubelet            Started container dev-app-liquibase
+  Normal  Scheduled  34m   default-scheduler  Successfully assigned go-app/dev-app-db-8c6cbfcc4-qps2j to docker-desktop
+  Normal  Pulled     34m   kubelet            Container image "postgres:14.5-alpine" already present on machine
+  Normal  Created    34m   kubelet            Created container app-db
+  Normal  Started    34m   kubelet            Started container app-db
+
+
+Name:             dev-app-liquibase-install-empty-rn5dd
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Sun, 12 Mar 2023 08:35:59 +0300
+Labels:           app.kubernetes.io/instance=dev
+                  app.kubernetes.io/name=app
+                  controller-uid=8b235d8b-5eb5-4386-bba5-0474f1c5851c
+                  job-name=dev-app-liquibase-install-empty
+                  tier=app-liquibase-install-empty
+                  variant=dev
+Annotations:      <none>
+Status:           Succeeded
+IP:               10.1.2.56
+IPs:
+  IP:           10.1.2.56
+Controlled By:  Job/dev-app-liquibase-install-empty
+Init Containers:
+  init-app-liquibase-install-empty:
+    Container ID:  docker://04cadb4f24dc136c1b078db6279049510d33fd1e1dc0153176ae4e5cf3aba6c2
+    Image:         busybox:1.28
+    Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 12 Mar 2023 08:36:03 +0300
+      Finished:     Sun, 12 Mar 2023 08:37:16 +0300
+    Ready:          True
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:    <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>    Optional: false
+      APP_PG_PORT:    <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>    Optional: false
+      APP_PG_DBNAME:  <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7zsrh (ro)
+Containers:
+  dev-app-liquibase:
+    Container ID:  docker://904cf3632428ad4795de1abb46e11176678005fa5556f8457888bd5d67214d7b
+    Image:         romapres2010/app-liquibase:2.0.1
+    Image ID:      docker://sha256:f56083d1daec566bfbd358ef90ffd4d74fb5474a91e80e3792b8440de2a4906b
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_EMPTY_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 12 Mar 2023 08:37:17 +0300
+      Finished:     Sun, 12 Mar 2023 08:37:22 +0300
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:                     <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>                     Optional: false
+      APP_PG_PORT:                     <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>                     Optional: false
+      APP_PG_DBNAME:                   <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>                   Optional: false
+      APP_PG_USER:                     <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>                         Optional: false
+      APP_PG_PASS:                     <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>                         Optional: false
+      APP_PG_INSTALL_EMPTY_CHANGELOG:  <set to the key 'APP_PG_INSTALL_EMPTY_CHANGELOG' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-7zsrh (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-7zsrh:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  34m   default-scheduler  Successfully assigned go-app/dev-app-liquibase-install-empty-rn5dd to docker-desktop
+  Normal  Pulled     34m   kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    34m   kubelet            Created container init-app-liquibase-install-empty
+  Normal  Started    34m   kubelet            Started container init-app-liquibase-install-empty
+  Normal  Pulled     33m   kubelet            Container image "romapres2010/app-liquibase:2.0.1" already present on machine
+  Normal  Created    33m   kubelet            Created container dev-app-liquibase
+  Normal  Started    33m   kubelet            Started container dev-app-liquibase
+
+
+Name:             dev-app-liquibase-install-testdata-bsgnd
+Namespace:        go-app
+Priority:         0
+Service Account:  default
+Node:             docker-desktop/192.168.65.4
+Start Time:       Sun, 12 Mar 2023 08:37:25 +0300
+Labels:           app.kubernetes.io/instance=dev
+                  app.kubernetes.io/name=app
+                  controller-uid=2884d341-e9b2-4d5e-afe7-27f3f193ffaf
+                  job-name=dev-app-liquibase-install-testdata
+                  tier=app-liquibase-install-testdata
+                  variant=dev
+Annotations:      <none>
+Status:           Succeeded
+IP:               10.1.2.57
+IPs:
+  IP:           10.1.2.57
+Controlled By:  Job/dev-app-liquibase-install-testdata
+Init Containers:
+  init-app-liquibase-install-testdata:
+    Container ID:  docker://3441c5a42e82a042e6c9dcbed78f165dc11c7966bcfe11b108f5765fe9a0dcb2
+    Image:         busybox:1.28
+    Image ID:      docker-pullable://busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      until nc -w 2 $(APP_PG_HOST) $(APP_PG_PORT); do echo Waiting for $(APP_PG_HOST):$(APP_PG_PORT) to be ready; sleep 5; done
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 12 Mar 2023 08:37:27 +0300
+      Finished:     Sun, 12 Mar 2023 08:37:27 +0300
+    Ready:          True
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:    <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>    Optional: false
+      APP_PG_PORT:    <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>    Optional: false
+      APP_PG_DBNAME:  <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-r8b99 (ro)
+Containers:
+  dev-app-liquibase:
+    Container ID:  docker://ad2a248be91e71c58af48684f602ba3b50d1856a3622de395fb5075973fd8f9b
+    Image:         romapres2010/app-liquibase:2.0.1
+    Image ID:      docker://sha256:f56083d1daec566bfbd358ef90ffd4d74fb5474a91e80e3792b8440de2a4906b
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sh
+      -c
+      docker-entrypoint.sh --changelog-file=./changelog/$(APP_PG_INSTALL_TESTDATA_CHANGELOG) --url=jdbc:postgresql://$(APP_PG_HOST):$(APP_PG_PORT)/$(APP_PG_DBNAME) --username=$(APP_PG_USER) --password=$(APP_PG_PASS) --logLevel=info update
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sun, 12 Mar 2023 08:37:28 +0300
+      Finished:     Sun, 12 Mar 2023 08:37:32 +0300
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      APP_PG_HOST:                        <set to the key 'APP_PG_HOST' of config map 'dev-app-config'>                        Optional: false
+      APP_PG_PORT:                        <set to the key 'APP_PG_PORT' of config map 'dev-app-config'>                        Optional: false
+      APP_PG_DBNAME:                      <set to the key 'APP_PG_DBNAME' of config map 'dev-app-config'>                      Optional: false
+      APP_PG_USER:                        <set to the key 'APP_PG_USER' in secret 'dev-app-secret'>                            Optional: false
+      APP_PG_PASS:                        <set to the key 'APP_PG_PASS' in secret 'dev-app-secret'>                            Optional: false
+      APP_PG_INSTALL_TESTDATA_CHANGELOG:  <set to the key 'APP_PG_INSTALL_TESTDATA_CHANGELOG' of config map 'dev-app-config'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-r8b99 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-r8b99:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  33m   default-scheduler  Successfully assigned go-app/dev-app-liquibase-install-testdata-bsgnd to docker-desktop
+  Normal  Pulled     32m   kubelet            Container image "busybox:1.28" already present on machine
+  Normal  Created    32m   kubelet            Created container init-app-liquibase-install-testdata
+  Normal  Started    32m   kubelet            Started container init-app-liquibase-install-testdata
+  Normal  Pulled     32m   kubelet            Container image "romapres2010/app-liquibase:2.0.1" already present on machine
+  Normal  Created    32m   kubelet            Created container dev-app-liquibase
+  Normal  Started    32m   kubelet            Started container dev-app-liquibase
 
 ================= kubectl describe deployment =================
 Name:               dev-app-api
 Namespace:          go-app
-CreationTimestamp:  Sun, 12 Feb 2023 21:25:52 +0300
+CreationTimestamp:  Sun, 12 Mar 2023 08:35:59 +0300
 Labels:             app.kubernetes.io/instance=dev
                     app.kubernetes.io/managed-by=Helm
                     app.kubernetes.io/name=app
@@ -466,7 +459,7 @@ Pod Template:
     Mounts:           <none>
   Containers:
    app-api:
-    Image:      romapres2010/app-api:2.0.0
+    Image:      romapres2010/app-api:2.0.1
     Port:       8080/TCP
     Host Port:  0/TCP
     Limits:
@@ -492,19 +485,21 @@ Pod Template:
 Conditions:
   Type           Status  Reason
   ----           ------  ------
-  Available      True    MinimumReplicasAvailable
   Progressing    True    NewReplicaSetAvailable
+  Available      True    MinimumReplicasAvailable
 OldReplicaSets:  <none>
-NewReplicaSet:   dev-app-api-5b76589b77 (1/1 replicas created)
+NewReplicaSet:   dev-app-api-599b9f4fd4 (1/1 replicas created)
 Events:
-  Type    Reason             Age    From                   Message
-  ----    ------             ----   ----                   -------
-  Normal  ScalingReplicaSet  9m38s  deployment-controller  Scaled up replica set dev-app-api-5b76589b77 to 1
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  34m   deployment-controller  Scaled up replica set dev-app-api-599b9f4fd4 to 1
+  Normal  ScalingReplicaSet  17m   deployment-controller  Scaled up replica set dev-app-api-599b9f4fd4 to 3 from 1
+  Normal  ScalingReplicaSet  64s   deployment-controller  Scaled down replica set dev-app-api-599b9f4fd4 to 1 from 3
 
 
 Name:               dev-app-db
 Namespace:          go-app
-CreationTimestamp:  Sun, 12 Feb 2023 21:25:52 +0300
+CreationTimestamp:  Sun, 12 Mar 2023 08:35:59 +0300
 Labels:             app.kubernetes.io/instance=dev
                     app.kubernetes.io/managed-by=Helm
                     app.kubernetes.io/name=app
@@ -552,9 +547,9 @@ Conditions:
 OldReplicaSets:  <none>
 NewReplicaSet:   dev-app-db-8c6cbfcc4 (1/1 replicas created)
 Events:
-  Type    Reason             Age    From                   Message
-  ----    ------             ----   ----                   -------
-  Normal  ScalingReplicaSet  9m38s  deployment-controller  Scaled up replica set dev-app-db-8c6cbfcc4 to 1
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  34m   deployment-controller  Scaled up replica set dev-app-db-8c6cbfcc4 to 1
 
 ================= kubectl describe StatefulSet =================
 No resources found in go-app namespace.
@@ -575,13 +570,13 @@ Selector:                 app.kubernetes.io/instance=dev,app.kubernetes.io/name=
 Type:                     LoadBalancer
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       10.100.45.206
-IPs:                      10.100.45.206
+IP:                       10.98.42.70
+IPs:                      10.98.42.70
 LoadBalancer Ingress:     localhost
-Port:                     apiport  3000/TCP
+Port:                     apiport  3001/TCP
 TargetPort:               apiport/TCP
-NodePort:                 apiport  30559/TCP
-Endpoints:                10.1.2.42:8080
+NodePort:                 apiport  30247/TCP
+Endpoints:                10.1.2.54:8080
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
@@ -602,13 +597,13 @@ Selector:                 app.kubernetes.io/instance=dev,app.kubernetes.io/name=
 Type:                     NodePort
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       10.97.57.214
-IPs:                      10.97.57.214
+IP:                       10.102.115.58
+IPs:                      10.102.115.58
 LoadBalancer Ingress:     localhost
 Port:                     pgport  5432/TCP
 TargetPort:               pgport/TCP
-NodePort:                 pgport  32168/TCP
-Endpoints:                10.1.2.44:5432
+NodePort:                 pgport  31397/TCP
+Endpoints:                10.1.2.55:5432
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:                   <none>
@@ -627,6 +622,24 @@ Annotations:  meta.helm.sh/release-name: dev
 
 Data
 ====
+APP_CONFIG_FILE:
+----
+/app/defcfg/app.global.yaml
+APP_HTTP_LISTEN_SPEC:
+----
+0.0.0.0:8080
+APP_LOG_FILE:
+----
+/app/log/app.log
+APP_PG_HOST:
+----
+dev-app-db
+APP_PG_UPGRADE_CHANGELOG:
+----
+
+APP_HTTP_PORT:
+----
+8080
 APP_LOG_LEVEL:
 ----
 INFO
@@ -642,24 +655,6 @@ db.changelog-1.0_testData.xml
 APP_PG_PORT:
 ----
 5432
-APP_CONFIG_FILE:
-----
-/app/defcfg/app.global.yaml
-APP_HTTP_LISTEN_SPEC:
-----
-0.0.0.0:8080
-APP_HTTP_PORT:
-----
-8080
-APP_LOG_FILE:
-----
-/app/log/app.log
-APP_PG_HOST:
-----
-dev-app-db
-APP_PG_UPGRADE_CHANGELOG:
-----
-
 
 BinaryData
 ====
@@ -709,7 +704,7 @@ Name:          dev-app-db-claim
 Namespace:     go-app
 StorageClass:  hostpath
 Status:        Bound
-Volume:        pvc-99578510-0832-4897-b4fd-ef18f29ddd34
+Volume:        pvc-5da4ad47-6732-4941-a35a-7990f0a5d290
 Labels:        app.kubernetes.io/instance=dev
                app.kubernetes.io/managed-by=Helm
                app.kubernetes.io/name=app
@@ -726,18 +721,18 @@ Finalizers:    [kubernetes.io/pvc-protection]
 Capacity:      100Mi
 Access Modes:  RWO
 VolumeMode:    Filesystem
-Used By:       dev-app-db-8c6cbfcc4-qsqc8
+Used By:       dev-app-db-8c6cbfcc4-qps2j
 Events:
-  Type    Reason                 Age    From                                                                         Message
-  ----    ------                 ----   ----                                                                         -------
-  Normal  ExternalProvisioning   9m39s  persistentvolume-controller                                                  waiting for a volume to be created, either by external provisioner "docker.io/hostpath" or manually created by system administrator
-  Normal  Provisioning           9m39s  docker.io/hostpath_storage-provisioner_251d3490-155a-43b1-9d7a-0a6d76d4c220  External provisioner is provisioning volume for claim "go-app/dev-app-db-claim"
-  Normal  ProvisioningSucceeded  9m39s  docker.io/hostpath_storage-provisioner_251d3490-155a-43b1-9d7a-0a6d76d4c220  Successfully provisioned volume pvc-99578510-0832-4897-b4fd-ef18f29ddd34
+  Type    Reason                 Age   From                                                                         Message
+  ----    ------                 ----  ----                                                                         -------
+  Normal  ExternalProvisioning   34m   persistentvolume-controller                                                  waiting for a volume to be created, either by external provisioner "docker.io/hostpath" or manually created by system administrator
+  Normal  Provisioning           34m   docker.io/hostpath_storage-provisioner_6b6d0a9e-40ec-4fad-b3fe-6a75139c9faf  External provisioner is provisioning volume for claim "go-app/dev-app-db-claim"
+  Normal  ProvisioningSucceeded  34m   docker.io/hostpath_storage-provisioner_6b6d0a9e-40ec-4fad-b3fe-6a75139c9faf  Successfully provisioned volume pvc-5da4ad47-6732-4941-a35a-7990f0a5d290
 
 ================= kubectl describe pv =================
-Name:            pvc-99578510-0832-4897-b4fd-ef18f29ddd34
+Name:            pvc-5da4ad47-6732-4941-a35a-7990f0a5d290
 Labels:          <none>
-Annotations:     docker.io/hostpath: /var/lib/k8s-pvs/dev-app-db-claim/pvc-99578510-0832-4897-b4fd-ef18f29ddd34
+Annotations:     docker.io/hostpath: /var/lib/k8s-pvs/dev-app-db-claim/pvc-5da4ad47-6732-4941-a35a-7990f0a5d290
                  pv.kubernetes.io/provisioned-by: docker.io/hostpath
 Finalizers:      [kubernetes.io/pv-protection]
 StorageClass:    hostpath
@@ -751,7 +746,7 @@ Node Affinity:   <none>
 Message:         
 Source:
     Type:          HostPath (bare host directory volume)
-    Path:          /var/lib/k8s-pvs/dev-app-db-claim/pvc-99578510-0832-4897-b4fd-ef18f29ddd34
+    Path:          /var/lib/k8s-pvs/dev-app-db-claim/pvc-5da4ad47-6732-4941-a35a-7990f0a5d290
     HostPathType:  
 Events:            <none>
 
@@ -768,10 +763,10 @@ Labels:                                                   app.kubernetes.io/inst
                                                           variant=dev
 Annotations:                                              meta.helm.sh/release-name: dev
                                                           meta.helm.sh/release-namespace: go-app
-CreationTimestamp:                                        Sun, 12 Feb 2023 21:25:52 +0300
+CreationTimestamp:                                        Sun, 12 Mar 2023 08:35:59 +0300
 Reference:                                                Deployment/dev-app-api
 Metrics:                                                  ( current / target )
-  resource memory on pods  (as a percentage of request):  8% (26181632) / 90%
+  resource memory on pods  (as a percentage of request):  6% (20107264) / 90%
   resource cpu on pods  (as a percentage of request):     1% (1m) / 90%
 Min replicas:                                             1
 Max replicas:                                             3
@@ -783,9 +778,15 @@ Conditions:
   ScalingActive   True    ValidMetricFound    the HPA was able to successfully calculate a replica count from memory resource utilization (percentage of request)
   ScalingLimited  False   DesiredWithinRange  the desired count is within the acceptable range
 Events:
-  Type     Reason                   Age    From                       Message
-  ----     ------                   ----   ----                       -------
-  Warning  FailedGetResourceMetric  8m39s  horizontal-pod-autoscaler  failed to get cpu utilization: did not receive metrics for any ready pods
+  Type     Reason                        Age   From                       Message
+  ----     ------                        ----  ----                       -------
+  Warning  FailedGetResourceMetric       34m   horizontal-pod-autoscaler  failed to get memory utilization: unable to get metrics for resource memory: no metrics returned from resource metrics API
+  Warning  FailedGetResourceMetric       34m   horizontal-pod-autoscaler  failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API
+  Warning  FailedComputeMetricsReplicas  34m   horizontal-pod-autoscaler  invalid metrics (2 invalid out of 2), first error is: failed to get memory resource metric value: failed to get memory utilization: unable to get metrics for resource memory: no metrics returned from resource metrics API
+  Warning  FailedGetResourceMetric       33m   horizontal-pod-autoscaler  failed to get cpu utilization: did not receive metrics for any ready pods
+  Warning  FailedComputeMetricsReplicas  33m   horizontal-pod-autoscaler  invalid metrics (1 invalid out of 2), first error is: failed to get cpu resource metric value: failed to get cpu utilization: did not receive metrics for any ready pods
+  Normal   SuccessfulRescale             17m   horizontal-pod-autoscaler  New size: 3; reason: cpu resource utilization (percentage of request) above target
+  Normal   SuccessfulRescale             66s   horizontal-pod-autoscaler  New size: 1; reason: All metrics below target
 
 ================= kubectl describe ingress =================
 Name:             dev-app-api-ingress
@@ -804,7 +805,7 @@ Rules:
   Host        Path  Backends
   ----        ----  --------
   localhost   
-              /app-local   dev-app-api:3000 (10.1.2.42:8080)
+              /app-local   dev-app-api:3001 (10.1.2.54:8080)
 Annotations:  kubernetes.io/ingress.class: nginx
               meta.helm.sh/release-name: dev
               meta.helm.sh/release-namespace: go-app

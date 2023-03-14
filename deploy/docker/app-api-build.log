@@ -1,0 +1,307 @@
+#1 [internal] load build definition from app-api.Dockerfile
+#1 sha256:86ff35010d38248862e0cd4b75b1baf36dd8bdc66996b77cd8094561e0bbb7e3
+#1 transferring dockerfile: 1.81kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load .dockerignore
+#2 sha256:ca688ebe80b0f2a64841452d793464bfc035e3ab68126a0c99da4f16131f8f31
+#2 transferring context: 182B 0.0s done
+#2 DONE 0.1s
+
+#4 [internal] load metadata for gcr.io/distroless/base-debian10:latest
+#4 sha256:0c37502214c1c883d58b74d1d7d14888cb34767130fad21e84bf52c05d79af21
+#4 DONE 0.7s
+
+#3 [internal] load metadata for docker.io/library/golang:1.19-buster
+#3 sha256:6325b89177fdf3681f104d295fb3f2dc29b65ae74ac81a4c53e72a68bfbce9a7
+#3 DONE 2.4s
+
+#5 [stage-1 1/3] FROM gcr.io/distroless/base-debian10@sha256:101798a3b76599762d3528635113f0466dc9655ecba82e8e33d410e2bf5cd319
+#5 sha256:d2fd0da35b6889d42bc675156cca3bc8970e579013cd905e816a5e3cb2a670fe
+#5 DONE 0.0s
+
+#7 [build  1/11] FROM docker.io/library/golang:1.19-buster@sha256:6a4683c65dc20b4d6504610d424fb6384fb8b233b3cc09cfc289bc8451fb25ec
+#7 sha256:100dd582873d8fe1384ee8ec8ab0d3cc8b7a1f383192be0a51ad916beff89250
+#7 resolve docker.io/library/golang:1.19-buster@sha256:6a4683c65dc20b4d6504610d424fb6384fb8b233b3cc09cfc289bc8451fb25ec 0.1s done
+#7 sha256:9bc5dbcd0da8865afbfd76a5114e8ee238930e862237c0dfdc04aa146450e50d 1.80kB / 1.80kB done
+#7 sha256:92f0244a69684f0022898b00264aa6fe5de08c9805f2f2a8287d5a504c8b5500 7.10kB / 7.10kB done
+#7 sha256:6a4683c65dc20b4d6504610d424fb6384fb8b233b3cc09cfc289bc8451fb25ec 988B / 988B done
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 0B / 7.86MB 0.1s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 0B / 50.45MB 0.2s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 0B / 10.00MB 0.1s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 3.15MB / 50.45MB 0.8s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 6.29MB / 50.45MB 1.0s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 9.44MB / 50.45MB 1.2s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 12.58MB / 50.45MB 1.7s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 1.05MB / 10.00MB 1.6s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 15.73MB / 50.45MB 2.2s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 2.10MB / 10.00MB 2.2s
+#7 ...
+
+#10 [internal] load build context
+#10 sha256:32cf0edfce59606bd5fa0391088b3e701c0ec724eceeed7c1627b93cdad0c50a
+#10 transferring context: 19.49MB 2.5s done
+#10 DONE 2.6s
+
+#7 [build  1/11] FROM docker.io/library/golang:1.19-buster@sha256:6a4683c65dc20b4d6504610d424fb6384fb8b233b3cc09cfc289bc8451fb25ec
+#7 sha256:100dd582873d8fe1384ee8ec8ab0d3cc8b7a1f383192be0a51ad916beff89250
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 18.87MB / 50.45MB 2.9s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 3.15MB / 10.00MB 2.8s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 1.05MB / 7.86MB 3.4s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 4.19MB / 10.00MB 3.4s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 22.02MB / 50.45MB 3.7s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 5.24MB / 10.00MB 3.8s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 6.29MB / 10.00MB 4.2s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 25.17MB / 50.45MB 4.5s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 7.34MB / 10.00MB 4.7s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 8.39MB / 10.00MB 5.1s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 28.31MB / 50.45MB 5.3s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 9.44MB / 10.00MB 5.4s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 2.10MB / 7.86MB 5.8s
+#7 sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 10.00MB / 10.00MB 5.7s done
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 0B / 51.87MB 5.8s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 31.46MB / 50.45MB 6.0s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 34.60MB / 50.45MB 6.7s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 37.75MB / 50.45MB 7.4s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 3.15MB / 51.87MB 7.4s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 3.15MB / 7.86MB 7.6s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 40.89MB / 50.45MB 8.4s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 6.29MB / 51.87MB 8.6s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 44.04MB / 50.45MB 9.1s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 9.44MB / 51.87MB 9.7s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 47.19MB / 50.45MB 9.9s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 4.19MB / 7.86MB 10.2s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 50.45MB / 50.45MB 10.8s
+#7 sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 50.45MB / 50.45MB 10.9s done
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 12.58MB / 51.87MB 10.9s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 0B / 68.85MB 10.9s
+#7 extracting sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 5.24MB / 7.86MB 11.2s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 6.29MB / 7.86MB 11.7s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 15.73MB / 51.87MB 12.1s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 4.19MB / 68.85MB 12.3s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 7.34MB / 7.86MB 12.4s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 7.86MB / 7.86MB 12.8s
+#7 sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 7.86MB / 7.86MB 12.9s done
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 0B / 149.01MB 13.0s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 18.87MB / 51.87MB 13.5s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 7.87MB / 68.85MB 13.5s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 11.53MB / 68.85MB 14.7s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 22.02MB / 51.87MB 14.9s
+#7 extracting sha256:d8a6bce2a40cb0c3e3cc6646bfeccfb2ac5b303c39ea70d67e30406d270f2009 4.5s done
+#7 extracting sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 15.73MB / 68.85MB 16.0s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 25.17MB / 51.87MB 16.4s
+#7 extracting sha256:b4fc05781c9a4a3dee77723abf708dd674020a00d7d57dd6cc1f9bc72da96143 1.4s done
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 19.92MB / 68.85MB 17.2s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 28.31MB / 51.87MB 17.4s
+#7 extracting sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 5.24MB / 149.01MB 18.0s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 31.46MB / 51.87MB 18.5s
+#7 extracting sha256:4efc3ea86e67ce8cdce1cf3619f311735cbbb8744a1c69536f8a390d014c0a99 1.2s done
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 24.12MB / 68.85MB 18.7s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 34.60MB / 51.87MB 19.7s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 28.31MB / 68.85MB 20.0s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 37.75MB / 51.87MB 20.6s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 32.51MB / 68.85MB 21.4s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 40.89MB / 51.87MB 21.9s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 36.70MB / 68.85MB 22.5s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 44.04MB / 51.87MB 22.7s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 8.39MB / 149.01MB 23.2s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 47.19MB / 51.87MB 23.7s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 40.89MB / 68.85MB 23.7s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 50.33MB / 51.87MB 24.7s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 45.09MB / 68.85MB 25.0s
+#7 sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 51.87MB / 51.87MB 25.3s done
+#7 sha256:b8b41fac1e1cf3e80e3e7bae9a61a606044bf004a4a9b63ddad37c79febbd05c 0B / 155B 25.4s
+#7 extracting sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 49.28MB / 68.85MB 25.8s
+#7 sha256:b8b41fac1e1cf3e80e3e7bae9a61a606044bf004a4a9b63ddad37c79febbd05c 155B / 155B 26.0s
+#7 sha256:b8b41fac1e1cf3e80e3e7bae9a61a606044bf004a4a9b63ddad37c79febbd05c 155B / 155B 26.1s done
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 53.48MB / 68.85MB 26.6s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 58.72MB / 68.85MB 27.5s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 14.68MB / 149.01MB 28.2s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 63.96MB / 68.85MB 28.6s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 68.16MB / 68.85MB 29.7s
+#7 sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 68.85MB / 68.85MB 30.2s done
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 24.12MB / 149.01MB 30.6s
+#7 extracting sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 5.1s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 32.51MB / 149.01MB 31.8s
+#7 extracting sha256:47452733a7c0712961d7ef8b48e3d823328f056af1c90c715966748b137b3d1c 6.9s done
+#7 extracting sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 40.89MB / 149.01MB 33.0s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 49.28MB / 149.01MB 34.2s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 57.67MB / 149.01MB 35.4s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 66.06MB / 149.01MB 36.8s
+#7 extracting sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 5.1s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 74.45MB / 149.01MB 37.9s
+#7 extracting sha256:b5253fb917d27d45dda13ba51813713fac4266088086cd5721f622543cd4a676 5.5s done
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 82.84MB / 149.01MB 39.0s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 92.27MB / 149.01MB 40.3s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 100.66MB / 149.01MB 41.6s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 109.05MB / 149.01MB 42.8s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 117.44MB / 149.01MB 44.0s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 126.88MB / 149.01MB 45.3s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 135.27MB / 149.01MB 46.5s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 143.65MB / 149.01MB 47.7s
+#7 sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 149.01MB / 149.01MB 48.9s done
+#7 extracting sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 0.1s
+#7 extracting sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 5.1s
+#7 extracting sha256:2bcaa4619c8049e4bcab2be50282816a2820530d8f1db20480616ffea304848e 7.1s done
+#7 extracting sha256:b8b41fac1e1cf3e80e3e7bae9a61a606044bf004a4a9b63ddad37c79febbd05c done
+#7 DONE 58.2s
+
+#8 [build  2/11] WORKDIR /app
+#8 sha256:6a7ffa6d97857d9302a100abb071eb7e6b88df55147a268bce1428efbcc6cb5f
+#8 DONE 1.5s
+
+#9 [build  3/11] RUN mkdir ./run && mkdir ./run/defcfg && mkdir ./run/log && mkdir ./run/cfg
+#9 sha256:a1f3cdceb2af13ae678b560e2cf4cd982a085e6e5b66b28efe6f730ab0422528
+#9 DONE 0.8s
+
+#11 [build  4/11] COPY ./go.mod ./go.mod
+#11 sha256:a39fb34835f5f321ef84734875970d07a5e2821cc94964acb369c2ba3b627908
+#11 DONE 0.2s
+
+#12 [build  5/11] COPY ./go.sum ./go.sum
+#12 sha256:0b77687ab90187cd3808be408435beb17a8a2208da2b07fd58c8fb6c42871c52
+#12 DONE 0.1s
+
+#13 [build  6/11] COPY ./pkg ./pkg
+#13 sha256:17ce1728db9fa7a2f47f6c1b03b38fbc5627a4d5277b62f77d5e30245646f0f7
+#13 DONE 0.4s
+
+#14 [build  7/11] COPY ./cmd/app/main.go ./cmd/app/main.go
+#14 sha256:cbb2ac35c1bdd56dd9ecccc84c540aa53c1e0b011792a762f81827f329f3baf0
+#14 DONE 0.4s
+
+#15 [build  8/11] COPY ./vendor ./vendor
+#15 sha256:134995541fca001ce62d5d41264c8d280141788222992e959d51a0498efcda89
+#15 DONE 1.1s
+
+#16 [build  9/11] COPY ./deploy/config/. ./run/defcfg/
+#16 sha256:066213eacc32a038681a8b558280d03e94b6767b4569495639315576ebabfab7
+#16 DONE 0.2s
+
+#17 [build 10/11] RUN go build -v -mod vendor -ldflags "-X main.commit=d8bc0c4 -X main.buildTime=2023-03-12_05:06:36 -X main.version=2.0.1" -o ./run/main ./cmd/app/main.go
+#17 sha256:0bdfa5a77b23808ea8795c8471773e4734eab4fddf30f82ae7722ab088fd83b7
+#17 3.090 google.golang.org/protobuf/internal/flags
+#17 3.175 google.golang.org/protobuf/internal/set
+#17 3.306 github.com/jmoiron/sqlx/reflectx
+#17 3.323 github.com/pkg/errors
+#17 3.802 go.uber.org/atomic
+#17 3.863 github.com/jmoiron/sqlx
+#17 4.923 go.uber.org/multierr
+#17 5.964 go.uber.org/zap/buffer
+#17 6.295 go.uber.org/zap/internal/bufferpool
+#17 6.634 go.uber.org/zap/internal/color
+#17 6.707 go.uber.org/zap/internal/exit
+#17 6.794 go.uber.org/zap/zapcore
+#17 7.567 github.com/romapres2010/goapp/pkg/common/ctx
+#17 7.920 gopkg.in/natefinch/lumberjack.v2
+#17 8.200 github.com/dgrijalva/jwt-go
+#17 8.380 go.uber.org/zap/internal
+#17 8.464 go.uber.org/zap
+#17 9.385 google.golang.org/protobuf/internal/detrand
+#17 9.544 google.golang.org/protobuf/internal/errors
+#17 9.750 google.golang.org/protobuf/encoding/protowire
+#17 10.32 google.golang.org/protobuf/internal/pragma
+#17 10.42 google.golang.org/protobuf/reflect/protoreflect
+#17 11.95 google.golang.org/protobuf/internal/encoding/messageset
+#17 11.96 github.com/romapres2010/goapp/pkg/common/logger
+#17 12.02 google.golang.org/protobuf/internal/strs
+#17 12.11 google.golang.org/protobuf/internal/encoding/text
+#17 12.26 github.com/romapres2010/goapp/pkg/common/error
+#17 12.38 github.com/romapres2010/goapp/pkg/common/bytespool
+#17 12.47 github.com/romapres2010/goapp/pkg/common/httplog
+#17 12.61 github.com/romapres2010/goapp/pkg/common/jwt
+#17 12.67 google.golang.org/protobuf/internal/genid
+#17 12.69 google.golang.org/protobuf/internal/order
+#17 12.73 google.golang.org/protobuf/reflect/protoregistry
+#17 12.79 google.golang.org/protobuf/runtime/protoiface
+#17 12.90 google.golang.org/protobuf/internal/encoding/defval
+#17 13.04 google.golang.org/protobuf/internal/descfmt
+#17 13.07 google.golang.org/protobuf/proto
+#17 13.31 google.golang.org/protobuf/internal/descopts
+#17 13.37 google.golang.org/protobuf/internal/version
+#17 13.42 github.com/beorn7/perks/quantile
+#17 13.72 github.com/cespare/xxhash/v2
+#17 13.88 github.com/modern-go/concurrent
+#17 13.97 github.com/modern-go/reflect2
+#17 14.01 google.golang.org/protobuf/encoding/prototext
+#17 14.38 google.golang.org/protobuf/internal/filedesc
+#17 16.14 github.com/json-iterator/go
+#17 16.42 google.golang.org/protobuf/internal/encoding/tag
+#17 16.75 google.golang.org/protobuf/internal/impl
+#17 21.02 github.com/prometheus/common/model
+#17 21.91 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
+#17 22.02 github.com/prometheus/procfs/internal/fs
+#17 22.05 github.com/prometheus/procfs/internal/util
+#17 22.19 golang.org/x/sys/unix
+#17 22.87 google.golang.org/protobuf/internal/filetype
+#17 23.09 google.golang.org/protobuf/runtime/protoimpl
+#17 23.20 google.golang.org/protobuf/types/descriptorpb
+#17 23.93 google.golang.org/protobuf/types/known/timestamppb
+#17 23.97 google.golang.org/protobuf/reflect/protodesc
+#17 24.01 github.com/golang/protobuf/ptypes/timestamp
+#17 24.08 github.com/prometheus/procfs
+#17 24.67 github.com/golang/protobuf/proto
+#17 25.48 github.com/prometheus/client_model/go
+#17 25.73 github.com/prometheus/client_golang/prometheus/internal
+#17 26.03 github.com/matttproud/golang_protobuf_extensions/pbutil
+#17 26.06 github.com/prometheus/common/expfmt
+#17 26.45 github.com/romapres2010/goapp/pkg/common/recover
+#17 26.47 golang.org/x/text/encoding/internal/identifier
+#17 26.50 golang.org/x/text/transform
+#17 26.62 golang.org/x/text/encoding
+#17 26.64 github.com/prometheus/client_golang/prometheus
+#17 26.71 golang.org/x/text/encoding/internal
+#17 26.75 golang.org/x/text/internal/utf8internal
+#17 26.78 golang.org/x/text/runes
+#17 26.96 golang.org/x/text/encoding/unicode
+#17 27.06 gopkg.in/asn1-ber.v1
+#17 27.21 gopkg.in/ldap.v3
+#17 27.83 gopkg.in/korylprince/go-ad-auth.v2
+#17 27.96 gopkg.in/yaml.v3
+#17 28.09 github.com/povilasv/prommod
+#17 28.23 github.com/prometheus/client_golang/prometheus/collectors
+#17 28.52 github.com/prometheus/client_golang/prometheus/promauto
+#17 28.64 github.com/romapres2010/goapp/pkg/common/metrics
+#17 28.86 github.com/romapres2010/goapp/pkg/common/workerpool
+#17 29.04 github.com/romapres2010/goapp/pkg/common/workerpoolservice
+#17 29.19 github.com/gorilla/mux
+#17 29.56 github.com/prometheus/client_golang/prometheus/promhttp
+#17 30.07 github.com/romapres2010/goapp/pkg/common/httpservice
+#17 30.41 github.com/romapres2010/goapp/pkg/app/httphandler
+#17 30.57 github.com/romapres2010/goapp/pkg/common/version
+#17 30.57 github.com/romapres2010/goapp/pkg/common/httpserver
+#17 30.58 github.com/russross/blackfriday/v2
+#17 30.68 github.com/romapres2010/goapp/pkg/app/config
+#17 30.74 github.com/romapres2010/goapp/pkg/app/daemon
+#17 31.18 github.com/cpuguy83/go-md2man/v2/md2man
+#17 31.23 github.com/urfave/cli
+#17 31.86 command-line-arguments
+#17 DONE 33.6s
+
+#18 [build 11/11] RUN echo "Based on commit: d8bc0c4" && echo "Build Time: 2023-03-12_05:06:36" && echo "Version: 2.0.1"
+#18 sha256:80e6a7a0d1fa0e32102f72287e5737e47f7d17ff2fd5574cef4988cd48ba14fc
+#18 0.608 Based on commit: d8bc0c4
+#18 0.608 Build Time: 2023-03-12_05:06:36
+#18 0.608 Version: 2.0.1
+#18 DONE 0.6s
+
+#6 [stage-1 2/3] WORKDIR /app
+#6 sha256:70479231ef81752992c2943680666950fef2efe1aadb3f90a4a3aa528371dad5
+#6 CACHED
+
+#19 [stage-1 3/3] COPY --from=build /app/run/. .
+#19 sha256:35d25442442a1dfb86fc2c694d3a9e8544d185cb3eef1037fbdc43225f6bc9c4
+#19 DONE 0.3s
+
+#20 exporting to image
+#20 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+#20 exporting layers
+#20 exporting layers 0.2s done
+#20 writing image sha256:02be266f1ad872697867e1c8bc94a9d453ec3c77528e52222871350eab43d3a9 done
+#20 naming to docker.io/romapres2010/app-api:2.0.1 done
+#20 DONE 0.2s

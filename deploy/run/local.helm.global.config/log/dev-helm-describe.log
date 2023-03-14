@@ -1,15 +1,15 @@
-Got 3 arguments: [KUBE_VARIANT:dev], [KUBE_NAMESPACE:go-app], [LOG_DIR:/d/Projects/go/http/deploy/run/local.helm.global.config/log]
+Got 3 arguments: [KUBE_VARIANT:dev], [KUBE_NAMESPACE:go-app], [LOG_DIR:/d/Projects/go/goapp/deploy/run/local.helm.global.config/log]
 Kube variant: dev
 Kube namespace: go-app
-Log directory: /d/Projects/go/http/deploy/run/local.helm.global.config/log
-Describe file: /d/Projects/go/http/deploy/run/local.helm.global.config/log/helm-describe-dev.log
+Log directory: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log
+Describe file: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log/helm-describe-dev.log
 ================= RUN kube-get.sh =================
 ================= RUN kube-descibe.sh =================
 ================= RUN kube-log.sh =================
-Got 3 arguments: [KUBE_VARIANT:dev], [KUBE_NAMESPACE:go-app], [LOG_DIR:/d/Projects/go/http/deploy/run/local.helm.global.config/log]
+Got 3 arguments: [KUBE_VARIANT:dev], [KUBE_NAMESPACE:go-app], [LOG_DIR:/d/Projects/go/goapp/deploy/run/local.helm.global.config/log]
 Kube namespace: go-app
 Kube variant: dev
-Log directory: /d/Projects/go/http/deploy/run/local.helm.global.config/log
-APP db Log file: /d/Projects/go/http/deploy/run/local.helm.global.config/log/log-dev-app-db.log
-APP api Log file: /d/Projects/go/http/deploy/run/local.helm.global.config/log/log-dev-app-api.log
-APP liquibase Log file: /d/Projects/go/http/deploy/run/local.helm.global.config/log/log-dev-app-liquibase.log
+Log directory: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log
+APP db Log file: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log/log-dev-app-db.log
+APP api Log file: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log/log-dev-app-api.log
+APP liquibase Log file: /d/Projects/go/goapp/deploy/run/local.helm.global.config/log/log-dev-app-liquibase.log

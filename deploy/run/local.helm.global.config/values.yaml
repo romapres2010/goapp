@@ -35,7 +35,7 @@ appApi:
        memory: 300Mi
   service:
     type: LoadBalancer
-    port: 3000
+    port: 3001
 
 ingress:
   enabled: true
