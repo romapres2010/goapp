@@ -10,6 +10,8 @@
 
 Четвертая часть будет посвящена развертыванию в Kubernetes с Helm chart и настройке Horizontal Autoscaler.
 
+[Пятая часть](https://habr.com/ru/post/720286/) посвящена оптимизации Worker pool и особенностям его работы в составе микросервиса, развернутого в Kubernetes.
+
 Для корректного развертывания в Kubernetes, в шаблон пришлось внести изменения: 
 - способа конфигурирования - YAML, ENV, [Kustomize](https://kustomize.io/)
 - подхода к логированию - переход на [zap](https://github.com/uber-go/zap)
